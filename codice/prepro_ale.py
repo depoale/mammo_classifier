@@ -9,6 +9,12 @@ from PIL import Image
 train_dataset_path = 'datasets/Mammography_micro/Train'
 test_dataset_path = 'datasets/Mammography_micro/Test'
 
+"""This dataset contains many images representing portions of mammogram either containing microcalcification 
+clusters (label=1) or  normal breast tissue (label=0).
+The available images are already partitioned in a train and a test samples, containing, respectively:
+- Train set: 209 images with normal tissue and 187 images with microcalcification clusters  
+- Test set: 205 images with normal tissue and 196 images with microcalcification clusters """
+
 def read_imgs(dataset_path, classes):
     """A function to unpack images and labels from a folder
     ...
@@ -20,6 +26,11 @@ def read_imgs(dataset_path, classes):
     classes: list
         list of classes according to their folders
         eg: the first class will be dataset_path/classes[0]
+
+    Returns
+    ------
+    x, y: numpy.ndarray
+        data and labels
     """
     tmp = []
     labels = []

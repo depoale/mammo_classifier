@@ -1,0 +1,1 @@
+train_path = '../datasets/Mammography_micro/Train'
