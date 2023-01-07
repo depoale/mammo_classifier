@@ -1,5 +1,6 @@
 """first trial kinda naive, all hps set randomly by yours truly. 
-no hps tuner, no cv, used hold out to determine test accuracy"""
+no hps tuner, no cv, used hold out to determine test accuracy
+nevertheless test accuracy 0.88 ca :)"""
 
 import os
 import sys
