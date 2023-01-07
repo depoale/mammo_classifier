@@ -1,3 +1,6 @@
+"""first trial kinda naive, all hps set randomly by yours truly. 
+no hps tuner, no cv, used hold out to determine test accuracy"""
+
 import os
 import sys
 from matplotlib import pyplot as plt
@@ -15,8 +18,6 @@ sys.path.insert(
 ) 
 from keras.utils import image_dataset_from_directory
 
-from PIL import Image
-
 """ 
 used to convert dataset to 'png' estension (supported by keras.utils.image_dataset_from_directory)   
 for file in os.listdir('datasets/Mammography_micro/Test/0'):
@@ -30,82 +31,100 @@ for file in os.listdir('datasets/Mammography_micro/Test/0'):
 batch_size = 12
 img_height = 60
 img_width = 60
+split = 0.3
 
-train = image_dataset_from_directory(
-  'data_png/Train',
-  validation_split=0.3,
-  subset="training",
-  seed=123, color_mode='grayscale',
-  image_size=(img_height, img_width),
-  batch_size=batch_size)
+train_path = 'data_png/Train'
+test_path = 'data_png/Test'
 
-val = image_dataset_from_directory(
-  'data_png/Train',
-  validation_split=0.3,
-  subset="validation",
-  seed=123,
-  color_mode='grayscale',
-  image_size=(img_height, img_width),
-  batch_size=batch_size)
+def get_data(train_path = 'data_png/Train',test_path = 'data_png/Test',validation_split=0.3,
+                img_height=60, img_width=60):
+    """acquires data from designated folder.
+    Returns
+    -------
+    train, val, test: BatchData ????
+        keras.Dataset type"""
+    train = image_dataset_from_directory(
+    train_path,
+    validation_split=split,
+    subset="training",
+    seed=123, color_mode='grayscale',
+    image_size=(img_height, img_width),
+    batch_size=batch_size)
 
-test = image_dataset_from_directory(
-  'data_png/Test',
-  color_mode='grayscale',
-  image_size=(img_height, img_width),
-  batch_size=batch_size)
+    val = image_dataset_from_directory(
+    train_path,
+    validation_split=split,
+    subset="validation",
+    seed=123,
+    color_mode='grayscale',
+    image_size=(img_height, img_width),
+    batch_size=batch_size)
+
+    test = image_dataset_from_directory(
+    test_path,
+    color_mode='grayscale',
+    image_size=(img_height, img_width),
+    batch_size=batch_size)
+    return train, val, test
 
 #model
-model = Sequential()
-model.add(Input(shape=(60,60,1)))
-#this layer normalizes the grayscale values from [0,255] to [0,1]
-model.add(Rescaling(1./255))
-model.add(Conv2D(32, kernel_size=3, activation='relu'))
-model.add(MaxPooling2D())
-model.add(Conv2D(32, kernel_size=3, activation='relu'))
-model.add(MaxPooling2D())
-model.add(Conv2D(32, kernel_size=3, activation='relu'))
-model.add(MaxPooling2D())
-model.add(Flatten())
-model.add(Dense(60,activation='relu'))
-model.add(Dense(1, activation='sigmoid'))
-model.compile(Adam(learning_rate=1e-4), loss=keras.losses.BinaryCrossentropy(), metrics=['accuracy'])
-model.summary()
+def get_model():
+    model = Sequential()
+    model.add(Input(shape=(60,60,1)))
+    #this layer normalizes the grayscale values from [0,255] to [0,1]
+    model.add(Rescaling(1./255))
+    model.add(Conv2D(32, kernel_size=3, activation='relu'))
+    model.add(MaxPooling2D())
+    model.add(Conv2D(32, kernel_size=3, activation='relu'))
+    model.add(MaxPooling2D())
+    model.add(Conv2D(32, kernel_size=3, activation='relu'))
+    model.add(MaxPooling2D())
+    model.add(Flatten())
+    model.add(Dense(60,activation='relu'))
+    model.add(Dense(1, activation='sigmoid'))
+    model.compile(Adam(learning_rate=1e-4), loss=keras.losses.BinaryCrossentropy(), metrics=['accuracy'])
+    model.summary()
+    return model
 
 
 
 callbacks = (EarlyStopping(monitor='val_loss', patience=20, verbose=1),
                 ReduceLROnPlateau(monitor='val_loss', factor=0.25, patience=10, verbose=1))
 
-start=time.time()
-history = model.fit(train, batch_size=batch_size , epochs=500, validation_data=val, callbacks=callbacks)
+def plot(history):
+    """Plot loss and accuracy
+    .....
+    Parameters
+    ----------
+    history: keras History obj
+        model.fit() return
+   """
 
-""" fig = plt.figure()
-plt.plot(hist.history['loss'], color='teal', label='loss')
-plt.plot(hist.history['val_loss'], color='orange', label='val_loss')
-fig.suptitle('Loss', fontsize=20)
-plt.legend(loc="upper right") """
+    acc = history.history['accuracy']
+    val_acc = history.history['val_accuracy']
+    loss = history.history['loss']
+    val_loss = history.history['val_loss']
 
-acc = history.history['accuracy']
-val_acc = history.history['val_accuracy']
-loss = history.history['loss']
-val_loss = history.history['val_loss']
+    epochs_range = range(1, len(acc)+1)
+    #Train and validation accuracy 
+    plt.figure(figsize=(15, 15))
+    plt.subplot(2, 2, 1)
+    plt.plot(epochs_range, acc, label='Training Accuracy')
+    plt.plot(epochs_range, val_acc, label='Validation Accuracy')
+    plt.legend(loc='lower right')
+    plt.title('Training and Validation Accuracy')
+    #Train and validation loss 
+    plt.subplot(2, 2, 2)
+    plt.plot(epochs_range, loss, label='Training Loss')
+    plt.plot(epochs_range, val_loss, label='Validation Loss')
+    plt.legend(loc='upper right')
+    plt.title('Training and Validation Loss')
+    plt.show()
 
-epochs_range = range(1, len(acc)+1)
-#Train and validation accuracy 
-plt.figure(figsize=(15, 15))
-plt.subplot(2, 2, 1)
-plt.plot(epochs_range, acc, label='Training Accuracy')
-plt.plot(epochs_range, val_acc, label='Validation Accuracy')
-plt.legend(loc='lower right')
-plt.title('Training and Validation Accuracy')
-#Train and validation loss 
-plt.subplot(2, 2, 2)
-plt.plot(epochs_range, loss, label='Training Loss')
-plt.plot(epochs_range, val_loss, label='Validation Loss')
-plt.legend(loc='upper right')
-plt.title('Training and Validation Loss')
-plt.show()
-print(f'Elapsed time: {time.time()- start}')
-plt.show()
+if __name__ == '__main__':
+    model = get_model()
+    train, val, test = get_data()
+    history = model.fit(train, batch_size=batch_size , epochs=500, validation_data=val, callbacks=callbacks)
 
-print(f'test accuracy: {round(model.evaluate(test)[1],3)}')
+    plot(history=history)
+    print(f'test accuracy: {round(model.evaluate(test)[1],3)}')
