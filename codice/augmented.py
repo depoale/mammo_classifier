@@ -8,7 +8,7 @@ from matplotlib import pyplot as plt
 from prova import get_data, get_model, plot 
 from prova import callbacks,train_path, test_path, img_height, img_width, split, batch_size
 train, val, test = get_data()
-
+train_path = 'data_png/Train'
 train_datagen = ImageDataGenerator(
         rotation_range=0,
         #width_shift_range=0.1,
@@ -26,6 +26,7 @@ train_gen = train_datagen.flow_from_directory(
     target_size=(img_width, img_height),
     color_mode='grayscale', 
     class_mode='binary',
+    save_to_dir='augmented',
     subset='training')
 
 val_gen = train_datagen.flow_from_directory(
@@ -35,11 +36,10 @@ val_gen = train_datagen.flow_from_directory(
     class_mode='binary',
     subset='validation')
 
-print(train_gen.next()[0].shape)
-plt.imshow(train_gen.next()[0][1].squeeze(), cmap='gray')
-plt.show()
 
-model = get_model()
-history = model.fit(train_gen, batch_size=batch_size , epochs=500, validation_data=val_gen, callbacks=callbacks)
-plot(history=history)
-print(f'test accuracy: {round(model.evaluate(test)[1],3)}')
+if __name__=='__main__':
+
+    model = get_model()
+    history = model.fit(train_gen, batch_size=batch_size , epochs=500, validation_data=val_gen, callbacks=callbacks)
+    plot(history=history)
+    print(f'test accuracy: {round(model.evaluate(test)[1],3)}') 
