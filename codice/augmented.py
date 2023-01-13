@@ -1,6 +1,7 @@
 """data augmentation procedure.
     lowkey shitty bc test(& often val) accuracy fixed around 0.49 :(
-    tried tweaking some param in ImageDataGenerator but nothing major happened"""
+    tried tweaking some param in ImageDataGenerator but nothing major happened
+    try separating 0 from 1 in generating"""
 
 from keras.preprocessing.image import ImageDataGenerator
 from matplotlib import pyplot as plt
@@ -9,12 +10,12 @@ from prova import callbacks,train_path, test_path, img_height, img_width, split,
 train, val, test = get_data()
 
 train_datagen = ImageDataGenerator(
-        rotation_range=30,
-        width_shift_range=0.1,
-        height_shift_range=0.1,
+        rotation_range=0,
+        #width_shift_range=0.1,
+        #height_shift_range=0.1,
         rescale=1./255,
-        shear_range=0.2,
-        zoom_range=0.18,
+        #shear_range=0.2,
+        #zoom_range=0.18,
         horizontal_flip=True,
         vertical_flip=True,
         #fill_mode='reflect', #  nearest?

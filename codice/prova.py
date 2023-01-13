@@ -12,6 +12,7 @@ from keras.callbacks import EarlyStopping, ReduceLROnPlateau
 from keras.optimizers import Adam
 from keras.metrics import Precision, Recall, BinaryAccuracy
 import time
+from PIL import Image
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 sys.path.insert(
@@ -70,10 +71,10 @@ def get_data(train_path = 'data_png/Train',test_path = 'data_png/Test',validatio
 
 #model
 def get_model():
+    """creates model: first layer rescales the grayscale values from [0,255] to [0,1]"""
     model = Sequential()
     model.add(Input(shape=(60,60,1)))
-    #this layer normalizes the grayscale values from [0,255] to [0,1]
-    model.add(Rescaling(1./255))
+    model.add(Rescaling(scale=1./255.))
     model.add(Conv2D(32, kernel_size=3, activation='relu'))
     model.add(MaxPooling2D())
     model.add(Conv2D(32, kernel_size=3, activation='relu'))
