@@ -6,8 +6,8 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 sys.path.insert(
     0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../data_opt"))
 ) 
-from prova import get_data, get_model, plot 
-from prova import callbacks, img_height, img_width, split, batch_size
+from models import get_data, get_model, plot 
+from models import callbacks, img_height, img_width, split, batch_size
 train_path = 'data_opt/Train'
 test_path = 'data_opt/Test'
 
