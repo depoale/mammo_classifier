@@ -1,10 +1,9 @@
 from sklearn.model_selection import KFold
-import time
-from models import callbacks
+from utils import callbacks
 import numpy as np
 from matplotlib import pyplot as plt
 import statistics as stats
-import random
+
 
 def fold(X, y, model, k=5):
     """performs kfold model assessment & plots accuracy learning curve.
