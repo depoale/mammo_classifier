@@ -30,7 +30,7 @@ for file in os.listdir('datasets/Mammography_micro/Test/0'):
             im.save(new_file)
  """
 
-batch_size = 72
+batch_size = 64
 img_height = 60
 img_width = 60
 split = 0.3
@@ -38,7 +38,7 @@ split = 0.3
 train_path = 'data_png/Train'
 test_path = 'data_png/Test'
 
-def get_data(train_path = 'data_png/Train',test_path = 'data_png/Test',validation_split=0.3,
+def get_data(train_path = 'data_png/Train',test_path = 'data_png/Test', validation_split=split,
                 img_height=60, img_width=60):
     """acquires data from designated folder.
     Returns
@@ -51,7 +51,7 @@ def get_data(train_path = 'data_png/Train',test_path = 'data_png/Test',validatio
     subset="training",
     seed=123, color_mode='grayscale',
     image_size=(img_height, img_width),
-    batch_size=batch_size)
+    batch_size=1)
 
     val = image_dataset_from_directory(
     train_path,
@@ -60,13 +60,13 @@ def get_data(train_path = 'data_png/Train',test_path = 'data_png/Test',validatio
     seed=123,
     color_mode='grayscale',
     image_size=(img_height, img_width),
-    batch_size=batch_size)
+    batch_size=1)
 
     test = image_dataset_from_directory(
     test_path,
     color_mode='grayscale',
     image_size=(img_height, img_width),
-    batch_size=batch_size)
+    batch_size=1)
     return train, val, test
 
 #model
@@ -126,22 +126,23 @@ def cnn_model(shape=(60, 60, 1), verbose=False):
         Return the convolutional neural network.
     """
     model = Sequential()
+    model.add(Rescaling(scale=1./255.))
     model.add(Conv2D(32, (3, 3), activation='relu', padding='same', name='conv_1', input_shape=shape))
     model.add(MaxPooling2D((2, 2), name='maxpool_1'))
 
     model.add(Conv2D(64, (3, 3), activation='relu', padding='same', name='conv_2'))
     model.add(MaxPooling2D((2, 2), name='maxpool_2'))
-    model.add(Dropout(0.25))
+    model.add(Dropout(0.01))
 
     model.add(Conv2D(128, (3, 3), activation='relu', padding='same', name='conv_3'))
     model.add(MaxPooling2D((2, 2), name='maxpool_3'))
-    model.add(Dropout(0.25))
+    model.add(Dropout(0.01))
 
     model.add(Conv2D(128, (3, 3), activation='relu', padding='same', name='conv_4'))
     model.add(MaxPooling2D((2, 2), name='maxpool_4'))
 
     model.add(Flatten())
-    model.add(Dropout(0.5))
+    model.add(Dropout(0.1))
 
     model.add(Dense(256, activation='relu', name='dense_2'))
     model.add(Dense(128, activation='relu', name='dense_3'))
@@ -187,12 +188,13 @@ def plot(history):
     plt.plot(epochs_range, val_loss, label='Validation Loss')
     plt.legend(loc='upper right')
     plt.title('Training and Validation Loss')
-    plt.show()
+    plt.show(block=False)
 
 if __name__ == '__main__':
     model = cnn_model()
-    train, val, test = get_data()
+    train, val, test = get_data(train_path='data_all/Train', test_path='data_all/Test')
     history = model.fit(train, batch_size=batch_size , epochs=1000, validation_data=val, callbacks=callbacks)
 
     plot(history=history)
-    print(f'test accuracy: {round(model.evaluate(test)[1],3)}')
+    plt.show()
+    print(f'test accuracy: {round(model.evaluate(test)[1],3)}') 

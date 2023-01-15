@@ -6,11 +6,11 @@
 from keras.preprocessing.image import ImageDataGenerator
 from matplotlib import pyplot as plt
 from models import get_data, get_model, plot, get_bigger_model, cnn_model
-from models import callbacks,train_path, test_path, img_height, img_width, split, batch_size
+from models import callbacks,train_path, test_path, img_height, img_width, split
 from model_assessment import fold
-train, val, test = get_data()
-train_path = 'data_png/Train'
-batch_size=64
+train, val, test = get_data(train_path='data_all/Train', test_path='data_all/Test')
+train_path = 'data_all/Train'
+batch_size=128
 train_datagen = ImageDataGenerator(
         rotation_range=0,
         #width_shift_range=0.1,
@@ -40,7 +40,7 @@ val_gen = train_datagen.flow_from_directory(
 
 
 if __name__=='__main__': 
-    model = cnn_model(verbose=True)
+    model = cnn_model(verbose=False)
     #print(type(train_gen))
     #fold(data=(X,y), model=model)
     history = model.fit(train_gen, batch_size=batch_size , epochs=1000, validation_data=val_gen, callbacks=callbacks)

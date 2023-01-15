@@ -6,13 +6,17 @@ from matplotlib import pyplot as plt
 import statistics as stats
 import random
 
-def fold(data, model, k=5):
+def fold(X, y, model, k=5):
     """performs kfold model assessment & plots accuracy learning curve.
     Parameters:
     ----------
-    data: keras.preprocessing.image.DirectoryIterator
+    xxxxxxxxxxdata: keras.preprocessing.image.DirectoryIterator
         result from data augmentation procedure
-    model: keras.Model
+    X: numpy.array
+        data
+    y: numpy.array
+        labels
+    model: tf.keras.Model
         model choosen for training
     k: int
         number of folds. default set to 5 """
@@ -20,8 +24,6 @@ def fold(data, model, k=5):
     
     acc=[]
     val_acc=[]   
-    X, y = data
-    print('here', len(X), len(y))
     for dev_idx, test_idx in outer_kfold.split(X, y):
         X_dev, X_test = X[dev_idx], X[test_idx]
         y_dev, y_test = y[dev_idx], y[test_idx]   
