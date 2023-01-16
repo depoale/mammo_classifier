@@ -168,11 +168,11 @@ def cnn_classifier(shape=(60, 60, 1), verbose=False):
 
 if __name__ == '__main__':
     model = cnn_model()
-    #train, val, test = get_data(train_path='new_data/Train', test_path='new_data/Test')
-    #history = model.fit(train, batch_size=batch_size , epochs=50, validation_data=val, callbacks=callbacks)
+    train, val, test = get_data(train_path='new_data/Train', test_path='new_data/Test')
+    history = model.fit(train, batch_size=batch_size , epochs=50, validation_data=val, callbacks=callbacks)
     #model.save('best_model')
-    #model.save_weights("weights.h5", save_format="h5")
-    path='total_data'
+    model.save_weights("weights.h5", save_format="h5")
+    """ path='total_data'
     data = image_dataset_from_directory(
     path,
     color_mode='grayscale',
@@ -190,4 +190,4 @@ if __name__ == '__main__':
 
     plot(history=history)
     plt.show()
-    print(f'test accuracy: {round(model.evaluate(X_test, y_test)[1],3)}') 
+    print(f'test accuracy: {round(model.evaluate(X_test, y_test)[1],3)}')  """
