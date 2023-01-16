@@ -9,6 +9,10 @@ from keras.optimizers import Adam
 from keras.metrics import Precision, Recall, BinaryAccuracy
 import time
 from PIL import Image
+import glob
+import logging
+from skimage.io import imread
+import numpy as np
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 sys.path.insert(
@@ -17,6 +21,38 @@ sys.path.insert(
 from keras.utils import image_dataset_from_directory
 
 split=0.3
+
+def read_imgs(dataset_path, classes):
+    """Function reading all the images in a given folder which already contains
+    two subfolder.
+
+    Parameters
+    ----------
+        dataset_path : str
+            Path to the image folder.
+        classes : list
+            0 and 1 mean normal tissue and microcalcification clusters, respectively.
+
+    Returns
+    -------
+        array: numpy_array
+            Array containing the value of image/label.
+
+    Examples
+    --------
+    >>> TRAIN_DATA_PATH = '/path/to/train/folder'
+    >>> x_train, y_train = read_imgs(TRAIN_DATA_PATH, [0, 1])
+    """
+    tmp = []
+    labels = []
+    for cls in classes:
+        print(cls)
+        fnames = glob.glob(os.path.join(dataset_path, str(cls), '*.png'))
+        logging.info(f'Read images from class {cls}')
+        tmp += [imread(fname) for fname in fnames]
+        labels += len(fnames)*[cls]
+
+    return np.array(tmp, dtype='float32')[..., np.newaxis]/255, np.array(labels)
 
 def get_data(train_path = 'data_png/Train',test_path = 'data_png/Test', validation_split=split,
                 img_height=60, img_width=60):

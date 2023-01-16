@@ -1,6 +1,5 @@
-from models import cnn_model 
+from models import cnn_model, cnn_classifier 
 from utils import get_data, plot
-from model_assessment import fold
 from sklearn.model_selection import KFold
 import numpy as np
 import tensorflow as tf
@@ -38,7 +37,7 @@ if __name__=='__main__':
 
     for train, test in kfold.split(inputs, targets):
         print(train.shape, test.shape)
-        model = cnn_model(learning_rate=5e-3)
+        model = cnn_classifier()
         history = model.fit(inputs[train], targets[train],  batch_size=1 , 
                             epochs=200, validation_split=1/7, callbacks=callbacks)
         accuracy= round(model.evaluate(inputs[test], targets[test],)[1],3)

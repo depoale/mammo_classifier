@@ -11,6 +11,7 @@ import keras
 from keras.callbacks import EarlyStopping, ReduceLROnPlateau
 from keras.optimizers import Adam
 from keras.metrics import Precision, Recall, BinaryAccuracy
+import numpy as np
 from PIL import Image
 from utils import get_data, plot, callbacks
 
@@ -126,12 +127,67 @@ def cnn_model(shape=(60, 60, 1), learning_rate=1e-3, verbose=False):
   
     return model
 
+def cnn_classifier(shape=(60, 60, 1), verbose=False):
+    """removed resizing layer
+    """
+
+    model = Sequential()
+    model.add(Conv2D(32, (3, 3),
+    activation='relu',
+    padding='same',
+    name='conv_1',
+    input_shape=shape)
+    )
+    model.add(MaxPooling2D((2, 2), name='maxpool_1'))
+
+    model.add(Conv2D(64, (3, 3), activation='relu', padding='same', name='conv_2'))
+    model.add(MaxPooling2D((2, 2), name='maxpool_2'))
+    model.add(Dropout(0.05))
+
+    model.add(Conv2D(128, (3, 3), activation='relu', padding='same', name='conv_3'))
+    model.add(MaxPooling2D((2, 2), name='maxpool_3'))
+    model.add(Dropout(0.05))
+
+    model.add(Conv2D(128, (3, 3), activation='relu', padding='same', name='conv_4'))
+    model.add(MaxPooling2D((2, 2), name='maxpool_4'))
+
+    model.add(Flatten())
+    model.add(Dropout(0.1))
+
+    model.add(Dense(256, activation='relu', name='dense_2'))
+    model.add(Dense(128, activation='relu', name='dense_3'))
+    model.add(Dense(1, activation='sigmoid', name='output'))
+
+    model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
+
+    if verbose:
+        model.summary()
+
+    return model
+
 
 if __name__ == '__main__':
     model = cnn_model()
-    train, val, test = get_data(train_path='new_data/Train', test_path='new_data/Test')
-    history = model.fit(train, batch_size=batch_size , epochs=1000, validation_data=val, callbacks=callbacks)
+    #train, val, test = get_data(train_path='new_data/Train', test_path='new_data/Test')
+    #history = model.fit(train, batch_size=batch_size , epochs=50, validation_data=val, callbacks=callbacks)
+    #model.save('best_model')
+    #model.save_weights("weights.h5", save_format="h5")
+    path='total_data'
+    data = image_dataset_from_directory(
+    path,
+    color_mode='grayscale',
+    image_size=(img_height, img_width),
+    batch_size=1)
+    data.shuffle(672483)
+ 
+    inputs = np.concatenate(list(data.map(lambda x, y:x)))
+    targets = np.concatenate(list(data.map(lambda x, y:y)))
+    
+    X_dev, X_test= inputs[:696], inputs[696:]
+    y_dev, y_test= targets[:696], targets[696:]
+    print(X_dev.shape, y_test.shape)
+    history = model.fit(X_dev,y_dev, batch_size=batch_size , epochs=50, validation_split=0.1, callbacks=callbacks)
 
     plot(history=history)
     plt.show()
-    print(f'test accuracy: {round(model.evaluate(test)[1],3)}') 
+    print(f'test accuracy: {round(model.evaluate(X_test, y_test)[1],3)}') 
