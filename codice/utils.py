@@ -14,13 +14,26 @@ import logging
 from skimage.io import imread
 import numpy as np
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-sys.path.insert(
-    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../datasets"))
-) 
+#sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..\data_png")))
+
+#sys.path.insert(
+#    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../datasets"))
+#)
+
+#sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "new_data")))
+
+#sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "data_png")))
+
+#sys.path.append("..")
+#sys.path.append("data_png")
+
+train_path = r"c:\\Users\\franc\Desktop\DISPENSE 4 ANNO\\Computing Methods\\ESAME\\cmepda_prj\data_png\\Train"
+test_path = r"c:\\Users\\franc\Desktop\DISPENSE 4 ANNO\\Computing Methods\\ESAME\\cmepda_prj\data_png\\Test"
+
+
 from keras.utils import image_dataset_from_directory
 
-split=0.3
+split=0.25
 
 def read_imgs(dataset_path, classes):
     """Function reading all the images in a given folder which already contains
@@ -54,7 +67,7 @@ def read_imgs(dataset_path, classes):
 
     return np.array(tmp, dtype='float32')[..., np.newaxis]/255, np.array(labels)
 
-def get_data(train_path = 'data_png/Train',test_path = 'data_png/Test', validation_split=split,
+def get_data(train_path = train_path ,test_path = test_path, validation_split=split,
                 img_height=60, img_width=60):
     """acquires data from designated folder.
     Returns
