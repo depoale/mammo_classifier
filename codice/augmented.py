@@ -12,10 +12,10 @@ from kfold import fold, fold_tuner
 from sklearn.utils import shuffle
 import os
 batch_size=64
-IMGS_DIR ='total_data'
+IMGS_DIR ='augmented_data'
 
 datagen = ImageDataGenerator(
-        rotation_range=10,
+        rotation_range=50,
         width_shift_range=3,
         height_shift_range=3,
         rescale=1./255,
@@ -32,27 +32,18 @@ if __name__=='__main__':
 
     for i, one_class in enumerate(os.listdir(IMGS_DIR)):
         print(one_class)
+        dir_path = os.path.join(os.getcwd(),'augmented_data', one_class)
         gen = datagen.flow_from_directory(
             IMGS_DIR,
             target_size = (img_width, img_height),
             batch_size = 1,
+            color_mode = 'grayscale',
             class_mode = None,
             classes = [one_class],
-            save_to_dir ='total_classes_'
+            save_to_dir = dir_path
         )
+        #generate & save the images
         for k in range(len(gen)):
             gen.next()
 
-    """ for label in labels:
-        path = os.path.join(os.getcwd(),IMGS_DIR, label)
-        print(path)
-        dir_path = os.path.join(os.getcwd(),'augmented_data', label)
-        print(dir_path)
-        datagen.flow_from_directory(
-                path,
-                target_size=(img_width, img_height),
-                batch_size=1,
-                class_mode = None,
-                color_mode='grayscale', 
-                save_to_dir='dir_path')
- """
+   

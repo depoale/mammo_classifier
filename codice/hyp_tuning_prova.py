@@ -17,13 +17,15 @@ from sklearn.model_selection import train_test_split
 from models import hyp_tuning_model
 
 
-PATH ='total_data'
+#PATH ='total_data'
+PATH = 'augmented_data'
 
 
 
 if __name__ == '__main__':
     X, y = read_imgs(PATH, [0, 1])
-    X, y = shuffle(X, y)
+    print (X.shape)
+    X, y = shuffle(X, y, random_state=123)
     fold_tuner(X, y, k=5, modelBuilder=hyp_tuning_model)
 
 

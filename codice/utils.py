@@ -85,7 +85,7 @@ def get_data(train_path = train_path ,test_path = test_path, validation_split=sp
     return train, val, test
 
 callbacks = [EarlyStopping(monitor='val_accuracy', min_delta=5e-3, patience=20, verbose=1),
-                ReduceLROnPlateau(monitor='val_accuracy', factor=0.25, min_delta=1e-3,patience=10, verbose=1)]
+                ReduceLROnPlateau(monitor='val_accuracy', factor=0.25, min_delta=1e-4,patience=10, verbose=1)]
 
 def plot(history):
     """Plot loss and accuracy
