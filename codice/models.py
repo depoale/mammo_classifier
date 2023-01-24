@@ -14,16 +14,8 @@ from keras.metrics import Precision, Recall, BinaryAccuracy
 import numpy as np
 from PIL import Image
 from utils import get_data, plot, callbacks
-
-#sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..\data_png")))
-
-#sys.path.insert(
-#    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../datasets"))
-#)
-
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "data_png")))
-
+sys.path.append('..')
+sys.path.append('data_png')
 
 from keras.utils import image_dataset_from_directory
 
@@ -42,11 +34,9 @@ img_height = 60
 img_width = 60
 split = 0.3
 
-#train_path = r"c:\\Users\\franc\Desktop\DISPENSE 4 ANNO\\Computing Methods\\ESAME\\cmepda_prj\data_png\\Train"
-#test_path = r"c:\\Users\\franc\Desktop\DISPENSE 4 ANNO\\Computing Methods\\ESAME\\cmepda_prj\data_png\\Test"
 
-train_path=sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "Train")))
-test_path=sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "Test")))
+train_path= os.path.join(os.getcwd(),'data_png' ,'Train')
+test_path=os.path.join(os.getcwd(),'data_png' ,'Test')
 
 #model
 def get_model():
@@ -218,12 +208,10 @@ def make_model(shape=(60, 60, 1), learning_rate=0.001):
 
 
 if __name__ == '__main__':
-    #sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-    #sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "data_png")))
-    os.chdir('data_png')
-    print(os.getcwd())
+    
+    print('cwd',os.getcwd())
     #model = cnn_model()
-    #train, val, test = get_data(train_path=train_path, test_path=test_path)
+    train, val, test = get_data(train_path=train_path, test_path=test_path)
     #history = model.fit(train, batch_size=batch_size , epochs=100, validation_data=val, callbacks=callbacks)
     #model.save('best_model')
     #model.save_weights("weights.h5", save_format="h5")

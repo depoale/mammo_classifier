@@ -14,10 +14,7 @@ import random
 import statistics as stats
 from sklearn.utils import shuffle
 from utils import get_data, plot, callbacks
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-sys.path.insert(
-    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../datasets"))
-) 
+
 from keras.utils import image_dataset_from_directory
 from utils import read_imgs
 from models import cnn_classifier
@@ -59,6 +56,7 @@ def fold(X, y, k):
 
 
 if __name__ == '__main__':
+    print(os.getcwd())
     X, y = read_imgs(PATH, [0, 1])
     X, y = shuffle(X, y)
     fold(X, y, k=5)
