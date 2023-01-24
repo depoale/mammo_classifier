@@ -28,14 +28,30 @@ labels= ['0','1']
 
 
 if __name__=='__main__': 
-    for label in labels:
-        path = os.path.join(os.getcwd(),IMGS_DIR)
+    print('\n cwd:',os.getcwd())
+
+    for i, one_class in enumerate(os.listdir(IMGS_DIR)):
+        gen = datagen.flow_from_directory(
+            IMGS_DIR,
+            target_size = (img_width, img_height),
+            batch_size = 25,
+            class_mode = 'binary',
+            classes = [one_class],
+            save_to_dir = f'total_classes_/{one_class}',
+            save_prefix = 'new_image',
+            save_format = 'png'
+        )
+
+    """ for label in labels:
+        path = os.path.join(os.getcwd(),IMGS_DIR, label)
         print(path)
-        dir_path = os.path.join(os.getcwd(),'augmented_data')
+        dir_path = os.path.join(os.getcwd(),'augmented_data', label)
         print(dir_path)
-        new_imgs = datagen.flow_from_directory(
+        datagen.flow_from_directory(
                 path,
                 target_size=(img_width, img_height),
                 batch_size=1,
+                class_mode = None,
                 color_mode='grayscale', 
-                save_to_dir=dir_path)
+                save_to_dir='dir_path')
+ """
