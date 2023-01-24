@@ -1,6 +1,7 @@
 cose da fare:
 - implementare data augmentation
-- FRA: leggere cose sullo scheletro dell'hypermodel e modificare di conseguenza / fare prove 
+- FRA: leggere cose sullo scheletro dell'hypermodel e modificare di conseguenza / fare prove
+    (da piccolo a grande, tutto uguale, da grande a piccolo)
 - SOM
 - FRA: Wavelet
 - ai interpretability immagini
