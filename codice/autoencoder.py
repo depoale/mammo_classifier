@@ -2,17 +2,10 @@ import sklearn
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from keras.layers import Dense, Input, Dropout, Flatten, Reshape
+from keras.layers import Dense, InputLayer, Dropout, Rescaling, Flatten, Reshape, concatenate
 import keras
-from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import StandardScaler
-from keras import Model
-from sklearn import linear_model
-from sklearn.metrics import mean_squared_error, mean_absolute_error
-import tensorflow as tf
-from scikeras.wrappers import KerasRegressor
-from sklearn.model_selection import GridSearchCV
-from sklearn.model_selection import GridSearchCV, cross_val_score, KFold
+import h5py
+from sklearn.utils import shuffle
 import keras_tuner as kt
 from keras.optimizers import Adam, SGD
 from keras.callbacks import EarlyStopping, ReduceLROnPlateau
@@ -23,47 +16,112 @@ from kfold import fold_tuner_auto
 PATH = 'total_data'
 
 
-def get_autoenc(hp):
+def get_autoenc():
     shape_in = (60,60,1)
     model = keras.models.Sequential()
-    model.add(Input(shape=(shape_in,)))
+    model.add(InputLayer(shape_in))
+    model.add(Rescaling(scale=1./255.))
     model.add(Flatten())
+    model.add(Dropout(0.05))
+    model.add(Dense(256, activation='relu', name='dense1'))
+    model.add(Dropout(0.05))
+    model.add(Dense(160, activation='relu', name='dense2'))
+    model.add(Dropout(0.05))
+    model.add(Dense(64, activation='relu', name='enc'))  #neck of the bottle neck
+    model.add(Dropout(0.05))
+    model.add(Dense(160, activation='relu'))
+    model.add(Dropout(0.05))
+    model.add(Dense(256, activation='relu'))
+    model.add(Dropout(0.05))
+
     
-    hp_units = hp.Choice('units',[128, 256])
-    hp_dropout = hp.Choice('dropout', [ 1e-2, 1e-3, 0.0])
-    hp_depth = hp.Int('depth', min_value=4, max_value=8, step=2)
-    hp_learning_rate = hp.Choice('learning_rate', values=[1e-2, 1e-3])
-    
-    for i in range(hp_depth+1):
-        model.add(Dropout(hp_dropout))
-        fun = lambda x: round(hp_units/10 +9*hp_units/10*(np.cos(np.pi*x/hp_depth))**2)
-        model.add(Dense(fun(i), activation='relu'))
-        
-    model.add(Dense(shape_in))
+    model.add(Dense(np.prod(shape_in)))
     model.add(Reshape(shape_in))
-    model.compile(loss='MSE', optimizer=Adam(learning_rate=hp_learning_rate))
+    model.compile(loss='MSE', optimizer=Adam(learning_rate=0.01))
     return model
 
-def get_encoder(hp):
+def get_encoder():
     shape_in = (60,60,1)
-    model = keras.models.Sequential()
-    model.add(Input(shape=(shape_in,)))
-    model.add(Flatten())
-    
-    hp_units = hp.Choice('units',[64, 128, 256])
-    hp_dropout = hp.Choice('dropout', [ 1e-2, 1e-3, 0.0])
-    hp_depth = hp.Int('depth', min_value=4, max_value=8, step=2)
-    hp_learning_rate = hp.Choice('learning_rate', values=[1e-2, 1e-3])
-    
-    for i in range(hp_depth+1):
-        if i<=(hp_depth+1)//2:
-            model.add(Dropout(hp_dropout))
-            fun = lambda x: round(hp_units/10 +9*hp_units/10*(np.cos(np.pi*x/hp_depth))**2)
-            model.add(Dense(fun(i), activation='relu',trainable=False))
-    
-    model.compile(loss='MSE', optimizer=Adam(learning_rate=hp_learning_rate))
+    inputs = keras.layers.Input(shape_in)
+    x = Rescaling(scale=1./255.)(inputs)
+    x = Flatten()(x)
+    x=Dropout(0.05)(x)
+    x = Dense(256, activation='relu', trainable=False, name='dense1')(x)
+    x=Dropout(0.05)(x)
+    x = Dense(160, activation='relu', trainable=False, name='dense2')(x)
+    x=Dropout(0.05)(x)
+    enc = Dense(64, activation='relu', trainable=False, name='enc')(x)
+    model = keras.Model(inputs, enc)
+    model.compile(loss='MSE', optimizer=Adam(learning_rate=0.01))
+    return model
+
+def get_decoder():
+    pass
+
+
+
+def get_concatenated_deepNN():
+    shape_in = (60,60,1)
+    inputs = keras.layers.Input(shape_in)
+    x = Rescaling(scale=1./255.)(inputs)
+    x = Flatten()(x)
+    x=Dropout(0.05)(x)
+    x = Dense(256, activation='relu', trainable=False, name='dense1')(x)
+    x=Dropout(0.05)(x)
+    x = Dense(160, activation='relu', trainable=False, name='dense2')(x)
+    x=Dropout(0.05)(x)
+    enc = Dense(64, activation='relu', trainable=False, name='enc')(x)
+
+    #trainable net
+    x = Dense(256, activation='relu')(enc)
+    x= Dropout(0.05)(x)
+    x = Dense(256, activation='relu', name='dense1.1')(x)
+    x= Dropout(0.05)(x)
+    x = Dense(128, activation='relu',name='dense1.2')(x)
+    x= Dropout(0.05)(x)
+    x = Dense(64, activation='relu', name='dense1.3')(x)
+    outputs = Dense(1, activation='sigmoid', name='outputs')(x)
+    model =keras.Model(inputs, outputs)
+    model.compile(loss='binary_crossentropy', optimizer= Adam(learning_rate=0.01), metrics=['accuracy'])
     return model
 
 if __name__=='__main__':
     X, y = read_imgs(PATH, [0,1])
-    fold_tuner_auto(X, X, k=5, modelBuilder=get_autoenc)
+    X, y = shuffle(X, y)
+    X_train, X_test = X[:700], X[700:]
+    y_train, y_test = y[:700], y[700:]
+    autoencoder = get_autoenc()
+    history = autoencoder.fit(X_train, X_train, epochs=100, validation_split=0.2, 
+                callbacks= [EarlyStopping(monitor='val_loss', min_delta=5e-3, patience=20, verbose=1),
+                ReduceLROnPlateau(monitor='val_loss', factor=0.25, min_delta=1e-4,patience=10, verbose=1)])
+
+    autoencoder.save_weights("weights_auto.h5")
+
+    #lerning curve plot
+    loss = history.history['loss']
+    val_loss = history.history['val_loss']
+    epochs_range = range(1, len(loss)+1)
+    plt.plot(epochs_range, loss, label='Training Loss')
+    plt.plot(epochs_range, val_loss, label='Validation Loss')
+    plt.legend(loc='upper right')
+    plt.title('Training and Validation Loss')
+    plt.show(block=False)
+
+   
+    print(f'test loss: {autoencoder.evaluate(X_test, y_test)}')
+    new_model = get_concatenated_deepNN()
+    new_model.load_weights("weights_auto.h5", by_name=True, skip_mismatch=True)
+    new_model.summary()
+    history = new_model.fit(X_train, y_train, epochs=100, validation_split=0.2, 
+                callbacks= [EarlyStopping(monitor='val_accuracy', min_delta=5e-3, patience=20, verbose=1),
+                ReduceLROnPlateau(monitor='val_accuracy', factor=0.25, min_delta=1e-4,patience=10, verbose=1)])
+    print(f'test loss: {new_model.evaluate(X_test, y_test)}')
+
+
+    
+
+    
+
+
+
+
