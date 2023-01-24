@@ -14,22 +14,8 @@ import logging
 from skimage.io import imread
 import numpy as np
 
-#sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..\data_png")))
-
-#sys.path.insert(
-#    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../datasets"))
-#)
-
-#sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "new_data")))
-
-#sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "data_png")))
-
-#sys.path.append("..")
-#sys.path.append("data_png")
-
-train_path = r"c:\\Users\\franc\Desktop\DISPENSE 4 ANNO\\Computing Methods\\ESAME\\cmepda_prj\data_png\\Train"
-test_path = r"c:\\Users\\franc\Desktop\DISPENSE 4 ANNO\\Computing Methods\\ESAME\\cmepda_prj\data_png\\Test"
-
+train_path = os.path.join(os.getcwd(),'data_png' ,'Train')
+test_path = os.path.join(os.getcwd(),'data_png' ,'Test')
 
 from keras.utils import image_dataset_from_directory
 
@@ -98,8 +84,8 @@ def get_data(train_path = train_path ,test_path = test_path, validation_split=sp
     batch_size=1)
     return train, val, test
 
-callbacks = EarlyStopping(monitor='val_accuracy', min_delta=5e-3, patience=20, verbose=1)
-                #ReduceLROnPlateau(monitor='val_accuracy', factor=0.25, patience=10, verbose=1))
+callbacks = [EarlyStopping(monitor='val_accuracy', min_delta=5e-3, patience=20, verbose=1),
+                ReduceLROnPlateau(monitor='val_accuracy', factor=0.25, min_delta=1e-3,patience=10, verbose=1)]
 
 def plot(history):
     """Plot loss and accuracy

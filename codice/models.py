@@ -14,8 +14,6 @@ from keras.metrics import Precision, Recall, BinaryAccuracy
 import numpy as np
 from PIL import Image
 from utils import get_data, plot, callbacks
-sys.path.append('..')
-sys.path.append('data_png')
 
 from keras.utils import image_dataset_from_directory
 
@@ -206,6 +204,48 @@ def make_model(shape=(60, 60, 1), learning_rate=0.001):
   
   return model
 
+def hyp_tuning_model(hp):
+    shape = (60, 60, 1)
+    model = Sequential()
+    model.add(Input(shape=shape))
+
+    hp_learning_rate = hp.Choice('learning_rate', values=[5e-2, 1e-2, 1e-3])
+    hp_depth = hp.Int('depth', min_value = 2, max_value = 4, step=1)
+    hp_Dense_units = hp.Choice('Dense_units', values=[128, 256])
+    
+    
+    model.add(Rescaling(scale=1./255.))
+
+    model.add(Conv2D(32, (3, 3), activation='relu', padding='same', name='conv_1', input_shape=shape))
+    model.add(BatchNormalization())
+    model.add(MaxPooling2D((2, 2), name='maxpool_1'))
+
+    model.add(Conv2D(64, (3, 3), activation='relu', padding='same', name='conv_2'))
+    model.add(BatchNormalization())
+    model.add(MaxPooling2D((2, 2), name='maxpool_2'))
+    model.add(Dropout(0.01))
+
+    model.add(Conv2D(128, (3, 3), activation='relu', padding='same', name='conv_3'))
+    model.add(BatchNormalization())
+    model.add(MaxPooling2D((2, 2), name='maxpool_3'))
+    model.add(Dropout(0.01))
+
+    model.add(Conv2D(128, (3, 3), activation='relu', padding='same', name='conv_4'))
+    model.add(BatchNormalization())
+    model.add(MaxPooling2D((2, 2), name='maxpool_4'))
+
+    model.add(Flatten())
+    model.add(Dropout(0.1))
+
+    for i in range(hp_depth):
+        units = hp_Dense_units/(i+1)
+        model.add(Dense(units, activation='relu', name=f'dense_{i}'))
+
+    model.add(Dense(1, activation='sigmoid', name='output'))
+
+    model.compile(loss='MSE', optimizer= Adam(learning_rate = hp_learning_rate), metrics=['accuracy'])
+    
+    return model
 
 if __name__ == '__main__':
     

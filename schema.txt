@@ -1,0 +1,10 @@
+cose da fare:
+- implementare data augmentation
+- FRA: leggere cose sullo scheletro dell'hypermodel e modificare di conseguenza / fare prove 
+- SOM
+- FRA: Wavelet
+- ai interpretability immagini
+- final model selection: ensembe o lotta
+- ALE: GAN internet
+- ALE: GAN nuova
+- ALE: preprocessing (dim reduction: auto-encoder)
