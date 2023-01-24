@@ -31,16 +31,17 @@ if __name__=='__main__':
     print('\n cwd:',os.getcwd())
 
     for i, one_class in enumerate(os.listdir(IMGS_DIR)):
+        print(one_class)
         gen = datagen.flow_from_directory(
             IMGS_DIR,
             target_size = (img_width, img_height),
-            batch_size = 25,
-            class_mode = 'binary',
+            batch_size = 1,
+            class_mode = None,
             classes = [one_class],
-            save_to_dir = f'total_classes_/{one_class}',
-            save_prefix = 'new_image',
-            save_format = 'png'
+            save_to_dir ='total_classes_'
         )
+        for k in range(len(gen)):
+            gen.next()
 
     """ for label in labels:
         path = os.path.join(os.getcwd(),IMGS_DIR, label)
