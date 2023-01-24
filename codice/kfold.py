@@ -40,7 +40,7 @@ def fold_tuner(X, y, k, modelBuilder):
         y_dev, y_test = y[dev_idx], y[test_idx]
         model = modelBuilder
         tuner = kt.BayesianOptimization(modelBuilder, objective='accuracy', max_trials=5, overwrite=True, directory='tuner')
-        tuner.search(X_dev, y_dev, epochs=100, validation_split=1/(k-1), batch_size=32, 
+        tuner.search(X_dev, y_dev, epochs=50, validation_split=1/(k-1), batch_size=32, 
                     callbacks=callbacks, verbose=1)
         best_hps = tuner.get_best_hyperparameters(num_trials=1)[0]
     

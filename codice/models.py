@@ -209,33 +209,35 @@ def hyp_tuning_model(hp):
     model = Sequential()
     model.add(Input(shape=shape))
 
-    hp_learning_rate = hp.Choice('learning_rate', values=[5e-2, 1e-2, 1e-3])
-    hp_depth = hp.Int('depth', min_value = 2, max_value = 4, step=1)
-    hp_Dense_units = hp.Choice('Dense_units', values=[128, 256])
+    hp_depth = hp.Int('depth', min_value = 1, max_value = 3, step=1)
+    hp_Dense_units = hp.Choice('Dense_units', values=[256])
+    hp_Conv2D_init = hp.Choice('Conv2d_init', values=[10, 20, 30])
+    hp_dropout = hp.Choice('dropout', values=[0.01, 0.03, 0.05])
+    hp_Conv2d_size = hp.Choice('Conv2D_size', values=[3, 5])
     
     
     model.add(Rescaling(scale=1./255.))
 
-    model.add(Conv2D(32, (3, 3), activation='relu', padding='same', name='conv_1', input_shape=shape))
+    model.add(Conv2D(hp_Conv2D_init, (hp_Conv2d_size, hp_Conv2d_size), activation='relu', padding='same', strides=1, name='conv_1', input_shape=shape))
     model.add(BatchNormalization())
-    model.add(MaxPooling2D((2, 2), name='maxpool_1'))
+    model.add(MaxPooling2D((2, 2), strides = 2, name='maxpool_1'))
 
-    model.add(Conv2D(64, (3, 3), activation='relu', padding='same', name='conv_2'))
+    model.add(Conv2D(2*hp_Conv2D_init, (hp_Conv2d_size, hp_Conv2d_size), activation='relu', padding='same', strides=1, name='conv_2'))
     model.add(BatchNormalization())
-    model.add(MaxPooling2D((2, 2), name='maxpool_2'))
-    model.add(Dropout(0.01))
+    model.add(MaxPooling2D((2, 2), strides=2,  name='maxpool_2'))
+    model.add(Dropout(hp_dropout))
 
-    model.add(Conv2D(128, (3, 3), activation='relu', padding='same', name='conv_3'))
+    model.add(Conv2D(4*hp_Conv2D_init, (hp_Conv2d_size, hp_Conv2d_size), activation='relu', padding='same', strides=1, name='conv_3'))
     model.add(BatchNormalization())
-    model.add(MaxPooling2D((2, 2), name='maxpool_3'))
-    model.add(Dropout(0.01))
+    model.add(MaxPooling2D((2, 2), strides=2, name='maxpool_3'))
+    model.add(Dropout(hp_dropout))
 
-    model.add(Conv2D(128, (3, 3), activation='relu', padding='same', name='conv_4'))
+    """ model.add(Conv2D(128, (3, 3), activation='relu', padding='zero', name='conv_4'))
     model.add(BatchNormalization())
-    model.add(MaxPooling2D((2, 2), name='maxpool_4'))
+    model.add(MaxPooling2D((2, 2), name='maxpool_4')) """
 
     model.add(Flatten())
-    model.add(Dropout(0.1))
+    model.add(Dropout(hp_dropout*5))
 
     for i in range(hp_depth):
         units = hp_Dense_units/(i+1)
@@ -243,7 +245,7 @@ def hyp_tuning_model(hp):
 
     model.add(Dense(1, activation='sigmoid', name='output'))
 
-    model.compile(loss='MSE', optimizer= Adam(learning_rate = hp_learning_rate), metrics=['accuracy'])
+    model.compile(loss='MSE', optimizer= Adam(learning_rate = 0.001), metrics=['accuracy'])
     
     return model
 
