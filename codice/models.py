@@ -222,7 +222,7 @@ if __name__ == '__main__':
     #sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "data_png")))
     os.chdir('data_png')
     print(os.getcwd())
-    model = cnn_model()
+    #model = cnn_model()
     #train, val, test = get_data(train_path=train_path, test_path=test_path)
     #history = model.fit(train, batch_size=batch_size , epochs=100, validation_data=val, callbacks=callbacks)
     #model.save('best_model')
