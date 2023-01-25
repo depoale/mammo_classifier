@@ -10,9 +10,9 @@ import keras_tuner as kt
 from keras.optimizers import Adam, SGD
 from keras.callbacks import EarlyStopping, ReduceLROnPlateau
 import statistics as stats
-import time
+from utils import plot
 from utils import read_imgs
-from kfold import fold_tuner_auto
+
 PATH = 'total_data'
 
 
@@ -23,42 +23,22 @@ def get_autoenc():
     model.add(Rescaling(scale=1./255.))
     model.add(Flatten())
     model.add(Dropout(0.05))
-    model.add(Dense(256, activation='relu', name='dense1'))
+    model.add(Dense(512, activation='relu', name='dense1'))
     model.add(Dropout(0.05))
-    model.add(Dense(160, activation='relu', name='dense2'))
+    model.add(Dense(256, activation='relu', name='dense2'))
     model.add(Dropout(0.05))
-    model.add(Dense(64, activation='relu', name='enc'))  #neck of the bottle neck
-    model.add(Dropout(0.05))
-    model.add(Dense(160, activation='relu'))
+    model.add(Dense(160, activation='relu', name='enc'))  #neck of the bottle neck
     model.add(Dropout(0.05))
     model.add(Dense(256, activation='relu'))
+    model.add(Dropout(0.05))
+    model.add(Dense(512, activation='relu'))
     model.add(Dropout(0.05))
 
     
     model.add(Dense(np.prod(shape_in)))
     model.add(Reshape(shape_in))
-    model.compile(loss='MSE', optimizer=Adam(learning_rate=0.01))
+    model.compile(loss='MSE', optimizer=Adam(learning_rate=0.001))
     return model
-
-def get_encoder():
-    shape_in = (60,60,1)
-    inputs = keras.layers.Input(shape_in)
-    x = Rescaling(scale=1./255.)(inputs)
-    x = Flatten()(x)
-    x=Dropout(0.05)(x)
-    x = Dense(256, activation='relu', trainable=False, name='dense1')(x)
-    x=Dropout(0.05)(x)
-    x = Dense(160, activation='relu', trainable=False, name='dense2')(x)
-    x=Dropout(0.05)(x)
-    enc = Dense(64, activation='relu', trainable=False, name='enc')(x)
-    model = keras.Model(inputs, enc)
-    model.compile(loss='MSE', optimizer=Adam(learning_rate=0.01))
-    return model
-
-def get_decoder():
-    pass
-
-
 
 def get_concatenated_deepNN():
     shape_in = (60,60,1)
@@ -66,17 +46,17 @@ def get_concatenated_deepNN():
     x = Rescaling(scale=1./255.)(inputs)
     x = Flatten()(x)
     x=Dropout(0.05)(x)
-    x = Dense(256, activation='relu', trainable=False, name='dense1')(x)
+    x = Dense(512, activation='relu', trainable=False, name='dense1')(x)
     x=Dropout(0.05)(x)
-    x = Dense(160, activation='relu', trainable=False, name='dense2')(x)
+    x = Dense(256, activation='relu', trainable=False, name='dense2')(x)
     x=Dropout(0.05)(x)
-    enc = Dense(64, activation='relu', trainable=False, name='enc')(x)
+    enc = Dense(160, activation='relu', trainable=False, name='enc')(x)
 
     #trainable net
-    x = Dense(256, activation='relu')(enc)
+    x = Dense(512, activation='relu', name='dense1.0')(enc)
     x= Dropout(0.05)(x)
     x = Dense(256, activation='relu', name='dense1.1')(x)
-    x= Dropout(0.05)(x)
+    x= Dropout(0.05)(x) 
     x = Dense(128, activation='relu',name='dense1.2')(x)
     x= Dropout(0.05)(x)
     x = Dense(64, activation='relu', name='dense1.3')(x)
@@ -116,6 +96,8 @@ if __name__=='__main__':
                 callbacks= [EarlyStopping(monitor='val_accuracy', min_delta=5e-3, patience=20, verbose=1),
                 ReduceLROnPlateau(monitor='val_accuracy', factor=0.25, min_delta=1e-4,patience=10, verbose=1)])
     print(f'test loss: {new_model.evaluate(X_test, y_test)}')
+    plot(history)
+    plt.show()
 
 
     

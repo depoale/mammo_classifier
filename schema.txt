@@ -1,6 +1,6 @@
 cose da fare:
-- implementare data augmentation
-- FRA: leggere cose sullo scheletro dell'hypermodel e modificare di conseguenza / fare prove
+• implementare data augmentation
+• FRA: leggere cose sullo scheletro dell'hypermodel e modificare di conseguenza / fare prove
     (da piccolo a grande, tutto uguale, da grande a piccolo)
     (https://www.learndatasci.com/tutorials/convolutional-neural-networks-image-classification/ 
     zero-padding è meglio XD)
@@ -12,4 +12,4 @@ cose da fare:
 - final model selection: ensembe o lotta
 - ALE: GAN internet
 - ALE: GAN nuova
-- ALE: preprocessing (dim reduction: auto-encoder)
+• ALE: preprocessing (dim reduction: auto-encoder)
