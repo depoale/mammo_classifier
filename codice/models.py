@@ -30,11 +30,11 @@ for file in os.listdir('datasets/Mammography_micro/Test/0'):
 batch_size = 64
 img_height = 60
 img_width = 60
-split = 0.3
+split = 0.4
 
 
-train_path= os.path.join(os.getcwd(),'data_png' ,'Train')
-test_path=os.path.join(os.getcwd(),'data_png' ,'Test')
+train_path= os.path.join(os.getcwd(),'data_png_WAVELET' ,'Train')
+test_path=os.path.join(os.getcwd(),'data_png_WAVELET' ,'Test')
 
 #model
 def get_model():
@@ -253,9 +253,9 @@ def hyp_tuning_model(hp):
 if __name__ == '__main__':
     
     print('cwd',os.getcwd())
-    #model = cnn_model()
+    model = cnn_classifier()
     train, val, test = get_data(train_path=train_path, test_path=test_path)
-    #history = model.fit(train, batch_size=batch_size , epochs=100, validation_data=val, callbacks=callbacks)
+    history = model.fit(train, batch_size=batch_size , epochs=100, validation_data=val, callbacks=callbacks)
     #model.save('best_model')
     #model.save_weights("weights.h5", save_format="h5")
     """ path='total_data'

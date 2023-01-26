@@ -13,7 +13,7 @@ from keras.callbacks import ReduceLROnPlateau, EarlyStopping
 from utils import read_imgs
 from models import cnn_classifier, hyp_tuning_model
 
-PATH='total_data'
+PATH='total_data_WAVELET'
 
 def fold(X, y, k, modelBuilder):
     test_acc=[]

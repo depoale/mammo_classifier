@@ -19,7 +19,7 @@ test_path = os.path.join(os.getcwd(),'data_png' ,'Test')
 
 from keras.utils import image_dataset_from_directory
 
-split=0.25
+split=0.35
 
 def read_imgs(dataset_path, classes):
     """Function reading all the images in a given folder which already contains
