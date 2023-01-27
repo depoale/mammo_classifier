@@ -8,8 +8,8 @@ cose da fare:
 
 - SOM
 - FRA: Wavelet
-- ai interpretability immagini
+- ALE: ai interpretability immagini
 - final model selection: ensembe o lotta
 - ALE: GAN internet
-- ALE: GAN nuova
+• ALE: GAN nuova #meglio di no che l'autoendoder fa schifo
 • ALE: preprocessing (dim reduction: auto-encoder)

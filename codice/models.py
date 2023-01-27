@@ -13,9 +13,8 @@ from keras.optimizers import Adam
 from keras.metrics import Precision, Recall, BinaryAccuracy
 import numpy as np
 from PIL import Image
-from utils import get_data, plot, callbacks
-
-from keras.utils import image_dataset_from_directory
+from utils import get_data, plot, callbacks, read_imgs
+from sklearn.utils import shuffle
 
 """ 
 used to convert dataset to 'png' estension (supported by keras.utils.image_dataset_from_directory)   
@@ -249,15 +248,62 @@ def hyp_tuning_model(hp):
     model.compile(loss='MSE', optimizer= Adam(learning_rate = 0.001), metrics=['accuracy'])
     
     return model
+def trial_for_map(shape=(60, 60, 1), learning_rate=1e-3, verbose=False):
+    """
+    CNN for microcalcification clusters classification.
+
+    Parameters
+    ----------
+    shape : tuple, optional
+        The first parameter.
+    verbose : bool, optional
+        Enables the printing of the summary. Defaults to False.
+
+    Returns
+    -------
+    model
+        Return the convolutional neural network.
+    """
+    model = Sequential()
+    model.add(Rescaling(scale=1./255.))
+    model.add(Conv2D(32, (3, 3), activation='relu', padding='same', name='conv_1', input_shape=shape))
+    BatchNormalization()
+    model.add(MaxPooling2D((2, 2), name='maxpool_1'))
+
+    model.add(Conv2D(64, (3, 3), activation='relu', padding='same', name='conv_2'))
+    BatchNormalization()
+    model.add(MaxPooling2D((2, 2), name='maxpool_2'))
+    model.add(Dropout(0.01))
+
+    model.add(Conv2D(128, (3, 3), activation='relu', padding='same', name='conv_3'))
+    BatchNormalization()
+    model.add(MaxPooling2D((2, 2), name='maxpool_3'))
+    model.add(Dropout(0.01))
+
+    model.add(Conv2D(256, (3, 3), activation='relu', padding='same', name='conv_4'))
+    BatchNormalization()
+    model.add(MaxPooling2D((2, 2), name='maxpool_4'))
+
+    model.add(Flatten())
+    model.add(Dense(1, activation='sigmoid', name='output'))
+
+    model.compile(loss='binary_crossentropy', optimizer= Adam(learning_rate=learning_rate), metrics=['accuracy'])
+    
+    if verbose:
+      model.summary()
+  
+    return model
 
 if __name__ == '__main__':
-    
+    test_path= os.path.join(os.getcwd(),'data_png' ,'Test')
+    train_path= os.path.join(os.getcwd(),'data_png' ,'Train')
     print('cwd',os.getcwd())
-    model = cnn_classifier()
+    model = cnn_model()
     train, val, test = get_data(train_path=train_path, test_path=test_path)
-    history = model.fit(train, batch_size=batch_size , epochs=100, validation_data=val, callbacks=callbacks)
+    #history = model.fit(train, batch_size=batch_size , epochs=100, validation_data=val, callbacks=callbacks)
     #model.save('best_model')
     #model.save_weights("weights.h5", save_format="h5")
+    #print(f'test accuracy: {round(model.evaluate(X_test, y_test)[1],3)}')  
     """ path='total_data'
     data = image_dataset_from_directory(
     path,
