@@ -16,12 +16,11 @@ def make_gradcam_heatmap(
 ):
 
     #img_array = tf.convert_to_tensor(img_array)
-    img_array = np.reshape(img_array, newshape=(None, 60,60,1))
     print('img',img_array.shape)
     # First, we create a model that maps the input image to the activations
     # of the last conv layer
     last_conv_layer = model.get_layer(last_conv_layer_name)
-    last_conv_layer_model = tf.keras.Model(model.inputs, last_conv_layer.output)
+    last_conv_layer_model = tf.keras.Model(model.input, last_conv_layer.output)
     last_conv_layer_model.summary()
 
     # Second, we create a model that maps the activations of the last conv
