@@ -130,6 +130,7 @@ def cnn_classifier(shape=(60, 60, 1), verbose=False):
     """
 
     model = Sequential()
+    model.add(Input(shape=shape))
     model.add(Conv2D(32, (3, 3),
     activation='relu',
     padding='same',
@@ -139,17 +140,17 @@ def cnn_classifier(shape=(60, 60, 1), verbose=False):
     model.add(MaxPooling2D((2, 2), name='maxpool_1'))
 
     model.add(Conv2D(64, (3, 3), activation='relu', padding='same', name='conv_2'))
-    BatchNormalization()
+    model.add(BatchNormalization())
     model.add(MaxPooling2D((2, 2), name='maxpool_2'))
     model.add(Dropout(0.05))
 
     model.add(Conv2D(128, (3, 3), activation='relu', padding='same', name='conv_3'))
-    BatchNormalization()
+    model.add(BatchNormalization())
     model.add(MaxPooling2D((2, 2), name='maxpool_3'))
     model.add(Dropout(0.05))
 
     model.add(Conv2D(128, (3, 3), activation='relu', padding='same', name='conv_4'))
-    BatchNormalization()
+    model.add(BatchNormalization())
     model.add(MaxPooling2D((2, 2), name='maxpool_4'))
 
     model.add(Flatten())
@@ -282,9 +283,9 @@ def trial_for_map(shape=(60, 60, 1), learning_rate=1e-3, verbose=False):
 
     model.add(Conv2D(256, (3, 3), activation='relu', padding='same', name='conv_4'))
     BatchNormalization()
-    model.add(MaxPooling2D((2, 2), name='maxpool_4'))
+    #model.add(MaxPooling2D((2, 2), name='maxpool_4'))
 
-    model.add(Flatten())
+    model.add(keras.layers.GlobalAveragePooling2D(name='last'))
     model.add(Dense(1, activation='sigmoid', name='output'))
 
     model.compile(loss='binary_crossentropy', optimizer= Adam(learning_rate=learning_rate), metrics=['accuracy'])
@@ -298,10 +299,14 @@ if __name__ == '__main__':
     test_path= os.path.join(os.getcwd(),'data_png' ,'Test')
     train_path= os.path.join(os.getcwd(),'data_png' ,'Train')
     print('cwd',os.getcwd())
-    model = cnn_model()
-    train, val, test = get_data(train_path=train_path, test_path=test_path)
-    #history = model.fit(train, batch_size=batch_size , epochs=100, validation_data=val, callbacks=callbacks)
-    #model.save('best_model')
+    model = cnn_classifier()
+    X_train, y_train = read_imgs(train_path, [0, 1])
+    print(X_train.shape)
+    X_train, y_train = shuffle(X_train, y_train)
+    X_test, y_test = read_imgs(test_path, [0, 1])
+    print(X_test.shape)
+    history = model.fit(X_train, y_train, batch_size=batch_size , epochs=70, validation_split=0.2)
+    model.save('best_model.h5')
     #model.save_weights("weights.h5", save_format="h5")
     #print(f'test accuracy: {round(model.evaluate(X_test, y_test)[1],3)}')  
     """ path='total_data'

@@ -9,24 +9,30 @@ from IPython.display import Image, display
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 
-def make_gradcam_heatmap(img_array, model, last_conv_layer_name, pred_index=None):
+def make_gradcam_heatmap(img_array, model, last_conv_layer_name):
     # First, we create a model that maps the input image to the activations
     # of the last conv layer as well as the output predictions
     grad_model = tf.keras.models.Model(
         [model.inputs], [model.get_layer(last_conv_layer_name).output, model.output]
     )
-
+    grad_model.summary()
     # Then, we compute the gradient of the top predicted class for our input image
     # with respect to the activations of the last conv layer
     with tf.GradientTape() as tape:
-        last_conv_layer_output, preds = grad_model(img_array)
-        if pred_index is None:
-            pred_index = tf.argmax(preds[0])
-        class_channel = preds[:, pred_index]
 
-    # This is the gradient of the output neuron (top predicted or chosen)
-    # with regard to the output feature map of the last conv layer
-    grads = tape.gradient(class_channel, last_conv_layer_output)
+        # Compute activations of the last conv layer and make the tape watch it
+        last_conv_layer_output = last_conv_layer_model(img_array)
+        tape.watch(last_conv_layer_output)
+
+        # Compute class predictions
+        preds = grad_model(last_conv_layer_output)
+        top_pred_index = tf.argmax(preds[0])
+        top_class_channel = preds[:, top_pred_index]
+
+    # This is the gradient of the top predicted class with regard to
+    # the output feature map of the last conv layer
+    grads = tape.gradient(top_class_channel, last_conv_layer_output)
+    
 
     # This is a vector where each entry is the mean intensity of the gradient
     # over a specific feature map channel
@@ -58,6 +64,11 @@ if __name__=='__main__':
     print(examples[0].shape)
     preds = model.predict(examples)
     print("Predicted:", (preds))
-    heatmap = make_gradcam_heatmap(examples[0], model, last_conv_layer_name='maxpool_4')
-    plt.matshow(heatmap)
+    heatmap = make_gradcam_heatmap(examples[0], model, last_conv_layer_name='conv_4')
+    print(heatmap)
+    heatmap = make_gradcam_heatmap(examples[1], model, last_conv_layer_name='conv_4')
+    print(heatmap)
+    heatmap = make_gradcam_heatmap(examples[2], model, last_conv_layer_name='conv_4')
+    print(heatmap)
+    #plt.matshow(heatmap)
     plt.show()
