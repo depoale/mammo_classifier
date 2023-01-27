@@ -53,37 +53,6 @@ def read_imgs(dataset_path, classes):
 
     return np.array(tmp, dtype='float32')[..., np.newaxis]/255, np.array(labels)
 
-def get_data(train_path = train_path ,test_path = test_path, validation_split=split,
-                img_height=60, img_width=60):
-    """acquires data from designated folder.
-    Returns
-    -------
-    train, val, test: tf.Dataset
-        keras.Dataset type"""
-    train = image_dataset_from_directory(
-    train_path,
-    validation_split=split,
-    subset="training",
-    seed=123, color_mode='grayscale',
-    image_size=(img_height, img_width),
-    batch_size=1)
-
-    val = image_dataset_from_directory(
-    train_path,
-    validation_split=split,
-    subset="validation",
-    seed=123,
-    color_mode='grayscale',
-    image_size=(img_height, img_width),
-    batch_size=1)
-
-    test = image_dataset_from_directory(
-    test_path,
-    color_mode='grayscale',
-    image_size=(img_height, img_width),
-    batch_size=1)
-    return train, val, test
-
 callbacks = [EarlyStopping(monitor='val_accuracy', min_delta=5e-3, patience=20, verbose=1),
                 ReduceLROnPlateau(monitor='val_accuracy', factor=0.25, min_delta=1e-4,patience=10, verbose=1)]
 

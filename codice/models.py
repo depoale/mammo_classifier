@@ -70,7 +70,7 @@ def cnn_classifier(shape=(60, 60, 1), verbose=False):
     model.add(Dense(128, activation='relu', name='dense_3'))
     model.add(Dense(1, activation='sigmoid', name='output'))
 
-    model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
+    model.compile(loss='binary_crossentropy', optimizer=Adam(learning_rate=1e-2), metrics=['accuracy'])
 
     if verbose:
         model.summary()
@@ -139,7 +139,6 @@ def trial_for_map(shape=(60, 60, 1), learning_rate=1e-3, verbose=False):
         Return the convolutional neural network.
     """
     model = Sequential()
-    model.add(Rescaling(scale=1./255.))
     model.add(Conv2D(32, (3, 3), activation='relu', padding='same', name='conv_1', input_shape=shape))
     BatchNormalization()
     model.add(MaxPooling2D((2, 2), name='maxpool_1'))
@@ -181,6 +180,8 @@ if __name__ == '__main__':
     history = model.fit(X_train, y_train, batch_size=batch_size , epochs=70, validation_split=0.2)
     #model.save('best_model.h5')
     #model.save_weights("weights.h5", save_format="h5")
+    plot(history)
+    plt.show()
     print(f'test accuracy: {round(model.evaluate(X_test, y_test)[1],3)}')  
     """ path='total_data'
     data = image_dataset_from_directory(

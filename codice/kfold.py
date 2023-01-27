@@ -22,7 +22,7 @@ def fold(X, y, k, modelBuilder):
         X_dev, X_test = X[dev_idx], X[test_idx]
         y_dev, y_test = y[dev_idx], y[test_idx]
         model = modelBuilder()
-        history = model.fit(X_dev, y_dev, epochs=100, validation_split=1/(k-1), callbacks=callbacks)
+        history = model.fit(X_dev, y_dev, epochs=100, validation_split=1/(k-1), batch_size=64,callbacks=callbacks)
         accuracy= round(model.evaluate(X_test, y_test)[1],3)
         plot(history=history)
         print(f'test accuracy: {accuracy}')
@@ -44,8 +44,7 @@ def fold_tuner(X, y, k, modelBuilder):
                     callbacks=callbacks, verbose=1)
         best_hps = tuner.get_best_hyperparameters(num_trials=1)[0]
         best_hps_list.append(best_hps)
-        #tuner.results_summary()
-
+    
         best_model = tuner.get_best_models()[0]
         print(f'best_hps:{best_hps}')
         history = best_model.fit(X_dev, y_dev, epochs=100, validation_split=1/(k-1), callbacks=callbacks)
@@ -65,4 +64,5 @@ if __name__ == '__main__':
     X, y = read_imgs(PATH, [0, 1])
     X, y = shuffle(X, y)
     fold(X, y, k=5, modelBuilder=cnn_classifier)
+    plt.show()
     
