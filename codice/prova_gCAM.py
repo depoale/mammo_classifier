@@ -9,12 +9,13 @@ from utils import read_imgs
 from IPython.display import Image, display
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
+import matplotlib.image as mpimg
 
 
 def make_gradcam_heatmap(
     img_array, model, last_conv_layer_name, classifier_layer_names, output_path=None
 ):
-
+    img_array = img_array.reshape(1, 60, 60, 1)
     #img_array = tf.convert_to_tensor(img_array)
     print('img',img_array.shape)
     # First, we create a model that maps the input image to the activations
@@ -38,13 +39,12 @@ def make_gradcam_heatmap(
     with tf.GradientTape() as tape:
 
         # Compute activations of the last conv layer and make the tape watch it
-        last_conv_layer_output = last_conv_layer_model.predict(img_array)
+        last_conv_layer_output = last_conv_layer_model(img_array)
         #last_conv_layer_output_2 = model(img_array).get_layer
         tape.watch(last_conv_layer_output)
-        print('last_conv:', last_conv_layer_output)
         #print("DIOCAN: ", last_conv_layer_output_2)
         # Compute class predictions
-        #preds = classifier_model.predict(last_conv_layer_output)
+        preds = classifier_model(last_conv_layer_output)
         top_pred_index = tf.argmax(preds[0])
         top_class_channel = preds[:, top_pred_index]
 
@@ -71,8 +71,27 @@ def make_gradcam_heatmap(
     heatmap = np.maximum(heatmap, 0) / np.max(heatmap)
 
     # We rescale heatmap to a range 0-255
-    heatmap = np.uint8(255 * heatmap)
-    return heatmap
+    heatmap = np.uint8(255*heatmap)
+    # We use jet colormap to colorize heatmap
+    jet = cm.get_cmap("jet")
+
+    # We use RGB values of the colormap
+    jet_colors = jet(np.arange(256))[:, :3]
+    jet_heatmap = jet_colors[heatmap]
+
+    # We create an image with RGB colorized heatmap
+    img_array*=255
+    img_array = img_array.reshape(60, 60, 1)
+    jet_heatmap = tf.keras.preprocessing.image.array_to_img(jet_heatmap)
+    jet_heatmap = jet_heatmap.resize((img_array.shape[1], img_array.shape[0]))
+    jet_heatmap = tf.keras.preprocessing.image.img_to_array(jet_heatmap)
+
+    # Superimpose the heatmap on original image
+    superimposed_img = jet_heatmap * 0.3 + img_array
+    superimposed_img = tf.keras.preprocessing.image.array_to_img(superimposed_img)
+
+    #Save the the superimposed image to the output path
+    superimposed_img.save(output_path)
 
 if __name__=='__main__':
     model = keras.models.load_model('best_model.h5')
@@ -88,15 +107,11 @@ if __name__=='__main__':
     preds = model.predict(examples)
     print("Predicted:", (preds))
     classifier_layer_names = ['batch_normalization_2','maxpool_4','flatten', 'dropout_2', 'dense_2', 'dense_3', 'output']
-    heatmap = make_gradcam_heatmap(examples[0], model=model, last_conv_layer_name='conv_4', 
-            classifier_layer_names=classifier_layer_names)
-    print(heatmap)
-    heatmap = make_gradcam_heatmap(examples[1], model, last_conv_layer_name='conv_4',
-                classifier_layer_names=classifier_layer_names)
-    print(heatmap)
-    heatmap = make_gradcam_heatmap(examples[2], model, last_conv_layer_name='conv_4',
-                classifier_layer_names=classifier_layer_names)
-    print(heatmap)
-    plt.matshow(heatmap)
+    make_gradcam_heatmap(examples[0], model=model, last_conv_layer_name='conv_4', 
+            classifier_layer_names=classifier_layer_names, output_path='1.png')
+    make_gradcam_heatmap(examples[1], model, last_conv_layer_name='conv_4',
+                classifier_layer_names=classifier_layer_names, output_path='2.png')
+    make_gradcam_heatmap(examples[2], model, last_conv_layer_name='conv_4',
+                classifier_layer_names=classifier_layer_names, output_path='3.png')
     plt.show()
  
