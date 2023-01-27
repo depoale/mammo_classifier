@@ -80,6 +80,7 @@ def plot(history):
     plt.title('Training and Validation Accuracy')
     #Train and validation loss 
     plt.subplot(2, 2, 2)
+    plt.yscale('log')
     plt.plot(epochs_range, loss, label='Training Loss')
     plt.plot(epochs_range, val_loss, label='Validation Loss')
     plt.legend(loc='upper right')

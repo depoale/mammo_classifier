@@ -7,7 +7,7 @@ from sklearn.model_selection import KFold
 import random
 import statistics as stats
 from sklearn.utils import shuffle
-from utils import get_data, plot, callbacks
+from utils import  plot, callbacks
 
 from keras.callbacks import ReduceLROnPlateau, EarlyStopping
 from utils import read_imgs

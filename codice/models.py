@@ -70,7 +70,7 @@ def cnn_classifier(shape=(60, 60, 1), verbose=False):
     model.add(Dense(128, activation='relu', name='dense_3'))
     model.add(Dense(1, activation='sigmoid', name='output'))
 
-    model.compile(loss='binary_crossentropy', optimizer=Adam(learning_rate=1e-2), metrics=['accuracy'])
+    model.compile(loss='binary_crossentropy', optimizer=Adam(learning_rate=5e-2), metrics=['accuracy'])
 
     if verbose:
         model.summary()
@@ -88,8 +88,6 @@ def hyp_tuning_model(hp):
     hp_dropout = hp.Choice('dropout', values=[0.0, 0.05])
     hp_Conv2d_size = hp.Choice('Conv2D_size', values=[3, 5])
     
-    
-    model.add(Rescaling(scale=1./255.))
 
     model.add(Conv2D(hp_Conv2D_init, (3, 3), activation='relu', padding='same', strides=1, name='conv_1', input_shape=shape))
     model.add(BatchNormalization())

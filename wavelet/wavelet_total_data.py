@@ -3,10 +3,12 @@ from matplotlib import pyplot as plt
 from matplotlib import image as img
 import matlab.engine
 import os
+from PIL import Image
 
 eng = matlab.engine.start_matlab()
 print(eng)
 
+Q = 2 #quante dev std considero nel filtraggio
 
 dataset_path_0 = './DATA/0'
 dataset_path_1='./DATA/1'
@@ -56,9 +58,9 @@ for name in names_1:
     c_mod.setflags(write=1)
     c_mod[c_labels==0]=0
 
-    c_mod[(c_labels==1)&(abs(c)<1*std1)]=0
-    c_mod[(c_labels==2)&(abs(c)<1*std2)]=0
-    c_mod[(c_labels==3)&(abs(c)<1*std3)]=0
+    c_mod[(c_labels==1)&(abs(c)<Q*std1)]=0
+    c_mod[(c_labels==2)&(abs(c)<Q*std2)]=0
+    c_mod[(c_labels==3)&(abs(c)<Q*std3)]=0
 
     I_rec = eng.waverec2(c_mod,s,wave, nargout=1)
     I_rec = np.asarray(I_rec)
@@ -66,6 +68,7 @@ for name in names_1:
     #plt.figure('rec_wavelet')
     #plt.imshow(I_rec, cmap='gray')
     plt.imsave(f'./DATA_WAVELET/1/{name}.png', I_rec, cmap='gray', format='png')
+    Image.open(f'./DATA_WAVELET/1/{name}.png').convert('L').save(f'./DATA_WAVELET/1/{name}.png')
     #plt.show()
 
 
@@ -110,9 +113,9 @@ for name in names_0:
     c_mod.setflags(write=1)
     c_mod[c_labels==0]=0
 
-    c_mod[(c_labels==1)&(abs(c)<1*std1)]=0
-    c_mod[(c_labels==2)&(abs(c)<1*std2)]=0
-    c_mod[(c_labels==3)&(abs(c)<1*std3)]=0
+    c_mod[(c_labels==1)&(abs(c)<Q*std1)]=0
+    c_mod[(c_labels==2)&(abs(c)<Q*std2)]=0
+    c_mod[(c_labels==3)&(abs(c)<Q*std3)]=0
 
     I_rec = eng.waverec2(c_mod,s,wave, nargout=1)
     I_rec = np.asarray(I_rec)
@@ -120,4 +123,5 @@ for name in names_0:
     #plt.figure('rec_wavelet')
     #plt.imshow(I_rec, cmap='gray')
     plt.imsave(f'./DATA_WAVELET/0/{name}.png', I_rec, cmap='gray', format='png')
+    Image.open(f'./DATA_WAVELET/0/{name}.png').convert('L').save(f'./DATA_WAVELET/0/{name}.png')
     #plt.show()
