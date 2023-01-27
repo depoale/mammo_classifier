@@ -35,96 +35,6 @@ split = 0.4
 train_path= os.path.join(os.getcwd(),'data_png_WAVELET' ,'Train')
 test_path=os.path.join(os.getcwd(),'data_png_WAVELET' ,'Test')
 
-#model
-def get_model():
-    """creates model: first layer rescales the grayscale values from [0,255] to [0,1]"""
-    model = Sequential()
-    model.add(Input(shape=(img_height,img_width,1)))
-    #model.add(Rescaling(scale=1./255.))
-    model.add(Conv2D(32, kernel_size=3, activation='relu'))
-    model.add(MaxPooling2D())
-    model.add(Conv2D(64, kernel_size=3, activation='relu'))
-    model.add(MaxPooling2D())
-    model.add(Conv2D(32, kernel_size=3, activation='relu'))
-    model.add(MaxPooling2D())
-    model.add(Flatten())
-    model.add(Dense(128,activation='relu'))
-    model.add(Dense(1, activation='sigmoid'))
-    model.compile(Adam(learning_rate=1e-3), loss=keras.losses.BinaryCrossentropy(), metrics=['accuracy'])
-    model.summary()
-    return model
-
-def get_bigger_model():
-    """creates model: first layer rescales the grayscale values from [0,255] to [0,1]"""
-    model = Sequential()
-    model.add(Input(shape=(img_height,img_width,1)))
-    #model.add(Rescaling(scale=1./255.))
-    model.add(Conv2D(32, kernel_size=3, activation='relu'))
-    model.add(MaxPooling2D())
-    model.add(Conv2D(64, kernel_size=3, activation='relu'))
-    model.add(MaxPooling2D())
-    model.add(Conv2D(128, kernel_size=3, activation='relu'))
-    model.add(MaxPooling2D())
-    model.add(Conv2D(128, kernel_size=3, activation='relu'))
-    model.add(MaxPooling2D())
-    model.add(Flatten())
-    model.add(Dense(256,activation='relu'))
-    model.add(Dense(128, activation='relu'))
-    model.add(Dense(1, activation='sigmoid'))
-    model.compile(Adam(learning_rate=1e-3), loss=keras.losses.BinaryCrossentropy(), metrics=['accuracy'])
-    model.summary()
-    return model
-
-def cnn_model(shape=(60, 60, 1), learning_rate=1e-3, verbose=False):
-    """
-    CNN for microcalcification clusters classification.
-
-    Parameters
-    ----------
-    shape : tuple, optional
-        The first parameter.
-    verbose : bool, optional
-        Enables the printing of the summary. Defaults to False.
-
-    Returns
-    -------
-    model
-        Return the convolutional neural network.
-    """
-    model = Sequential()
-    model.add(Rescaling(scale=1./255.))
-    model.add(Conv2D(32, (3, 3), activation='relu', padding='same', name='conv_1', input_shape=shape))
-    BatchNormalization()
-    model.add(MaxPooling2D((2, 2), name='maxpool_1'))
-
-    model.add(Conv2D(64, (3, 3), activation='relu', padding='same', name='conv_2'))
-    BatchNormalization()
-    model.add(MaxPooling2D((2, 2), name='maxpool_2'))
-    model.add(Dropout(0.01))
-
-    model.add(Conv2D(128, (3, 3), activation='relu', padding='same', name='conv_3'))
-    BatchNormalization()
-    model.add(MaxPooling2D((2, 2), name='maxpool_3'))
-    model.add(Dropout(0.01))
-
-    model.add(Conv2D(128, (3, 3), activation='relu', padding='same', name='conv_4'))
-    BatchNormalization()
-    model.add(MaxPooling2D((2, 2), name='maxpool_4'))
-
-    model.add(Flatten())
-    model.add(Dropout(0.1))
-
-    model.add(Dense(256, activation='relu', name='dense_2'))
-    model.add(Dense(128, activation='relu', name='dense_3'))
-    model.add(Dense(1, activation='sigmoid', name='output'))
-
-    model.compile(loss='binary_crossentropy', optimizer= Adam(learning_rate=learning_rate), metrics=['accuracy'])
-    
-    if verbose:
-      model.summary()
-  
-    return model
-
 def cnn_classifier(shape=(60, 60, 1), verbose=False):
     """removed resizing layer
     """
@@ -166,43 +76,6 @@ def cnn_classifier(shape=(60, 60, 1), verbose=False):
         model.summary()
 
     return model
-
-
-def make_model(shape=(60, 60, 1), learning_rate=0.001):
-  model = Sequential([
-      
-      Conv2D(8, (3,3), padding='same', input_shape=shape),
-      BatchNormalization(),
-      Activation('relu'),
-
-      MaxPool2D((2,2), strides=2),
-      #Dropout(0.4),
-
-      Conv2D(16, (3,3), padding='same'),
-      BatchNormalization(),
-      Activation('relu'),
-
-      MaxPool2D((2,2), strides=2),
-      #Dropout(0.4),
-
-      Conv2D(32, (3,3), padding='same'),
-      BatchNormalization(),
-      Activation('relu'),
-
-      MaxPool2D((2,2), strides=2),
-      #Dropout(0.4),
-
-      Flatten(),    #Flatten serves as a connection between the convolution and dense layers.
-
-      Dense(10, activation='relu'),
-      Dropout(0.2),
-      Dense(1, activation='sigmoid')
-     
-  ])
-
-  model.compile(loss='binary_crossentropy', optimizer= Adam(learning_rate=learning_rate), metrics=['accuracy'])
-  
-  return model
 
 def hyp_tuning_model(hp):
     shape = (60, 60, 1)
@@ -306,9 +179,9 @@ if __name__ == '__main__':
     X_test, y_test = read_imgs(test_path, [0, 1])
     print(X_test.shape)
     history = model.fit(X_train, y_train, batch_size=batch_size , epochs=70, validation_split=0.2)
-    model.save('best_model.h5')
+    #model.save('best_model.h5')
     #model.save_weights("weights.h5", save_format="h5")
-    #print(f'test accuracy: {round(model.evaluate(X_test, y_test)[1],3)}')  
+    print(f'test accuracy: {round(model.evaluate(X_test, y_test)[1],3)}')  
     """ path='total_data'
     data = image_dataset_from_directory(
     path,
