@@ -13,7 +13,7 @@ from keras.optimizers import Adam
 from keras.metrics import Precision, Recall, BinaryAccuracy
 import numpy as np
 from PIL import Image
-from utils import get_data, plot, callbacks, read_imgs
+from utils import plot, callbacks, read_imgs
 from sklearn.utils import shuffle
 
 """ 
