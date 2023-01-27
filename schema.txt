@@ -4,12 +4,17 @@ cose da fare:
     (da piccolo a grande, tutto uguale, da grande a piccolo)
     (https://www.learndatasci.com/tutorials/convolutional-neural-networks-image-classification/ 
     zero-padding è meglio XD)
-
-
+    
 - SOM
 - FRA: Wavelet
 - ALE: ai interpretability immagini
-- final model selection: ensembe o lotta
+- final model selection: ensemble o lotta
 - ALE: GAN internet
 • ALE: GAN nuova #meglio di no che l'autoendoder fa schifo
 • ALE: preprocessing (dim reduction: auto-encoder)
+- roc curve
+- confusion matrix
+
+cose abbandonate:
+- autoencoder
+- dynamic range
