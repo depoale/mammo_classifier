@@ -109,7 +109,7 @@ def make_model(shape=(60, 60, 1)):
       Dense(1, activation='sigmoid')
      
   ])
-  model.compile(loss='MSE', optimizer= Adam(learning_rate = 0.001), metrics=['accuracy'])
+  model.compile(loss='binary_crossentropy', optimizer= Adam(learning_rate = 0.001), metrics=['accuracy'])
   return model
 
 
@@ -153,7 +153,7 @@ def hyp_tuning_model(hp):
 
     model.add(Dense(1, activation='sigmoid', name='output'))
 
-    model.compile(loss='MSE', optimizer= Adam(learning_rate = 0.001), metrics=['accuracy'])
+    model.compile(optimizer='Adam', loss='binary_crossentropy', metrics=['accuracy'])
     
     return model
 
