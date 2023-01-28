@@ -13,6 +13,7 @@ import glob
 import logging
 from skimage.io import imread
 import numpy as np
+from sklearn.metrics import roc_curve, auc
 
 train_path = os.path.join(os.getcwd(),'data_png' ,'Train')
 test_path = os.path.join(os.getcwd(),'data_png' ,'Test')
@@ -74,15 +75,48 @@ def plot(history):
     #Train and validation accuracy 
     plt.figure(figsize=(15, 15))
     plt.subplot(2, 2, 1)
-    plt.plot(epochs_range, acc, label='Training Accuracy')
-    plt.plot(epochs_range, val_acc, label='Validation Accuracy')
+    plt.xlabel('Epochs')
+    plt.ylabel('Accuracy')
+    plt.plot(epochs_range, acc, label='Training Accuracy', color='blue')
+    plt.plot(epochs_range, val_acc, label='Validation Accuracy', color='darkorange')
     plt.legend(loc='lower right')
     plt.title('Training and Validation Accuracy')
     #Train and validation loss 
     plt.subplot(2, 2, 2)
-    plt.yscale('log')
-    plt.plot(epochs_range, loss, label='Training Loss')
-    plt.plot(epochs_range, val_loss, label='Validation Loss')
+    #plt.yscale('log')
+    plt.xlabel('Epochs')
+    plt.ylabel('Loss')
+    plt.plot(epochs_range, loss, label='Training Loss', color='blue')
+    plt.plot(epochs_range, val_loss, label='Validation Loss', color='darkorange')
     plt.legend(loc='upper right')
     plt.title('Training and Validation Loss')
     plt.show(block=False)
+    
+
+def ROC(x_test, y_test, model):
+    test_loss, test_accuracy = model.evaluate(x_test, y_test)
+    print(f'\nTest accuracy: {test_accuracy}')
+
+    preds_test = model.predict(x_test, verbose = 1)
+    fpr, tpr, _ = roc_curve(y_test, preds_test)
+    roc_auc = auc(fpr, tpr)
+    print(f'AUC = {roc_auc}')
+    
+    #plt.figure('Testing ROC curve')
+    #plt.title('ROC - Testing')
+    lw = 2
+    plt.plot(fpr, tpr, color = 'green', lw = lw, label = f'ROC curve (area = {roc_auc})')
+    plt.plot([0, 1], [0, 1], color = 'purple', lw = lw, linestyle = '--')
+    plt.xlim(0.0, 1.0)
+    plt.ylim(0.0, 1.05)
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+    plt.legend(loc='lower right')
+    plt.show()
+
+
+
+
+
+
+

@@ -10,10 +10,11 @@ from sklearn.utils import shuffle
 from utils import  plot, callbacks
 
 from keras.callbacks import ReduceLROnPlateau, EarlyStopping
-from utils import read_imgs
+from utils import read_imgs, ROC
 from models import cnn_classifier, hyp_tuning_model
+from sklearn.metrics import roc_curve, auc
 
-PATH='total_data_WAVELET'
+PATH='total_data'
 
 def fold(X, y, k, modelBuilder):
     test_acc=[]
