@@ -81,14 +81,7 @@ def cnn_classifier(shape=(60, 60, 1), verbose=False):
 def make_model(shape=(60, 60, 1)):
   model = Sequential([
       
-      Conv2D(8, (3,3), padding='same', input_shape=shape),
-      BatchNormalization(),
-      Activation('relu'),
-
-      MaxPool2D((2,2), strides=2),
-      #Dropout(0.4),
-
-      Conv2D(16, (3,3), padding='same'),
+      Conv2D(16, (3,3), padding='same', input_shape=shape),
       BatchNormalization(),
       Activation('relu'),
 
@@ -102,14 +95,21 @@ def make_model(shape=(60, 60, 1)):
       MaxPool2D((2,2), strides=2),
       #Dropout(0.4),
 
+      Conv2D(64, (3,3), padding='same'),
+      BatchNormalization(),
+      Activation('relu'),
+
+      MaxPool2D((2,2), strides=2),
+      #Dropout(0.4),
+
       Flatten(),    #Flatten serves as a connection between the convolution and dense layers.
 
-      Dense(10, activation='relu'),
-      Dropout(0.2),
+      Dense(128, activation='relu'),
+      Dense(64, activation ='relu'),
       Dense(1, activation='sigmoid')
      
   ])
-  model.compile(loss='binary_crossentropy', optimizer= Adam(learning_rate = 0.001), metrics=['accuracy'])
+  model.compile(loss='binary_crossentropy', optimizer= Adam(learning_rate = 0.01), metrics=['accuracy'])
   return model
 
 
