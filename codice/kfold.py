@@ -11,9 +11,9 @@ from utils import  plot, callbacks
 
 from keras.callbacks import ReduceLROnPlateau, EarlyStopping
 from utils import read_imgs
-from models import cnn_classifier, hyp_tuning_model
+from models import cnn_classifier, hyp_tuning_model, make_model
 
-PATH='total_data_WAVELET'
+PATH='total_data'
 
 def fold(X, y, k, modelBuilder):
     test_acc=[]
@@ -63,6 +63,6 @@ if __name__ == '__main__':
     print(os.getcwd())
     X, y = read_imgs(PATH, [0, 1])
     X, y = shuffle(X, y)
-    fold(X, y, k=5, modelBuilder=cnn_classifier)
+    fold(X, y, k=5, modelBuilder=make_model)
     plt.show()
     

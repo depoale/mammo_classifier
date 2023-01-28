@@ -109,6 +109,7 @@ def make_model(shape=(60, 60, 1)):
       Dense(1, activation='sigmoid')
      
   ])
+  model.compile(loss='MSE', optimizer= Adam(learning_rate = 0.001), metrics=['accuracy'])
   return model
 
 
@@ -154,50 +155,6 @@ def hyp_tuning_model(hp):
 
     model.compile(loss='MSE', optimizer= Adam(learning_rate = 0.001), metrics=['accuracy'])
     
-    return model
-def trial_for_map(shape=(60, 60, 1), learning_rate=1e-3, verbose=False):
-    """
-    CNN for microcalcification clusters classification.
-
-    Parameters
-    ----------
-    shape : tuple, optional
-        The first parameter.
-    verbose : bool, optional
-        Enables the printing of the summary. Defaults to False.
-
-    Returns
-    -------
-    model
-        Return the convolutional neural network.
-    """
-    model = Sequential()
-    model.add(Conv2D(32, (3, 3), activation='relu', padding='same', name='conv_1', input_shape=shape))
-    BatchNormalization()
-    model.add(MaxPooling2D((2, 2), name='maxpool_1'))
-
-    model.add(Conv2D(64, (3, 3), activation='relu', padding='same', name='conv_2'))
-    BatchNormalization()
-    model.add(MaxPooling2D((2, 2), name='maxpool_2'))
-    model.add(Dropout(0.01))
-
-    model.add(Conv2D(128, (3, 3), activation='relu', padding='same', name='conv_3'))
-    BatchNormalization()
-    model.add(MaxPooling2D((2, 2), name='maxpool_3'))
-    model.add(Dropout(0.01))
-
-    model.add(Conv2D(256, (3, 3), activation='relu', padding='same', name='conv_4'))
-    BatchNormalization()
-    #model.add(MaxPooling2D((2, 2), name='maxpool_4'))
-
-    model.add(keras.layers.GlobalAveragePooling2D(name='last'))
-    model.add(Dense(1, activation='sigmoid', name='output'))
-
-    model.compile(loss='binary_crossentropy', optimizer= Adam(learning_rate=learning_rate), metrics=['accuracy'])
-    
-    if verbose:
-      model.summary()
-  
     return model
 
 if __name__ == '__main__':
