@@ -10,11 +10,13 @@ from sklearn.utils import shuffle
 from utils import  plot, callbacks
 
 from keras.callbacks import ReduceLROnPlateau, EarlyStopping
-from utils import read_imgs, ROC
-from models import cnn_classifier, hyp_tuning_model
+
+from utils import read_imgs
+from models import cnn_classifier, hyp_tuning_model, make_model
 from sklearn.metrics import roc_curve, auc
 
-PATH='total_data'
+PATH='augmented_data'
+
 
 def fold(X, y, k, modelBuilder):
     test_acc=[]
@@ -23,11 +25,14 @@ def fold(X, y, k, modelBuilder):
         X_dev, X_test = X[dev_idx], X[test_idx]
         y_dev, y_test = y[dev_idx], y[test_idx]
         model = modelBuilder()
-        history = model.fit(X_dev, y_dev, epochs=100, validation_split=1/(k-1), batch_size=64,callbacks=callbacks)
+        history = model.fit(X_dev, y_dev, epochs=200, validation_split=0.2, batch_size=64,callbacks=callbacks)
         accuracy= round(model.evaluate(X_test, y_test)[1],3)
         plot(history=history)
         print(f'test accuracy: {accuracy}')
         test_acc.append(accuracy)
+        print('#########')
+        print(f'Sani: train {len(y_dev[y_dev==0])}, test {len(y_test[y_test==0])}')
+        print(f'Malati: train {len(y_dev[y_dev==1])}, test {len(y_test[y_test==1])}')
 
     print(test_acc)
     print(f'Expected accuracy: {round(stats.mean(test_acc),3)}+/- {round(stats.stdev(test_acc),3)}')
@@ -48,7 +53,7 @@ def fold_tuner(X, y, k, modelBuilder):
     
         best_model = tuner.get_best_models()[0]
         print(f'best_hps:{best_hps}')
-        history = best_model.fit(X_dev, y_dev, epochs=100, validation_split=1/(k-1), callbacks=callbacks)
+        history = best_model.fit(X_dev, y_dev, epochs=200, validation_split=1/(k-1), callbacks=callbacks)
         accuracy= round(best_model.evaluate(X_test, y_test)[1],3)
         plot(history=history)
         print(f'test accuracy: {accuracy}')
@@ -64,6 +69,6 @@ if __name__ == '__main__':
     print(os.getcwd())
     X, y = read_imgs(PATH, [0, 1])
     X, y = shuffle(X, y)
-    fold(X, y, k=5, modelBuilder=cnn_classifier)
+    fold(X, y, k=5, modelBuilder=make_model)
     plt.show()
     

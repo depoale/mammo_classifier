@@ -81,14 +81,7 @@ def cnn_classifier(shape=(60, 60, 1), verbose=False):
 def make_model(shape=(60, 60, 1)):
   model = Sequential([
       
-      Conv2D(8, (3,3), padding='same', input_shape=shape),
-      BatchNormalization(),
-      Activation('relu'),
-
-      MaxPool2D((2,2), strides=2),
-      #Dropout(0.4),
-
-      Conv2D(16, (3,3), padding='same'),
+      Conv2D(16, (3,3), padding='same', input_shape=shape),
       BatchNormalization(),
       Activation('relu'),
 
@@ -102,13 +95,21 @@ def make_model(shape=(60, 60, 1)):
       MaxPool2D((2,2), strides=2),
       #Dropout(0.4),
 
+      Conv2D(64, (3,3), padding='same'),
+      BatchNormalization(),
+      Activation('relu'),
+
+      MaxPool2D((2,2), strides=2),
+      #Dropout(0.4),
+
       Flatten(),    #Flatten serves as a connection between the convolution and dense layers.
 
-      Dense(10, activation='relu'),
-      Dropout(0.2),
+      Dense(128, activation='relu'),
+      Dense(64, activation ='relu'),
       Dense(1, activation='sigmoid')
      
   ])
+  model.compile(loss='binary_crossentropy', optimizer= Adam(learning_rate = 0.01), metrics=['accuracy'])
   return model
 
 
@@ -152,52 +153,8 @@ def hyp_tuning_model(hp):
 
     model.add(Dense(1, activation='sigmoid', name='output'))
 
-    model.compile(loss='MSE', optimizer= Adam(learning_rate = 0.001), metrics=['accuracy'])
+    model.compile(optimizer='Adam', loss='binary_crossentropy', metrics=['accuracy'])
     
-    return model
-def trial_for_map(shape=(60, 60, 1), learning_rate=1e-3, verbose=False):
-    """
-    CNN for microcalcification clusters classification.
-
-    Parameters
-    ----------
-    shape : tuple, optional
-        The first parameter.
-    verbose : bool, optional
-        Enables the printing of the summary. Defaults to False.
-
-    Returns
-    -------
-    model
-        Return the convolutional neural network.
-    """
-    model = Sequential()
-    model.add(Conv2D(32, (3, 3), activation='relu', padding='same', name='conv_1', input_shape=shape))
-    BatchNormalization()
-    model.add(MaxPooling2D((2, 2), name='maxpool_1'))
-
-    model.add(Conv2D(64, (3, 3), activation='relu', padding='same', name='conv_2'))
-    BatchNormalization()
-    model.add(MaxPooling2D((2, 2), name='maxpool_2'))
-    model.add(Dropout(0.01))
-
-    model.add(Conv2D(128, (3, 3), activation='relu', padding='same', name='conv_3'))
-    BatchNormalization()
-    model.add(MaxPooling2D((2, 2), name='maxpool_3'))
-    model.add(Dropout(0.01))
-
-    model.add(Conv2D(256, (3, 3), activation='relu', padding='same', name='conv_4'))
-    BatchNormalization()
-    #model.add(MaxPooling2D((2, 2), name='maxpool_4'))
-
-    model.add(keras.layers.GlobalAveragePooling2D(name='last'))
-    model.add(Dense(1, activation='sigmoid', name='output'))
-
-    model.compile(loss='binary_crossentropy', optimizer= Adam(learning_rate=learning_rate), metrics=['accuracy'])
-    
-    if verbose:
-      model.summary()
-  
     return model
 
 if __name__ == '__main__':

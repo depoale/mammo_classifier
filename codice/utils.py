@@ -55,7 +55,7 @@ def read_imgs(dataset_path, classes):
     return np.array(tmp, dtype='float32')[..., np.newaxis]/255, np.array(labels)
 
 callbacks = [EarlyStopping(monitor='val_accuracy', min_delta=5e-3, patience=20, verbose=1),
-                ReduceLROnPlateau(monitor='val_accuracy', factor=0.25, min_delta=1e-4,patience=10, verbose=1)]
+                ReduceLROnPlateau(monitor='val_loss', factor=0.1, min_delta=1e-4,patience=10, verbose=1)]
 
 def plot(history):
     """Plot loss and accuracy
