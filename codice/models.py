@@ -77,6 +77,41 @@ def cnn_classifier(shape=(60, 60, 1), verbose=False):
 
     return model
 
+
+def make_model(shape=(60, 60, 1)):
+  model = Sequential([
+      
+      Conv2D(8, (3,3), padding='same', input_shape=shape),
+      BatchNormalization(),
+      Activation('relu'),
+
+      MaxPool2D((2,2), strides=2),
+      #Dropout(0.4),
+
+      Conv2D(16, (3,3), padding='same'),
+      BatchNormalization(),
+      Activation('relu'),
+
+      MaxPool2D((2,2), strides=2),
+      #Dropout(0.4),
+
+      Conv2D(32, (3,3), padding='same'),
+      BatchNormalization(),
+      Activation('relu'),
+
+      MaxPool2D((2,2), strides=2),
+      #Dropout(0.4),
+
+      Flatten(),    #Flatten serves as a connection between the convolution and dense layers.
+
+      Dense(10, activation='relu'),
+      Dropout(0.2),
+      Dense(1, activation='sigmoid')
+     
+  ])
+  return model
+
+
 def hyp_tuning_model(hp):
     shape = (60, 60, 1)
     model = Sequential()
