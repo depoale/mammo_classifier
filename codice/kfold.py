@@ -8,12 +8,14 @@ import random
 import statistics as stats
 from sklearn.utils import shuffle
 from utils import  plot, callbacks
+import seaborn as sn
+import pandas as pd
 
 from keras.callbacks import ReduceLROnPlateau, EarlyStopping
 
-from utils import read_imgs
+from utils import read_imgs, ROC, get_confusion_matrix
 from models import cnn_classifier, hyp_tuning_model, make_model
-from sklearn.metrics import roc_curve, auc
+from sklearn.metrics import roc_curve, auc, confusion_matrix
 
 PATH='augmented_data'
 
@@ -21,18 +23,28 @@ PATH='augmented_data'
 def fold(X, y, k, modelBuilder):
     test_acc=[]
     fold  = KFold(n_splits=k, shuffle=True, random_state=42)
+    plt.figure('ROC - Testing')
+    plt.title('ROC - Testing')
+    plt.figure('Confusion Matrices')
+    i = 1
+    colors = ['green', 'red', 'blue', 'darkorange', 'gold']
     for dev_idx, test_idx in fold.split(X, y):
         X_dev, X_test = X[dev_idx], X[test_idx]
         y_dev, y_test = y[dev_idx], y[test_idx]
         model = modelBuilder()
-        history = model.fit(X_dev, y_dev, epochs=200, validation_split=0.2, batch_size=64,callbacks=callbacks)
+        history = model.fit(X_dev, y_dev, epochs=100, validation_split=0.2, batch_size=64,callbacks=callbacks)
         accuracy= round(model.evaluate(X_test, y_test)[1],3)
-        plot(history=history)
+        plot(history=history, i=i)
         print(f'test accuracy: {accuracy}')
         test_acc.append(accuracy)
         print('#########')
         print(f'Sani: train {len(y_dev[y_dev==0])}, test {len(y_test[y_test==0])}')
         print(f'Malati: train {len(y_dev[y_dev==1])}, test {len(y_test[y_test==1])}')
+        ROC(X_test, y_test=y_test, model=model, color=colors[i-1], i=i)
+        get_confusion_matrix(X_test, y_test=y_test, model=model, i=i)
+
+        i = i+1
+
 
     print(test_acc)
     print(f'Expected accuracy: {round(stats.mean(test_acc),3)}+/- {round(stats.stdev(test_acc),3)}')
@@ -70,5 +82,5 @@ if __name__ == '__main__':
     X, y = read_imgs(PATH, [0, 1])
     X, y = shuffle(X, y)
     fold(X, y, k=5, modelBuilder=make_model)
-    plt.show()
+    #plt.show()
     
