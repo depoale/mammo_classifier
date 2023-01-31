@@ -6,14 +6,14 @@ cose da fare:
     zero-padding è meglio XD)
     
 - SOM
-- FRA: Wavelet
-- ALE: ai interpretability immagini
+• FRA: Wavelet
+• ALE: ai interpretability immagini
 - final model selection: ensemble o lotta
 - ALE: GAN internet
 • ALE: GAN nuova #meglio di no che l'autoendoder fa schifo
 • ALE: preprocessing (dim reduction: auto-encoder)
-- roc curve
-- confusion matrix
+• FRA: roc curve
+• FRA: confusion matrix
 
 cose abbandonate:
 - autoencoder
