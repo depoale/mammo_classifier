@@ -29,16 +29,15 @@ else:
     DEVICE = torch.device('cpu')
 
 
-global test_mse_list, test_mee_list, epochs_list
+global test_mse_list, epochs_list
 
 test_mse_list = []
-test_mee_list = []
 epochs_list = []
 
 
 def train(model, optimizer, X_train, y_train, X_val, y_val, X_test, y_test, name=None):
 
-    '''Performs the forward and backwards training loop until early stopping, then computes the metric(s)'''
+    '''Performs the forward and backwards training loop until early stopping, then computes the metric'''
 
     loss_fn = nn.MSELoss()
     early_stopping = EarlyStopping()
@@ -52,9 +51,6 @@ def train(model, optimizer, X_train, y_train, X_val, y_val, X_test, y_test, name
     val_mse_values = []
     test_mse_values = []
 
-    train_mee_values = []
-    val_mee_values = []
-    test_mee_values = []
 
     for epoch in range(epochs):
 
@@ -66,7 +62,6 @@ def train(model, optimizer, X_train, y_train, X_val, y_val, X_test, y_test, name
         
         # 2. Calculate the loss
         train_mse = loss_fn(train_pred, y_train)
-        train_mee = nn.MSELoss(y_train.numpy(), train_pred.detach().numpy())
 
         # 3. Zero grad of the optimizer
         optimizer.zero_grad()
@@ -87,20 +82,15 @@ def train(model, optimizer, X_train, y_train, X_val, y_val, X_test, y_test, name
             val_pred = model(X_val)
             test_pred = model(X_test)
 
-            # 2. Caculate mse and mee on validation and test data        
+            # 2. Caculate mse and on validation and test data        
             val_mse = loss_fn(val_pred, y_val)                    
             test_mse = loss_fn(test_pred, y_test)
-            val_mee = nn.MSELoss(y_val.numpy(), val_pred.numpy())                    
-            test_mee = nn.MSELoss(y_test.numpy(), test_pred.numpy())        
-        
+
         epoch_count.append(epoch)
         train_mse_values.append(train_mse)
         val_mse_values.append(val_mse)
         test_mse_values.append(test_mse)
 
-        train_mee_values.append(train_mee)
-        val_mee_values.append(val_mee)
-        test_mee_values.append(test_mee)
     
         # early_stopping needs the validation loss to check if it has decreased
         early_stopping(val_mse, model)
@@ -110,13 +100,12 @@ def train(model, optimizer, X_train, y_train, X_val, y_val, X_test, y_test, name
             break
             
         if epoch % 10 == 0:
-            print(f"Epoch is {epoch:<3} | Training MSE: {train_mse:.3f} | Validation MSE: {val_mse:.3f} | Trainining MEE: {train_mee:.3f} | Val MEE: {val_mee:.3f}")
+            print(f"Epoch is {epoch:<3} | Training MSE: {train_mse:.3f} | Validation MSE: {val_mse:.3f}")
 
     print(f"Epoch is {epoch:<3} \nTraining MSE: {train_mse:.3f} | Validation MSE: {val_mse:.3f} | Test MSE: {test_mse:.3f}")
-    print(f"Training MEE: {train_mee:.3f} | Validation MEE: {val_mee:.3f} | Test MEE: {test_mee:.3f}")
+   
 
     test_mse_list.append(test_mse_values[-1])
-    test_mee_list.append(test_mee_values[-1])
     epochs_list.append(epoch_count[-1])
 
     if name: 
@@ -127,8 +116,6 @@ def train(model, optimizer, X_train, y_train, X_val, y_val, X_test, y_test, name
         plt.ylabel("MSE")
         plt.xlabel("Epochs")
         plt.legend()
-        folder = 'Pytorch-plots'
-        #save_plot(folder, name)
         plt.show()
 
 VAL_SPLIT =0.2
@@ -142,9 +129,9 @@ models_list = [model1, model2, model3]
 #data for the ensemble model comes from the predictions of the experts
 X = get_predictions(X, models_list)
 
-X = torch.from_numpy(X)
+X = torch.from_numpy(X. astype('float32'))
 print(X.dtype)
-y = torch.from_numpy(y.astype('float64'))
+y = torch.from_numpy(y.astype('float32'))
 print(y.dtype)
 w_init = weights_init_uniform_fan_in
 X_dev, X_test, y_dev, y_test = train_test_split(X, y, test_size=VAL_SPLIT, shuffle=False)
