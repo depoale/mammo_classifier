@@ -116,7 +116,9 @@ def train(model, optimizer, X_train, y_train, X_val, y_val, X_test, y_test, name
         plt.ylabel("MSE")
         plt.xlabel("Epochs")
         plt.legend()
-        plt.show()
+        plt.show(block = False)
+    
+    return model.parameters()
 
 VAL_SPLIT =0.2
 X, y = read_imgs('total_data', [0,1])
@@ -144,4 +146,7 @@ model.apply(w_init)
 
 optimizer = torch.optim.SGD(model.parameters(), lr=0.1)
 
-train(model, optimizer, X_train, y_train, X_val, y_val, X_test, y_test, name='no')
+weights = train(model, optimizer, X_train, y_train, X_val, y_val, X_test, y_test, name='no')
+for p in weights:
+    print(p)
+plt.show()
