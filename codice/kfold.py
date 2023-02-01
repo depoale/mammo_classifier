@@ -1,5 +1,5 @@
 import os
-
+import numpy as np
 from matplotlib import pyplot as plt
 import keras_tuner as kt
 
@@ -30,8 +30,13 @@ def fold_tuner(X, y, k, modelBuilder, overwrite=True):
         Returs best hps list (one entry for each fold)"""
     test_acc=[]
     best_hps_list=[]
+    
     plt.figure('ROC - Testing')
     plt.title('ROC - Testing')
+    tprs = []
+    aucs = []
+    mean_fpr = np.linspace(0, 1, 100)
+    
     plt.figure('Confusion Matrices')
 
     colors = ['green', 'red', 'blue', 'darkorange', 'gold']
@@ -57,10 +62,25 @@ def fold_tuner(X, y, k, modelBuilder, overwrite=True):
         test_acc.append(accuracy)
         
         plot(history=history, i=i)
-        ROC(X_test, y_test=y_test, model=best_model, color=colors[i], i=i+1)
+        ROC(X_test, y_test=y_test, model=best_model, color=colors[i], i=i+1, mean_fpr=mean_fpr, tprs=tprs, aucs=aucs)
         get_confusion_matrix(X_test, y_test=y_test, model=best_model, i=i+1)
 
-    print(test_acc)
+    
+    mean_tpr = np.mean(tprs, axis=0)
+    mean_tpr[-1] = 1.0
+    mean_auc = auc(mean_fpr, mean_tpr)
+    std_auc = np.std(aucs)
+    plt.figure('ROC - Testing')
+    plt.plot(mean_fpr, mean_tpr, color="black", label=r"Mean ROC (AUC = %0.2f $\pm$ %0.2f)" % (mean_auc, std_auc), lw=2, alpha=0.8)
+    
+    std_tpr = np.std(tprs, axis=0)
+    tprs_upper = np.minimum(mean_tpr + std_tpr, 1)
+    tprs_lower = np.maximum(mean_tpr - std_tpr, 0)
+    plt.figure('ROC - Testing')
+    plt.fill_between(mean_fpr, tprs_lower, tprs_upper, color="grey", alpha=0.2, label=r"$\pm$ 1 std. dev.")
+    plt.legend(loc='lower right')
+    
+    print(f'Test Accuracy {test_acc}')
     print(f'Expected accuracy: {round(stats.mean(test_acc),3)}+/- {round(stats.stdev(test_acc),3)}')
     print(f'best hps:{best_hps_list}')
     plt.show()
