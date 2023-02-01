@@ -95,26 +95,30 @@ def plot(history, i):
     #plt.show(block=False)
     
 
-def ROC(x_test, y_test, model, color, i):
+def ROC(x_test, y_test, model, color, i, mean_fpr, tprs, aucs):
     test_loss, test_accuracy = model.evaluate(x_test, y_test)
     print(f'\nTest accuracy: {test_accuracy}')
     
     preds_test = model.predict(x_test, verbose = 1)
     fpr, tpr, thresholds = roc_curve(y_test, preds_test)
+    interp_tpr = np.interp(mean_fpr, fpr, tpr)
+    interp_tpr[0] = 0.0
+    tprs.append(interp_tpr)
     #print(f'y_test: {y_test}, preds_test: {preds_test}, thresholds: {thresholds}')
     #print(f'len fpr: {len(fpr)} and len tpr: {len(tpr)} for fold {i}')
     print(f'len x_test: {len(x_test)} and len y_test: {len(y_test)}')
     #print(f'fpr: {fpr}, tpr: {tpr}')
     roc_auc = auc(fpr, tpr)
+    aucs.append(roc_auc)
     print(f'AUC = {roc_auc}')
     
     plt.figure('ROC - Testing')
     #plt.title('ROC - Testing')
     lw = 2
-    plt.plot(fpr, tpr, color = color, lw = lw, label = f'{i} ROC curve (area = {roc_auc})')
+    plt.plot(fpr, tpr, color = color, alpha=0.45, lw = lw, label = f'{i} ROC curve (area = {round(roc_auc, 2)})')
     plt.plot([0, 1], [0, 1], color = 'purple', lw = lw, linestyle = '--')
-    plt.xlim(0.0, 1.0)
-    plt.ylim(0.0, 1.05)
+    plt.xlim(-0.05, 1.05)
+    plt.ylim(-0.05, 1.05)
     plt.xlabel('False Positive Rate')
     plt.ylabel('True Positive Rate')
     plt.legend(loc='lower right')
@@ -127,7 +131,7 @@ def get_confusion_matrix(x_test, y_test, model, i):
     df_cm = pd.DataFrame(my_confusion_matrix, index = ['Negative', 'Positive'],
                   columns = ['Negative', 'Positive'])
     plt.figure('Confusion Matrices')
-    plt.subplot(2,3,i+1)
+    plt.subplot(2,3,i)
     plt.title(f'Fold {i}', fontsize=13, loc='left')
     sn.heatmap(df_cm, annot=True)
     plt.xlabel('Predicted label', fontsize=7)
