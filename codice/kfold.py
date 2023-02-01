@@ -17,33 +17,7 @@ from utils import read_imgs, ROC, get_confusion_matrix
 from models import cnn_classifier, hyp_tuning_model, make_model
 from sklearn.metrics import roc_curve, auc, confusion_matrix
 
-PATH='augmented_data'
-
-
-def fold(X, y, k, modelBuilder):
-    """didn't add implementation for ensemble, so do not use"""
-    test_acc=[]
-    fold  = KFold(n_splits=k, shuffle=True, random_state=42)
-    colors = ['green', 'red', 'blue', 'darkorange', 'gold']
-    for i, (dev_idx, test_idx) in enumerate(fold.split(X, y)):
-        X_dev, X_test = X[dev_idx], X[test_idx]
-        y_dev, y_test = y[dev_idx], y[test_idx]
-        model = modelBuilder()
-        history = model.fit(X_dev, y_dev, epochs=100, validation_split=0.2, batch_size=64,callbacks=callbacks)
-        accuracy= round(model.evaluate(X_test, y_test)[1],3)
-        plot(history=history, i=i)
-        print(f'test accuracy: {accuracy}')
-        test_acc.append(accuracy)
-        print('#########')
-        print(f'Sani: train {len(y_dev[y_dev==0])}, test {len(y_test[y_test==0])}')
-        print(f'Malati: train {len(y_dev[y_dev==1])}, test {len(y_test[y_test==1])}')
-        ROC(X_test, y_test=y_test, model=model, color=colors[i-1], i=i)
-        get_confusion_matrix(X_test, y_test=y_test, model=model, i=i)
-
-
-    print(test_acc)
-    print(f'Expected accuracy: {round(stats.mean(test_acc),3)}+/- {round(stats.stdev(test_acc),3)}')
-    plt.show()
+PATH = 'augmented_data'
 
 def retrain_and_save(X, y, best_hps_list, modelBuilder):
     for i, hps in enumerate(best_hps_list):
@@ -56,6 +30,10 @@ def fold_tuner(X, y, k, modelBuilder, overwrite=True):
         Returs best hps list (one entry for each fold)"""
     test_acc=[]
     best_hps_list=[]
+    plt.figure('ROC - Testing')
+    plt.title('ROC - Testing')
+    plt.figure('Confusion Matrices')
+
     colors = ['green', 'red', 'blue', 'darkorange', 'gold']
 
     fold  = KFold(n_splits=k, shuffle=True, random_state=42)
@@ -66,7 +44,7 @@ def fold_tuner(X, y, k, modelBuilder, overwrite=True):
         y_dev, y_test = y[dev_idx], y[test_idx]
         #set tuner
         print('###############')
-        print(f'FOLD {i}')
+        print(f'FOLD {i+1}')
         tuner = kt.BayesianOptimization(modelBuilder, objective='accuracy', max_trials=5, overwrite=overwrite, directory=f'tuner_{i}')
         tuner.search(X_dev, y_dev, epochs=20, validation_split=1/(k-1), batch_size=32, 
                     callbacks=callbacks, verbose=1)
@@ -79,8 +57,8 @@ def fold_tuner(X, y, k, modelBuilder, overwrite=True):
         test_acc.append(accuracy)
         
         plot(history=history, i=i)
-        ROC(X_test, y_test=y_test, model=best_model, color=colors[i], i=i)
-        get_confusion_matrix(X_test, y_test=y_test, model=best_model, i=i)
+        ROC(X_test, y_test=y_test, model=best_model, color=colors[i], i=i+1)
+        get_confusion_matrix(X_test, y_test=y_test, model=best_model, i=i+1)
 
     print(test_acc)
     print(f'Expected accuracy: {round(stats.mean(test_acc),3)}+/- {round(stats.stdev(test_acc),3)}')

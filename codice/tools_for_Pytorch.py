@@ -67,11 +67,9 @@ def weights_init_uniform_fan_in(m):
         m.weight.data.uniform_(-limit, limit)
         m.bias.data.fill_(0)
 
-def count_parameters(model):
-    '''Number of trainable parameters '''
-    return sum(p.numel() for p in model.parameters() if p.requires_grad)
 
 def get_predictions(X, experts):
+    """Creates and returns an array of model predictions. Each column corrispond to one expert preds."""
     y = np.empty(shape=(len(X), len(experts)))
     for count, expert in enumerate(experts):
         y[:, count] = np.squeeze(expert.predict(X))
