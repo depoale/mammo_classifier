@@ -10,6 +10,7 @@ from sklearn.preprocessing import LabelEncoder
 
 import torch
 import torch.nn as nn
+from torchmetrics.classification import BinaryAccuracy
 from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms, models
 from tools_for_Pytorch import EarlyStopping, weights_init_uniform_fan_in, count_parameters
@@ -32,6 +33,7 @@ else:
 global test_mse_list, epochs_list
 
 test_mse_list = []
+test_acc_list = []
 epochs_list = []
 
 
@@ -40,6 +42,7 @@ def train(model, optimizer, X_train, y_train, X_val, y_val, X_test, y_test, name
     '''Performs the forward and backwards training loop until early stopping, then computes the metric'''
 
     loss_fn = nn.MSELoss()
+    acc_fn = BinaryAccuracy()
     early_stopping = EarlyStopping()
 
     torch.manual_seed(42)
@@ -50,6 +53,9 @@ def train(model, optimizer, X_train, y_train, X_val, y_val, X_test, y_test, name
     train_mse_values = []
     val_mse_values = []
     test_mse_values = []
+    train_acc_values = []
+    val_acc_values = []
+    test_acc_values = []
 
 
     for epoch in range(epochs):
@@ -58,10 +64,11 @@ def train(model, optimizer, X_train, y_train, X_val, y_val, X_test, y_test, name
         model.train()
 
         # 1. Forward pass on train data
-        train_pred = model(X_train)
+        train_pred = torch.squeeze(model(X_train))
         
-        # 2. Calculate the loss
+        # 2. Calculate the loss and accuracy
         train_mse = loss_fn(train_pred, y_train)
+        train_acc = acc_fn(train_pred, y_train)
 
         # 3. Zero grad of the optimizer
         optimizer.zero_grad()
@@ -78,18 +85,24 @@ def train(model, optimizer, X_train, y_train, X_val, y_val, X_test, y_test, name
         # make predictions with model without gradient tracking 
         with torch.inference_mode():
 
-            # 1. Forward pass on validation and test data
-            val_pred = model(X_val)
-            test_pred = model(X_test)
+            # 1. Forward pass on validation and test data (squeeze is required to adjust dimensions)
+            val_pred = torch.squeeze(model(X_val))
+            test_pred = torch.squeeze(model(X_test))
 
-            # 2. Caculate mse and on validation and test data        
+            # 2. Caculate loss and acc on validation and test data        
             val_mse = loss_fn(val_pred, y_val)                    
             test_mse = loss_fn(test_pred, y_test)
+            val_acc = acc_fn(val_pred, y_val)                    
+            test_acc = acc_fn(test_pred, y_test)
 
+        # append current epoch results
         epoch_count.append(epoch)
         train_mse_values.append(train_mse)
         val_mse_values.append(val_mse)
         test_mse_values.append(test_mse)
+        train_acc_values.append(train_acc)
+        val_acc_values.append(val_acc)
+        test_acc_values.append(test_acc)
 
     
         # early_stopping needs the validation loss to check if it has decreased
@@ -100,53 +113,65 @@ def train(model, optimizer, X_train, y_train, X_val, y_val, X_test, y_test, name
             break
             
         if epoch % 10 == 0:
-            print(f"Epoch is {epoch:<3} | Training MSE: {train_mse:.3f} | Validation MSE: {val_mse:.3f}")
+            print(f"Epoch is {epoch:<3} | Training MSE: {train_mse:.3f} | Validation MSE: {val_mse:.3f} | Training acc: {train_mse:.3f} | Validation acc: {val_acc:.3f}")
 
-    print(f"Epoch is {epoch:<3} \nTraining MSE: {train_mse:.3f} | Validation MSE: {val_mse:.3f} | Test MSE: {test_mse:.3f}")
+    print(f"Epoch is {epoch:<3} \nTraining MSE: {train_mse:.3f} | Validation MSE: {val_mse:.3f} | Test MSE: {test_mse:.3f} | Training acc: {train_mse:.3f} | Validation acc: {val_acc:.3f}")
    
 
     test_mse_list.append(test_mse_values[-1])
+    test_acc_list.append(test_acc_values[-1])
     epochs_list.append(epoch_count[-1])
 
+    #learning curve and accuracy plot
     if name: 
-        fig,ax = plt.subplots()
+        plt.subplot(2,2,1)
         plt.plot(epoch_count, np.array(torch.tensor(train_mse_values).numpy()), label="Training MSE")
         plt.plot(epoch_count, val_mse_values, label="Validation MSE", linestyle='dashed')
         plt.title(name  + " TR and VL MSE")
         plt.ylabel("MSE")
         plt.xlabel("Epochs")
         plt.legend()
+        plt.subplot(2,2,2)
+        plt.plot(epoch_count, np.array(torch.tensor(train_acc_values).numpy()), label="Training acc")
+        plt.plot(epoch_count, val_acc_values, label="Validation acc", linestyle='dashed')
+        plt.title(name  + " TR and VL acc")
+        plt.ylabel("acc")
+        plt.xlabel("Epochs")
+        plt.legend()
         plt.show(block = False)
-    
+
     return model.parameters()
 
 VAL_SPLIT =0.2
 X, y = read_imgs('total_data', [0,1])
-
-model1=keras.models.load_model('model1')
-model2=keras.models.load_model('model2')
-model3=keras.models.load_model('model3')
-models_list = [model1, model2, model3]
+#load previously saved models
+model_0=keras.models.load_model('model_0')
+model_1=keras.models.load_model('model_1')
+model_2=keras.models.load_model('model_2')
+model_3=keras.models.load_model('model_3')
+model_4=keras.models.load_model('model_4')
+models_list = [model_0, model_1, model_2, model_3, model_4]
 
 #data for the ensemble model comes from the predictions of the experts
 X = get_predictions(X, models_list)
 
+# transform to tensors
 X = torch.from_numpy(X. astype('float32'))
-print(X.dtype)
 y = torch.from_numpy(y.astype('float32'))
-print(y.dtype)
-w_init = weights_init_uniform_fan_in
-X_dev, X_test, y_dev, y_test = train_test_split(X, y, test_size=VAL_SPLIT, shuffle=False)
-X_train, X_val, y_train, y_val = train_test_split(X_dev, y_dev, test_size=VAL_SPLIT, shuffle=False)
-    
+
+X_dev, X_test, y_dev, y_test = train_test_split(X, y, test_size=VAL_SPLIT, shuffle=True, random_state=42)
+X_train, X_val, y_train, y_val = train_test_split(X_dev, y_dev, test_size=VAL_SPLIT, shuffle=True, random_state=24)
+
+# model = weighted average     
 model = nn.Sequential(nn.Linear(in_features=len(models_list), out_features=1))
 
 # weights initialization 
+w_init = weights_init_uniform_fan_in
 model.apply(w_init)
 
 optimizer = torch.optim.SGD(model.parameters(), lr=0.1)
 
-weights = train(model, optimizer, X_train, y_train, X_val, y_val, X_test, y_test, name='no')
-for p in weights:
-    print(p)
+weights = train(model, optimizer, X_train, y_train, X_val, y_val, X_test, y_test, name='ensemble')
+for w in weights:
+    print(w)
 plt.show()

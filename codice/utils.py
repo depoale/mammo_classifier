@@ -127,7 +127,7 @@ def get_confusion_matrix(x_test, y_test, model, i):
     df_cm = pd.DataFrame(my_confusion_matrix, index = ['Negative', 'Positive'],
                   columns = ['Negative', 'Positive'])
     plt.figure('Confusion Matrices')
-    plt.subplot(2,3,i)
+    plt.subplot(2,3,i+1)
     plt.title(f'Fold {i}', fontsize=13, loc='left')
     sn.heatmap(df_cm, annot=True)
     plt.xlabel('Predicted label', fontsize=7)
