@@ -143,9 +143,19 @@ def set_hps(args):
             'Dense_units': args.Dense_units,
             'Conv2d_init': args.Conv2d_init,
             'dropout' : args.dropout_rate,
-            'Conv2D_size': args.Conv2D_size
+            'kernel_size': args.kernel_size
 
     }
+    return hps
+
+def wave_set(args):
+    wave_settings = {
+            'wavelet_family' : args.wavelet_family,
+            'decomposition_level': args.decomposition_level,
+            'threshold': args.threshold
+
+    }
+    return wave_settings
 
     
     

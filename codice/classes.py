@@ -10,8 +10,8 @@ from PIL import Image
 img_width = 60
 img_height = 60
 
-class Data():
-    def __init__(self, augmented: bool, wavelet: bool):
+class Data:
+    def __init__(self, augmented: bool, wavelet: bool, wave_settings: dict):
         """class used to choose and initialize dataset
         ...
         Attributes
@@ -66,13 +66,13 @@ class Data():
         self._PATH = IMGS_DIR
 
     
-    def wave(self):
+    def wave(self, wave_settings):
         eng = matlab.engine.start_matlab()
-
-        Q = 1 #quante dev std considero nel filtraggio (al massimo due consigliate)
-        wave = 'sym3' #quale wavelet utilizzo (anche un altro paio)
-        N = 3 #livello di approssimazione (consigliato 3)
-
+        
+        wave = wave_settings['wavelet_family'] 
+        N = wave_settings['decomposition_level'] 
+        Q =  wave_settings['threshold'] 
+        
         IMGS_DIR = 'wavelet_data'
 
         os.makedirs(os.path.join(f'{IMGS_DIR}', '0'))
