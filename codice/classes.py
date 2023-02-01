@@ -6,14 +6,14 @@ img_width = 60
 img_height = 60
 
 class Data():
-    def __init__(self, augmented, wavelet):
+    def __init__(self, augmented: bool, wavelet: bool):
         """class used to choose and initialize dataset
         ...
         Attributes
         ----------
-        augmentes: Bool
+        augmentes: bool
             whether to perform data augmentation
-        wavelet: Bool
+        wavelet: bool
             whether to use wavelet procedure """
         
         self._PATH = 'total_data'
@@ -43,7 +43,6 @@ class Data():
         fill_mode='reflect', #  nearest?
         validation_split=0)
         
-        labels= ['0','1']
         for i, one_class in enumerate(os.listdir(IMGS_DIR)):
             dir_path = os.path.join(os.getcwd(),'augmented_data', one_class)
             gen = datagen.flow_from_directory(
