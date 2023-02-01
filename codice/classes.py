@@ -138,3 +138,12 @@ class Data():
 
         
         self._PATH = IMGS_DIR
+
+class Model:
+    def __init__(self, Data, hps: dict):
+        self.X = Data.X
+        self.y = Data.y
+        self.hps = self.set_hps(hps)
+
+    def set_hps(self, hps):
+        pass

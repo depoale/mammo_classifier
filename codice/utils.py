@@ -137,6 +137,16 @@ def get_confusion_matrix(x_test, y_test, model, i):
     plt.xlabel('Predicted label', fontsize=7)
     plt.ylabel('Actual label', fontsize=7)
 
+def set_hps(args):
+    hps = {
+            'depth' : args.net_depth,
+            'Dense_units': args.Dense_units,
+            'Conv2d_init': args.Conv2d_init,
+            'dropout' : args.dropout_rate,
+            'Conv2D_size': args.Conv2D_size
+
+    }
+
     
     
 

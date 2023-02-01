@@ -35,6 +35,10 @@ split = 0.4
 train_path= os.path.join(os.getcwd(),'data_png_WAVELET' ,'Train')
 test_path=os.path.join(os.getcwd(),'data_png_WAVELET' ,'Test')
 
+def set_hyperp(hyperparam):
+    global hyperp
+    hyperp = hyperparam
+
 def cnn_classifier(shape=(60, 60, 1), verbose=False):
     """removed resizing layer
     """
@@ -124,6 +128,11 @@ def hyp_tuning_model(hp):
     hp_dropout = hp.Choice('dropout', values=[0.0, 0.05])
     hp_Conv2d_size = hp.Choice('Conv2D_size', values=[3, 5])
     
+    hp_depth = hp.Int('depth', hyperp['depth'])
+    hp_Dense_units = hp.Choice('Dense_units', hyperp['Dense_units'])
+    hp_Conv2D_init = hp.Choice('Conv2d_init', hyperp['Conv2d_init'])
+    hp_dropout = hp.Choice('dropout', hyperp['dropout'])
+    hp_Conv2d_size = hp.Choice('Conv2D_size', hyperp['Conv2D_size'])
 
     model.add(Conv2D(hp_Conv2D_init, (3, 3), activation='relu', padding='same', strides=1, name='conv_1', input_shape=shape))
     model.add(BatchNormalization())

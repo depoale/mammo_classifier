@@ -3,37 +3,95 @@ the same code used in models.py (where test accuracy is always above 0.93) """
 
 from models import cnn_model 
 from utils import get_data, plot
-from model_assessment import fold
 from sklearn.model_selection import KFold
 import numpy as np
 import tensorflow as tf
 from models import callbacks
 from matplotlib import pyplot as plt
+import argparse
+from classes import Data, Model
  
  
 if __name__=='__main__':
-    train, val, _ = get_data(train_path='total_data', test_path='data_all/Test')
+    parser = argparse.ArgumentParser(
+        description="Mammography classifier"
+    )
 
-    train_images = np.concatenate(list(train.map(lambda x, y:x)))
-    train_labels = np.concatenate(list(train.map(lambda x, y:y)))
+    parser.add_argument(
+        "-wave",
+        "--wavelet",
+        metavar="",
+        type=bool,
+        help="Whether to apply wavelet filter",
+        default=False,
+    )
+    
+    parser.add_argument(
+        "-aug",
+        "--augmented",
+        metavar="",
+        type=bool,
+        help="Whether to perform data augmentation procedure",
+        default=False,
+    )
 
-    val_images = np.concatenate(list(val.map(lambda x, y:x)))
-    val_labels = np.concatenate(list(val.map(lambda x, y:y)))
+    parser.add_argument(
+        "-or",
+        "--overwrite",
+        metavar="",
+        type=bool,
+        help="Whether to perform hyperparameters search or use the previously saved hyperpar",
+        default=False,
+    )
+    parser.add_argument(
+        "-depth",
+        "--net_depth",
+        metavar="",
+        type=list,
+        help="List of values for the hypermodel's depth",
+        default=[1,2,3],
+    )
+    
+    parser.add_argument(
+        "-units",
+        "--Dense_units",
+        metavar="",
+        type=list,
+        help="List of values for the hypermodel's number of hidden units",
+        default=[256],
+    )
 
-    inputs = np.concatenate((train_images, val_images), axis=0)
-    targets = np.concatenate((train_labels, val_labels), axis=0)
+    parser.add_argument(
+        "-conv_in",
+        "--Conv2d_init",
+        metavar="",
+        type=list,
+        help="List of values for the hypermodel's conv2d initial value",
+        default=[10, 20, 30],
+    )
+    parser.add_argument(
+        "-dropout",
+        "--dropout_rate",
+        metavar="",
+        type=list,
+        help="List of values for the hypermodel's dropout rate",
+        default=[0.0, 0.05],
+    )
+    parser.add_argument(
+        "-kerner_size",
+        "--kernel_size",
+        metavar="",
+        type=list,
+        help="List of values for the hypermodel's kernel_size",
+        default=[3, 5],
+    )
 
-    kfold = KFold(n_splits=10, shuffle=True, random_state=42)
-    test_acc=[]
+    args = parser.parse_args()
 
-    for train, test in kfold.split(inputs, targets):
-        model = cnn_model()
-        history = model.fit(inputs[train], targets[train],  batch_size=1 , 
-                            epochs=200, validation_split=0.25, callbacks=callbacks)
-        accuracy= round(model.evaluate(inputs[test], targets[test],)[1],3)
-        plot(history=history)
-        print(f'test accuracy: {accuracy}')
-        test_acc.append(accuracy)
+    ###############
+    #1. initialize dataset using user picked values
+    Data(augmented=args.augmented, wavelet=args.wavelet)
+    hps = set_hps(args)
+    Model(Data=Data, )
 
-    print(test_acc)
-    plt.show()
+
