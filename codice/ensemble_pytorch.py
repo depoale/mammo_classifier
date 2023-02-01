@@ -32,9 +32,6 @@ else:
 
 global test_mse_list, epochs_list
 
-test_mse_list = []
-test_acc_list = []
-epochs_list = []
 
 
 def train(model, optimizer, X_train, y_train, X_val, y_val, X_test, y_test, name=None):
@@ -117,11 +114,7 @@ def train(model, optimizer, X_train, y_train, X_val, y_val, X_test, y_test, name
 
     print(f"Epoch is {epoch:<3} \nTraining MSE: {train_mse:.3f} | Validation MSE: {val_mse:.3f} | Test MSE: {test_mse:.3f} | Training acc: {train_mse:.3f} | Validation acc: {val_acc:.3f}")
    
-
-    test_mse_list.append(test_mse_values[-1])
-    test_acc_list.append(test_acc_values[-1])
-    epochs_list.append(epoch_count[-1])
-
+    final_acc = val_acc_values[-1]
     #learning curve and accuracy plot
     if name: 
         plt.subplot(2,2,1)
@@ -140,7 +133,7 @@ def train(model, optimizer, X_train, y_train, X_val, y_val, X_test, y_test, name
         plt.legend()
         plt.show(block = False)
 
-    return model.parameters()
+    return model.parameters(), final_acc
 
 VAL_SPLIT =0.2
 X, y = read_imgs('total_data', [0,1])
@@ -171,7 +164,8 @@ model.apply(w_init)
 
 optimizer = torch.optim.SGD(model.parameters(), lr=0.1)
 
-weights = train(model, optimizer, X_train, y_train, X_val, y_val, X_test, y_test, name='ensemble')
+weights, final_acc = train(model, optimizer, X_train, y_train, X_val, y_val, X_test, y_test, name='ensemble')
+print(f'Final accuracy: {final_acc}')
 for w in weights:
     print(w)
 plt.show()
