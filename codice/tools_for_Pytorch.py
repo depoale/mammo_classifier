@@ -67,6 +67,14 @@ def weights_init_uniform_fan_in(m):
         m.weight.data.uniform_(-limit, limit)
         m.bias.data.fill_(0)
 
+def weights_init_ones(m):
+    '''Initizialize weights with a uniform distribution, according to fan-in rule, and set bias to 0'''
+    classname = m.__class__.__name__
+    # for every Linear layer in a model..
+    if classname.find('Linear') != -1:
+        m.weight.data.fill_(1)
+        m.bias.data.fill_(0)
+
 
 def get_predictions(X, experts):
     """Creates and returns an array of model predictions. Each column corrispond to one expert preds."""

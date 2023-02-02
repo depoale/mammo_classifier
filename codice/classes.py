@@ -4,13 +4,17 @@ import os
 from keras.preprocessing.image import ImageDataGenerator
 import numpy as np
 from matplotlib import pyplot as plt
-from matplotlib import image as img
+
 #import matlab.engine
 from sklearn.model_selection import KFold
+from sklearn.model_selection import train_test_split
 import keras_tuner as kt
-from PIL import Image
+import torch
+import torch.nn as nn
 import statistics as stats
 from sklearn.metrics import auc
+from tools_for_Pytorch import EarlyStopping, weights_init_ones
+from tools_for_Pytorch import get_predictions
 from ensemble import train_ensemble
 import keras
 
@@ -157,6 +161,7 @@ class Model:
 
     def train(self):
         self.fold()
+        self.ensemble()
 
     def tuner(self, X_dev, y_dev, modelBuilder, i, k=5):
         tuner = kt.BayesianOptimization(modelBuilder, objective='accuracy', max_trials=5, overwrite=self.overwrite, directory=f'tuner_{i}')
@@ -235,26 +240,20 @@ class Model:
         self.retrain_and_save(self.X, self.y, best_hps_list=best_hps_list, modelBuilder=self.modelBuilder, i=i)
         
     def ensemble(self):
-        #load previously saved models
-        model_0=keras.models.load_model('model_0')
-        model_1=keras.models.load_model('model_1')
-        model_2=keras.models.load_model('model_2')
-        model_3=keras.models.load_model('model_3')
-        model_4=keras.models.load_model('model_4')
-        X = get_predictions(X, models_list)
+        X = get_predictions(X, self.models_list)
 
         # transform to tensors
         X = torch.from_numpy(X. astype('float32'))
         y = torch.from_numpy(y.astype('float32'))
 
-        X_dev, X_test, y_dev, y_test = train_test_split(X, y, test_size=VAL_SPLIT, shuffle=True, random_state=42)
-        X_train, X_val, y_train, y_val = train_test_split(X_dev, y_dev, test_size=VAL_SPLIT, shuffle=True, random_state=24)
+        X_dev, X_test, y_dev, y_test = train_test_split(X, y, test_size=0.2, shuffle=True, random_state=42)
+        X_train, X_val, y_train, y_val = train_test_split(X_dev, y_dev, test_size=0.2, shuffle=True, random_state=24)
 
         # model = weighted average     
-        model = nn.Sequential(nn.Linear(in_features=len(models_list), out_features=1))
+        model = nn.Sequential(nn.Linear(in_features=len(self.models_list), out_features=1))
 
         # weights initialization 
-        w_init = weights_init_uniform_fan_in
+        w_init = weights_init_ones
         model.apply(w_init)
 
         optimizer = torch.optim.SGD(model.parameters(), lr=0.1)

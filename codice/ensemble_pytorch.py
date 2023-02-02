@@ -1,24 +1,17 @@
 
-import os
 import numpy as np
-import pandas as pd
-from PIL import Image
 import matplotlib.pyplot as plt
-from tqdm import tqdm
-import copy
-from sklearn.preprocessing import LabelEncoder
+
 
 import torch
 import torch.nn as nn
 from torchmetrics.classification import BinaryAccuracy
-from torch.utils.data import Dataset, DataLoader
-from torchvision import transforms, models
-from tools_for_Pytorch import EarlyStopping, weights_init_uniform_fan_in, count_parameters
+
+from tools_for_Pytorch import EarlyStopping, weights_init_uniform_fan_in
 import torch
 from torch import nn
 from utils import read_imgs
-from sklearn.model_selection import KFold, ShuffleSplit, train_test_split
-from tools_for_Pytorch import EarlyStopping, weights_init_uniform_fan_in, count_parameters
+from sklearn.model_selection import train_test_split
 import keras 
 from tools_for_Pytorch import get_predictions
 
@@ -32,9 +25,7 @@ else:
 
 global test_mse_list, epochs_list
 
-
-
-def train(model, optimizer, X_train, y_train, X_val, y_val, X_test, y_test, name=None):
+def train_ensemble(model, optimizer, X_train, y_train, X_val, y_val, X_test, y_test, name=None):
 
     '''Performs the forward and backwards training loop until early stopping, then computes the metric'''
 
@@ -164,7 +155,7 @@ model.apply(w_init)
 
 optimizer = torch.optim.SGD(model.parameters(), lr=0.1)
 
-weights, final_acc = train(model, optimizer, X_train, y_train, X_val, y_val, X_test, y_test, name='ensemble')
+weights, final_acc = train_ensemble(model, optimizer, X_train, y_train, X_val, y_val, X_test, y_test, name='ensemble')
 print(f'Final accuracy: {final_acc}')
 for w in weights:
     print(w)
