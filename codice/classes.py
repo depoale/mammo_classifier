@@ -46,7 +46,6 @@ class Data:
 
     def aug(self):
         IMGS_DIR ='augmented_data'
-
         datagen = ImageDataGenerator(
         rotation_range=50,
         width_shift_range=3,
