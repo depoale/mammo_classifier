@@ -12,6 +12,7 @@ from PIL import Image
 import statistics as stats
 from sklearn.metrics import auc
 from ensemble import train_ensemble
+import keras
 
 img_width = 60
 img_height = 60
@@ -158,7 +159,7 @@ class Model:
     def train(self):
         self.fold()
 
-    def tuner(self, X_dev, y_dev, modelBuilder, k=5):
+    def tuner(self, X_dev, y_dev, modelBuilder, i, k=5):
         tuner = kt.BayesianOptimization(modelBuilder, objective='accuracy', max_trials=5, overwrite=self.overwrite, directory=f'tuner_{i}')
         tuner.search(X_dev, y_dev, epochs=20, validation_split=1/(k-1), batch_size=32, 
                     callbacks=callbacks, verbose=1)
@@ -212,7 +213,7 @@ class Model:
             y_dev, y_test = self.y[dev_idx], self.y[test_idx]
             print('###############')
             print(f'FOLD {i+1}')
-            best_hps, best_model = self.tuner(X_dev, y_dev, self.modelBuilder, k=5)
+            best_hps, best_model = self.tuner(X_dev, y_dev, self.modelBuilder, i, k=5)
             best_hps_list.append(best_hps)
 
             #train best model and assess model's performance
@@ -235,6 +236,34 @@ class Model:
         self.retrain_and_save(self.X, self.y, best_hps_list=best_hps_list, modelBuilder=self.modelBuilder, i=i)
         
     def ensemble(self):
-        for model in self.models_list:
+        #load previously saved models
+        model_0=keras.models.load_model('model_0')
+        model_1=keras.models.load_model('model_1')
+        model_2=keras.models.load_model('model_2')
+        model_3=keras.models.load_model('model_3')
+        model_4=keras.models.load_model('model_4')
+        X = get_predictions(X, models_list)
+
+        # transform to tensors
+        X = torch.from_numpy(X. astype('float32'))
+        y = torch.from_numpy(y.astype('float32'))
+
+        X_dev, X_test, y_dev, y_test = train_test_split(X, y, test_size=VAL_SPLIT, shuffle=True, random_state=42)
+        X_train, X_val, y_train, y_val = train_test_split(X_dev, y_dev, test_size=VAL_SPLIT, shuffle=True, random_state=24)
+
+        # model = weighted average     
+        model = nn.Sequential(nn.Linear(in_features=len(models_list), out_features=1))
+
+        # weights initialization 
+        w_init = weights_init_uniform_fan_in
+        model.apply(w_init)
+
+        optimizer = torch.optim.SGD(model.parameters(), lr=0.1)
+
+        weights, final_acc = train_ensemble(model, optimizer, X_train, y_train, X_val, y_val, X_test, y_test, name='ensemble')
+        print(f'Final accuracy: {final_acc}')
+        for w in weights:
+            print(w)
+        plt.show()
 
 
