@@ -9,10 +9,12 @@ import tensorflow as tf
 from models import callbacks
 from matplotlib import pyplot as plt
 import argparse
+import os
 from classes import Data, Model
  
  
 if __name__=='__main__':
+    os.chdir('..')
     parser = argparse.ArgumentParser(
         description="Mammography classifier"
     )
@@ -39,7 +41,8 @@ if __name__=='__main__':
         "-wave_family",
         "--wavelet_family",
         metavar="",
-        type=list,
+        nargs='+',
+        type=str,
         help="Which wavelet family (between 'sym3' and 'haar') has to be used to realize the filter",
         default=['sym3'],
 
@@ -49,7 +52,8 @@ if __name__=='__main__':
         "-dec_level",
         "--decomposition_level",
         metavar="",
-        type=list,
+        nargs='+',
+        type=int,
         help="Decomposition level of the wavelet analysis",
         default=[3],
 
@@ -59,7 +63,8 @@ if __name__=='__main__':
         "-threshold",
         "--threshold",
         metavar="",
-        type=list,
+        nargs='+',
+        type=float,
         help="threshold of wavelet coefficients in terms of the standard deviation of their distributions (do not go over 2!)",
         default=[1.5],
 
@@ -78,7 +83,8 @@ if __name__=='__main__':
         "-depth",
         "--net_depth",
         metavar="",
-        type=list,
+        nargs='+',
+        type=int,
         help="List of values for the hypermodel's depth",
         default=[1,2,3],
     )
@@ -87,7 +93,8 @@ if __name__=='__main__':
         "-units",
         "--Dense_units",
         metavar="",
-        type=list,
+        nargs='+',
+        type=int,
         help="List of values for the hypermodel's number of hidden units",
         default=[256],
     )
@@ -96,7 +103,8 @@ if __name__=='__main__':
         "-conv_in",
         "--Conv2d_init",
         metavar="",
-        type=list,
+        nargs='+',
+        type=int,
         help="List of values for the hypermodel's conv2d initial value",
         default=[10, 20, 30],
     )
@@ -105,7 +113,8 @@ if __name__=='__main__':
         "-dropout",
         "--dropout_rate",
         metavar="",
-        type=list,
+        nargs='+',
+        type=float,
         help="List of values for the hypermodel's dropout rate",
         default=[0.0, 0.05],
     )
@@ -114,12 +123,14 @@ if __name__=='__main__':
         "-kernel_size",
         "--kernel_size",
         metavar="",
-        type=list,
+        nargs='+',
+        type=int,
         help="List of values for the hypermodel's kernel_size",
         default=[3, 5],
     )
 
     args = parser.parse_args()
+    print(os.getcwd())
 
     ###############
     #1. initialize dataset using user picked values
