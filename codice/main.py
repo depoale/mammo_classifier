@@ -137,6 +137,6 @@ if __name__=='__main__':
     wave_settings = wave_set(args)
     Data(augmented=args.augmented, wavelet=args.wavelet, wave_settings=wave_settings)
     hps = set_hps(args)
-    #Model(Data=Data, )
+    Model(Data=Data,hps=hps )
 
 

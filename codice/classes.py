@@ -151,7 +151,7 @@ class Data:
         self._PATH = IMGS_DIR
  """
 class Model:
-    def __init__(self, Data, hps: dict, overwrite:bool):
+    def __init__(self, Data, hps, overwrite=True):
         self.X = Data.X
         self.y = Data.y
         self.hps = self.set_hps(hps)
