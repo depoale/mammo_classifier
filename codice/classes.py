@@ -43,7 +43,6 @@ class Data:
         if wavelet:
             # create wavelet directory and set _PATH to that directory
             self.wave(wave_settings)
-            pass
         
         self.set_data(self._PATH)
     

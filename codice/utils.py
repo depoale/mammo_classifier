@@ -17,6 +17,7 @@ import numpy as np
 from sklearn.metrics import roc_curve, auc, confusion_matrix
 import seaborn as sn
 import pandas as pd
+import shutil
 
 from keras.utils import image_dataset_from_directory
 
@@ -158,7 +159,7 @@ def wave_set(args):
     
     
 def delete_directory(directory_path):
-    
+    shutil.rmtree(directory_path)
 
 
 
