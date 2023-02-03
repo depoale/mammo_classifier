@@ -46,8 +46,6 @@ def read_imgs(dataset_path, classes):
     tmp = []
     labels = []
     for cls in classes:
-        if not os.path.join(dataset_path, str(cls)):
-            raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), os.path.join(dataset_path, str(cls)) )
         fnames = glob.glob(os.path.join(dataset_path, str(cls), '*.png'))
         logging.info(f'Read images from class {cls}')
         tmp += [imread(fname) for fname in fnames]
@@ -158,6 +156,8 @@ def wave_set(args):
     return wave_settings
 
     
+    
+def delete_directory(directory_path):
     
 
 

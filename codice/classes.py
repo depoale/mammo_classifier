@@ -4,8 +4,10 @@ import os
 from keras.preprocessing.image import ImageDataGenerator
 import numpy as np
 from matplotlib import pyplot as plt
-
-#import matlab.engine
+from matplotlib import image as img
+import shutil
+from PIL import Image
+import matlab.engine
 from sklearn.model_selection import KFold
 from sklearn.model_selection import train_test_split
 import keras_tuner as kt
@@ -40,7 +42,7 @@ class Data:
         
         if wavelet:
             # create wavelet directory and set _PATH to that directory
-            #self.wave()
+            self.wave(wave_settings)
             pass
         
         self.set_data(self._PATH)
@@ -50,6 +52,20 @@ class Data:
 
     def aug(self):
         IMGS_DIR ='augmented_data'
+        os.makedirs(os.path.join(f'{IMGS_DIR}', '0'))
+        os.makedirs(os.path.join(f'{IMGS_DIR}', '1'))
+
+        dataset_path_0 = os.path.join(f'{self._PATH}', '0')
+        dataset_path_1 = os.path.join(f'{self._PATH}', '1')
+     
+        names_0 = os.listdir(dataset_path_0)
+        names_1 = os.listdir(dataset_path_1)
+        names = [names_0, names_1]
+
+        for i in range(0,2,1):
+            for name in names[i]:
+                shutil.copy(os.path.join(f'{self._PATH}', f'{i}', f'{name}'), os.path.join(f'{IMGS_DIR}', f'{i}'))
+
         datagen = ImageDataGenerator(
         rotation_range=50,
         width_shift_range=3,
@@ -59,10 +75,10 @@ class Data:
         fill_mode='reflect', #  nearest?
         validation_split=0)
         
-        for i, one_class in enumerate(os.listdir(IMGS_DIR)):
-            dir_path = os.path.join(os.getcwd(),'augmented_data', one_class)
+        for i, one_class in enumerate(os.listdir(self._PATH)):
+            dir_path = os.path.join(f'{IMGS_DIR}', one_class)
             gen = datagen.flow_from_directory(
-                IMGS_DIR,
+                self._PATH,
                 target_size = (img_width, img_height),
                 batch_size = 1,
                 color_mode = 'grayscale',
@@ -77,7 +93,7 @@ class Data:
         self._PATH = IMGS_DIR
 
     
-    """ def wave(self, wave_settings):
+    def wave(self, wave_settings):
         eng = matlab.engine.start_matlab()
         
         wave = wave_settings['wavelet_family'] 
@@ -149,7 +165,7 @@ class Data:
 
         
         self._PATH = IMGS_DIR
- """
+ 
 class Model:
     def __init__(self, Data, hps, overwrite=True):
         self.X = Data.X
