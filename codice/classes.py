@@ -24,7 +24,7 @@ img_width = 60
 img_height = 60
 
 class Data:
-    def __init__(self, augmented=False, wavelet=False, wave_settings={}):
+    def __init__(self, augmented=False, wavelet=False, wave_settings={'wavelet_family':'sym3','decomposition_level':3,'threshold':1}):
         """class used to choose and initialize dataset
         ...
         Attributes

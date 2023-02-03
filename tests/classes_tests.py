@@ -13,27 +13,21 @@ shutup.please()
 
 class DataTests(unittest.TestCase):
     def test_inputs(self):
-        '''d_aug_0 = Data(augmented = 0)
+        d_aug_0 = Data(augmented = 0)
         self.assertEqual(len(d_aug_0.X), len(d_aug_0.y))
 
         d_aug_1 = Data(augmented = 1)
         self.assertEqual(len(d_aug_1.X), len(d_aug_1.y))
-        #delete_directory(d_aug_1._PATH)'''
-
-        wave_settings_default = {
-            'wavelet_family' : 'sym3',
-            'decomposition_level': 3,
-            'threshold': 1
-        }
-
-        '''d_wave_0 = Data(augmented = 0, wavelet = 1, wave_settings = wave_settings_default)
+        delete_directory(d_aug_1._PATH)
+   
+        d_wave_0 = Data(augmented = 0, wavelet = 1)
         self.assertEqual(len(d_wave_0.X), len(d_wave_0.y))
-        #delete_directory(d_wave_0._PATH)'''
+        delete_directory(d_wave_0._PATH)
 
-        d_wave_1 = Data(augmented = 1, wavelet = 1, wave_settings = wave_settings_default)
+        d_wave_1 = Data(augmented = 1, wavelet = 1)
         self.assertEqual(len(d_wave_1.X), len(d_wave_1.y))
-        #delete_directory('augmented_data')
-        #delete_directory(d_wave_1._PATH)
+        delete_directory('augmented_data')
+        delete_directory(d_wave_1._PATH)
 
         
 
