@@ -8,6 +8,7 @@ from keras.callbacks import EarlyStopping, ReduceLROnPlateau
 from keras.optimizers import Adam
 from keras.metrics import Precision, Recall, BinaryAccuracy
 import time
+import errno
 from PIL import Image
 import glob
 import logging
@@ -16,9 +17,6 @@ import numpy as np
 from sklearn.metrics import roc_curve, auc, confusion_matrix
 import seaborn as sn
 import pandas as pd
-
-train_path = os.path.join(os.getcwd(),'data_png' ,'Train')
-test_path = os.path.join(os.getcwd(),'data_png' ,'Test')
 
 from keras.utils import image_dataset_from_directory
 
@@ -48,11 +46,13 @@ def read_imgs(dataset_path, classes):
     tmp = []
     labels = []
     for cls in classes:
-        print(cls)
+        if not os.path.join(dataset_path, str(cls)):
+            raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), os.path.join(dataset_path, str(cls)) )
         fnames = glob.glob(os.path.join(dataset_path, str(cls), '*.png'))
         logging.info(f'Read images from class {cls}')
         tmp += [imread(fname) for fname in fnames]
         labels += len(fnames)*[cls]
+
 
     return np.array(tmp, dtype='float32')[..., np.newaxis]/255, np.array(labels)
 
