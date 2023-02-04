@@ -39,16 +39,16 @@ Default hyperparameters space is set to be: <br>
 
 ## Training
 The model selection and model assessment procedure is presented in the diagram below: given an hypermodel an hyperparameters space, the best model is selected with an **internal Hold-out** (Validation set = 25% of development set). A **K-fold** cross-validation (K=5) procedure is chosen to evaluate the model’s performance.<br>
-<img src="images/model_sel_assess.jpeg" width="800"> 
+<img src="images/model_sel_assess.jpeg" width="800"> <br>
 At this point, we are left with 5 models (one for each fold), so an ensemble learning stategy is performed: each model is treated like an *expert*, so the final response of the ensemble comes from a weighted average of the single experts' predictions. These weights are trained to maximize the accuracy of the ensemble. 
 
 ## Performances
 Using the default values for Wavelet-filtering settings and model hyperparameters the classificator's performances we obtained are represented in the following graphs:<br> <ul>
-<li>Training and Validation Loss curve and Accuracy Curve for one of the 5 folds:</li>
+<li>Learning curves for one of the 5 folds:</li>
 <img src="images\Fold_1.png" width="800"> 
-<li>ROC curves relative to the testing data for all the 5 folds:</li>
+<li>ROC curves relative to the testing data for each of the 5 folds:</li>
 <img src="images\ROC_-_Testing.png" width="800">
-<li>Confusion Matrices compared for all the 5 folds:</li>
+<li>Confusion Matrices for each of the 5 folds:</li>
 <img src="images\Confusion_Matrices.png" width="800">
 
 
