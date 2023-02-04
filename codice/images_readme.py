@@ -32,7 +32,7 @@ def plottino():
     classes = [[0],[1]]
     i=1
     for cl in classes:
-        img_array, labels = read_imgs('augmented_data', cl)
+        img_array, labels = read_imgs('wavelet_data', cl)
         for idx in rnd_idx:
             ax=fig.add_subplot(rows, columns, i)
             ax.title.set_text(f'Label = {labels[idx]}')
