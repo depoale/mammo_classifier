@@ -125,5 +125,5 @@ def train_ensemble(model, optimizer, X_train, y_train, X_val, y_val, X_test, y_t
         plt.legend()
         plt.show(block = False)
 
-    model.save('trained_ensemble')
+    torch.save(model, 'trained_ensemble')
     return model.parameters(), final_acc

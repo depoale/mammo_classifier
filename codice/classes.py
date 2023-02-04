@@ -1,12 +1,10 @@
-from utils import read_imgs, set_hps, callbacks, ROC, get_confusion_matrix, plot
-from models import hyp_tuning_model, set_hyperp
+from utils import read_imgs, callbacks, ROC, get_confusion_matrix, plot
+from models import hyp_tuning_model
 import os
 from keras.preprocessing.image import ImageDataGenerator
 import numpy as np
 from matplotlib import pyplot as plt
-from matplotlib import image as img
 import shutil
-from PIL import Image
 #import matlab.engine
 from sklearn.model_selection import KFold
 from sklearn.model_selection import train_test_split
@@ -15,10 +13,9 @@ import torch
 import torch.nn as nn
 import statistics as stats
 from sklearn.metrics import auc
-from tools_for_Pytorch import EarlyStopping, weights_init_ones
+from tools_for_Pytorch import weights_init_ones
 from tools_for_Pytorch import get_predictions
 from ensemble import train_ensemble
-import keras
 
 img_width = 60
 img_height = 60
@@ -178,9 +175,11 @@ class Data:
         self._PATH = IMGS_DIR"""
  
 class Model:
-    def __init__(self, data, overwrite=True):
+    """Create and train ensemble"""
+    def __init__(self, data, overwrite, max_trials):
         self.X = data.X
         self.y = data.y
+        self.max_trials = max_trials
         self.overwrite = overwrite
         self.modelBuilder = hyp_tuning_model
         self.models_list = []
@@ -190,7 +189,8 @@ class Model:
         self.ensemble()
 
     def tuner(self, X_dev, y_dev, modelBuilder, i, k=5):
-        tuner = kt.BayesianOptimization(modelBuilder, objective='accuracy', max_trials=5, overwrite=self.overwrite, directory=f'tuner_{i}')
+        tuner = kt.BayesianOptimization(modelBuilder, objective='accuracy', max_trials=self.max_trials, 
+                                        overwrite=self.overwrite, directory=f'tuner_{i}', project_name='tuner')
         tuner.search(X_dev, y_dev, epochs=20, validation_split=1/(k-1), batch_size=32, 
                     callbacks=callbacks, verbose=1)
         best_hps = tuner.get_best_hyperparameters(num_trials=1)[0]
@@ -233,6 +233,7 @@ class Model:
         aucs = []
         mean_fpr = np.linspace(0, 1, 100)
         plt.figure('Confusion Matrices')
+        plt.title('Confusion Matrices')
         colors = ['green', 'red', 'blue', 'darkorange', 'gold']
 
         # here model selection and model assessment are peformed (k-fold + hold-out)
@@ -241,8 +242,9 @@ class Model:
             #divide development and test sets
             X_dev, X_test = self.X[dev_idx], self.X[test_idx]
             y_dev, y_test = self.y[dev_idx], self.y[test_idx]
-            print('###############')
+            print('--------------')
             print(f'FOLD {i+1}')
+            print('--------------')
             best_hps, best_model = self.tuner(X_dev, y_dev, self.modelBuilder, i, k=5)
             best_hps_list.append(best_hps)
 
@@ -263,20 +265,24 @@ class Model:
         print(f'Expected accuracy: {stats.mean(test_acc):.2f}+/- {stats.stdev(test_acc):.2f}')
         print(f'best hps:')
         for i, hps in enumerate(best_hps_list):
+            print(f'--------------------')
             print(f'Model_{i} chosen hps:')
             print(f'--------------------')
             print(f"Depth: {hps.get('depth')}")
             print(f"Conv_in: {hps.get('Conv2d_init')}")
             print(f"Dropout: {hps.get('dropout')}")
-        plt.show()
+            print(f'--------------------')
+        plt.show(block=False)
         self.retrain_and_save(self.X, self.y, best_hps_list=best_hps_list, modelBuilder=self.modelBuilder, i=i)
     
     def ensemble(self):
+        """Create and train ensemble starting from models obtained previously"""
+        #get each expert's predictions
         X = get_predictions(self.X, self.models_list)
 
         # transform to tensors
         X = torch.from_numpy(X. astype('float32'))
-        y = torch.from_numpy(y.astype('float32'))
+        y = torch.from_numpy(self.y.astype('float32'))
 
         X_dev, X_test, y_dev, y_test = train_test_split(X, y, test_size=0.2, shuffle=True, random_state=42)
         X_train, X_val, y_train, y_val = train_test_split(X_dev, y_dev, test_size=0.2, shuffle=True, random_state=24)

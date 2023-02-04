@@ -1,20 +1,7 @@
-"""few models. first ones quite naive.
-cnn_model has great potential. with this partition btw train and test
-got test accuracy = 0.967 :))"""
+"""Hypermodel builder and hps setter"""
 
-import os
-import sys
-from matplotlib import pyplot as plt
 from keras.models import Sequential
-from keras.layers import Conv2D, MaxPooling2D, Dense, Flatten, Dropout, Rescaling, Input, MaxPool2D, BatchNormalization, Activation
-import keras
-from keras.callbacks import EarlyStopping, ReduceLROnPlateau
-from keras.optimizers import Adam
-from keras.metrics import Precision, Recall, BinaryAccuracy
-import numpy as np
-from PIL import Image
-from utils import plot, callbacks, read_imgs
-from sklearn.utils import shuffle
+from keras.layers import Conv2D, MaxPooling2D, Dense, Flatten, Dropout, Input, BatchNormalization
 
 """ 
 used to convert dataset to 'png' estension (supported by keras.utils.image_dataset_from_directory)   
@@ -26,10 +13,8 @@ for file in os.listdir('datasets/Mammography_micro/Test/0'):
             im.save(new_file)
  """
 
-batch_size = 64
 img_height = 60
 img_width = 60
-split = 0.4
 
 
 def set_hyperp(args):
@@ -43,13 +28,20 @@ def set_hyperp(args):
 
     }
 
+def get_search_spaze_size():
+    size = 1
+    for key in hyperp:
+            size*= len(hyperp[key])
+    return size
+
 def hyp_tuning_model(hp):
-    shape = (60, 60, 1)
+    """Hypermodel builder"""
+    shape = (img_height, img_width, 1)
     model = Sequential()
     model.add(Input(shape=shape))
     hp_Dense_units = 256
 
-
+    # set hps using the user-selected values (stored in the dictionary hyperp)
     hp_depth = hp.Choice('depth', hyperp['depth'])
     hp_Conv2D_init = hp.Choice('Conv2d_init', hyperp['Conv2d_init'])
     hp_dropout = hp.Choice('dropout', hyperp['dropout'])
@@ -81,6 +73,3 @@ def hyp_tuning_model(hp):
     model.compile(optimizer='Adam', loss='binary_crossentropy', metrics=['accuracy'])
     
     return model
-
-if __name__ == '__main__':
-    pass

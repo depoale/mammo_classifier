@@ -1,15 +1,6 @@
 import os
-import sys
 from matplotlib import pyplot as plt
-from keras.models import Sequential
-from keras.layers import Conv2D, MaxPooling2D, Dense, Flatten, Dropout, Rescaling, Input
-import keras
 from keras.callbacks import EarlyStopping, ReduceLROnPlateau
-from keras.optimizers import Adam
-from keras.metrics import Precision, Recall, BinaryAccuracy
-import time
-import errno
-from PIL import Image
 import glob
 import logging
 from skimage.io import imread
@@ -19,7 +10,6 @@ import seaborn as sn
 import pandas as pd
 import shutil
 
-from keras.utils import image_dataset_from_directory
 
 split=0.35
 
@@ -74,8 +64,9 @@ def plot(history, i):
 
     epochs_range = range(1, len(acc)+1)
     #Train and validation accuracy 
-    plt.figure(f'Fold {i}',figsize=(15, 15))
-    plt.subplot(2, 2, 1)
+    plt.figure(f'Fold {i}',figsize=(8, 8))
+    plt.title(f'Learning curve and accuracy for fold{i}')
+    plt.subplot(1, 2, 1)
     plt.xlabel('Epochs')
     plt.ylabel('Accuracy')
     plt.plot(epochs_range, acc, label='Training Accuracy', color='blue')
@@ -83,7 +74,7 @@ def plot(history, i):
     plt.legend(loc='lower right')
     plt.title('Training and Validation Accuracy')
     #Train and validation loss 
-    plt.subplot(2, 2, 2)
+    plt.subplot(1, 2, 2)
     #plt.yscale('log')
     plt.xlabel('Epochs')
     plt.ylabel('Loss')
@@ -139,7 +130,6 @@ def get_confusion_matrix(x_test, y_test, model, i):
 def wave_set(args):
     wave_settings = {
             'wavelet_family' : args.wavelet_family,
-            'decomposition_level': args.decomposition_level,
             'threshold': args.threshold
 
     }
@@ -148,6 +138,21 @@ def wave_set(args):
     
 def delete_directory(directory_path):
     shutil.rmtree(directory_path)
+
+def comparison_plot(names, dimension, mean, std):
+    plt.figure('Comparison plot')
+    fig, ax = plt.subplots(figsize=(10,10))
+
+    plt.xlabel('Effective free parameters')
+    plt.ylabel('MEE')
+
+    #scatter plot
+    for i, txt in enumerate(names):
+        ax.errorbar(dimension[i], mean[i], yerr=std[i], label=names[i], fmt='.')
+        ax.annotate(txt, (dimension[i], mean[i]))
+    plt.savefig(os.path.join('images', 'comparison.pdf'))
+    #plt.legend()
+    plt.show()
 
 
 

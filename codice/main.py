@@ -3,11 +3,8 @@ the same code used in models.py (where test accuracy is always above 0.93) """
 
  
 from utils import wave_set
-from sklearn.model_selection import KFold
+from models import set_hyperp, get_search_spaze_size
 import numpy as np
-import tensorflow as tf
-from models import callbacks, set_hyperp
-from matplotlib import pyplot as plt
 import argparse
 import os
 from classes import Data, Model
@@ -41,7 +38,6 @@ if __name__=='__main__':
         "-wave_family",
         "--wavelet_family",
         metavar="",
-        nargs='+',
         type=str,
         help="Which wavelet family (between 'sym3' and 'haar') has to be used to realize the filter",
         default=['sym3'],
@@ -53,7 +49,6 @@ if __name__=='__main__':
         "-threshold",
         "--threshold",
         metavar="",
-        nargs='+',
         type=float,
         help="threshold of wavelet coefficients in terms of the standard deviation of their distributions (do not go over 2!)",
         default=[1.5],
@@ -76,7 +71,7 @@ if __name__=='__main__':
         nargs='+',
         type=int,
         help="List of values for the hypermodel's depth",
-        default=[1,2,3],
+        default=[1,2,3,4],
     )
     
     
@@ -87,7 +82,7 @@ if __name__=='__main__':
         nargs='+',
         type=int,
         help="List of values for the hypermodel's conv2d initial value",
-        default=[10, 20, 30],
+        default=[5, 10, 15, 20],
     )
     
     parser.add_argument(
@@ -97,19 +92,34 @@ if __name__=='__main__':
         nargs='+',
         type=float,
         help="List of values for the hypermodel's dropout rate",
-        default=[0.0, 0.05],
+        default=[0.1, 0.05, 0.0],
+    )
+
+    parser.add_argument(
+        "-sf",
+        "--searching_fraction",
+        metavar="",
+        nargs='+',
+        type=float,
+        help="Fraction of the hyperparamiters space explored during hypermodel search",
+        default=0.25,
     )
 
     args = parser.parse_args()
 
-    ###############
+    # -----Training process---------------------
+
     #1. initialize dataset using user picked values
     wave_settings = wave_set(args)
     data = Data(augmented=args.augmented, wavelet=args.wavelet, wave_settings=wave_settings)
-    #2. set chosen hyperparameters 
+
+    #2. set chosen hyperparameters and get number of trials
     set_hyperp(args)
+    space_size = get_search_spaze_size()
+    max_trials = np.rint(args.searching_fraction*space_size)
+
     #3. create and train the model
-    model = Model(data=data)
+    model = Model(data=data, overwrite=args.overwrite, max_trials=max_trials)
     model.train()
 
 
