@@ -46,7 +46,7 @@ At this point, we are left with 5 models (one for each fold), so an ensemble lea
 Using the default values for Wavelet-filtering settings and model hyperparameters the classificator's performances we obtained are represented in the following graphs:<br> <ul>
 <li>Learning curves for one of the 5 folds:</li>
 <img src="images\Fold_1.png" width="800"> 
-<li>ROC curves relative to the testing data for each of the 5 folds:</li>
+<li>ROC (Receiver Operating Characteristic) curves relative to the testing data for each of the 5 folds:</li>
 <img src="images\ROC_-_Testing.png" width="800">
 <li>Confusion Matrices for each of the 5 folds:</li>
 <img src="images\Confusion_Matrices.png" width="800">
