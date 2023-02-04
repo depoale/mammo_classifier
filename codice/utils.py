@@ -136,17 +136,6 @@ def get_confusion_matrix(x_test, y_test, model, i):
     plt.xlabel('Predicted label', fontsize=7)
     plt.ylabel('Actual label', fontsize=7)
 
-def set_hps(args):
-    hps = {
-            'depth' : args.net_depth,
-            'Dense_units': args.Dense_units,
-            'Conv2d_init': args.Conv2d_init,
-            'dropout' : args.dropout_rate,
-            'kernel_size': args.kernel_size
-
-    }
-    return hps
-
 def wave_set(args):
     wave_settings = {
             'wavelet_family' : args.wavelet_family,
@@ -156,7 +145,6 @@ def wave_set(args):
     }
     return wave_settings
 
-    
     
 def delete_directory(directory_path):
     shutil.rmtree(directory_path)

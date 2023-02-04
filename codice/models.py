@@ -32,87 +32,16 @@ img_width = 60
 split = 0.4
 
 
-def set_hyperp(hyperparam):
+def set_hyperp(args):
+    """Create a dictionary containg the user-selected hps. It is set to be a 
+    global variable so that it is accessible to the hypermodel aswell."""
     global hyperp
-    hyperp = hyperparam
+    hyperp  = {
+            'depth' : args.net_depth,
+            'Conv2d_init': args.Conv2d_init,
+            'dropout' : args.dropout_rate
 
-def cnn_classifier(shape=(60, 60, 1), verbose=False):
-    """removed resizing layer
-    """
-
-    model = Sequential()
-    model.add(Input(shape=shape))
-    model.add(Conv2D(32, (3, 3),
-    activation='relu',
-    padding='same',
-    name='conv_1',
-    input_shape=shape)
-    )
-    model.add(MaxPooling2D((2, 2), name='maxpool_1'))
-
-    model.add(Conv2D(64, (3, 3), activation='relu', padding='same', name='conv_2'))
-    model.add(BatchNormalization())
-    model.add(MaxPooling2D((2, 2), name='maxpool_2'))
-    model.add(Dropout(0.05))
-
-    model.add(Conv2D(128, (3, 3), activation='relu', padding='same', name='conv_3'))
-    model.add(BatchNormalization())
-    model.add(MaxPooling2D((2, 2), name='maxpool_3'))
-    model.add(Dropout(0.05))
-
-    model.add(Conv2D(128, (3, 3), activation='relu', padding='same', name='conv_4'))
-    model.add(BatchNormalization())
-    model.add(MaxPooling2D((2, 2), name='maxpool_4'))
-
-    model.add(Flatten())
-    model.add(Dropout(0.1))
-
-    model.add(Dense(256, activation='relu', name='dense_2'))
-    model.add(Dense(128, activation='relu', name='dense_3'))
-    model.add(Dense(1, activation='sigmoid', name='output'))
-
-    model.compile(loss='binary_crossentropy', optimizer=Adam(learning_rate=5e-2), metrics=['accuracy'])
-
-    if verbose:
-        model.summary()
-
-    return model
-
-
-def make_model(shape=(60, 60, 1)):
-  model = Sequential([
-      
-      Conv2D(16, (3,3), padding='same', input_shape=shape),
-      BatchNormalization(),
-      Activation('relu'),
-
-      MaxPool2D((2,2), strides=2),
-      #Dropout(0.4),
-
-      Conv2D(32, (3,3), padding='same'),
-      BatchNormalization(),
-      Activation('relu'),
-
-      MaxPool2D((2,2), strides=2),
-      #Dropout(0.4),
-
-      Conv2D(64, (3,3), padding='same'),
-      BatchNormalization(),
-      Activation('relu'),
-
-      MaxPool2D((2,2), strides=2),
-      #Dropout(0.4),
-
-      Flatten(),    #Flatten serves as a connection between the convolution and dense layers.
-
-      Dense(128, activation='relu'),
-      Dense(64, activation ='relu'),
-      Dense(1, activation='sigmoid')
-     
-  ])
-  model.compile(loss='binary_crossentropy', optimizer= Adam(learning_rate = 0.01), metrics=['accuracy'])
-  return model
-
+    }
 
 def hyp_tuning_model(hp):
     shape = (60, 60, 1)
@@ -120,11 +49,8 @@ def hyp_tuning_model(hp):
     model.add(Input(shape=shape))
     hp_Dense_units = 256
 
-    hp_depth = hp.Int('depth', min_value = 1, max_value = 3, step=1)
-    hp_Conv2D_init = hp.Choice('Conv2d_init', values=[10, 20, 30])
-    hp_dropout = hp.Choice('dropout', values=[0.0, 0.05])
-    
-    hp_depth = hp.Int('depth', hyperp['depth'])
+
+    hp_depth = hp.Choice('depth', hyperp['depth'])
     hp_Conv2D_init = hp.Choice('Conv2d_init', hyperp['Conv2d_init'])
     hp_dropout = hp.Choice('dropout', hyperp['dropout'])
 

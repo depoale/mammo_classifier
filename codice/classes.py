@@ -1,5 +1,5 @@
 from utils import read_imgs, set_hps, callbacks, ROC, get_confusion_matrix, plot
-from models import hyp_tuning_model
+from models import hyp_tuning_model, set_hyperp
 import os
 from keras.preprocessing.image import ImageDataGenerator
 import numpy as np
@@ -7,7 +7,7 @@ from matplotlib import pyplot as plt
 from matplotlib import image as img
 import shutil
 from PIL import Image
-import matlab.engine
+#import matlab.engine
 from sklearn.model_selection import KFold
 from sklearn.model_selection import train_test_split
 import keras_tuner as kt
@@ -25,16 +25,13 @@ img_height = 60
 
 wave_settings_default = {
     'wavelet_family': 'sym3',
-    'decomposition_level': 3,
-    'threshold': 1
+    'threshold': 1.5
 }
 
 hps_default = {
     'depth' : [1, 2, 3],
-    'Dense_units': 256,
     'Conv2d_init': [10, 20, 30],
-    'dropout' : [0.0, 0.05],
-    'kernel_size': 3
+    'dropout' : [0.0, 0.05]
 }
 
 class Data:
@@ -56,7 +53,8 @@ class Data:
         
         if wavelet:
             # create wavelet directory and set _PATH to that directory
-            self.wave(wave_settings)
+            #self.wave(wave_settings)
+            pass
         
         self.set_data(self._PATH)
     
@@ -106,11 +104,11 @@ class Data:
         self._PATH = IMGS_DIR
 
     
-    def wave(self, wave_settings):
+    """ def wave(self, wave_settings):
         eng = matlab.engine.start_matlab()
         
         wave = wave_settings['wavelet_family'] 
-        N = wave_settings['decomposition_level'] 
+        N = 3 
         Q =  wave_settings['threshold'] 
         
         IMGS_DIR = 'wavelet_data'
@@ -177,14 +175,12 @@ class Data:
                 Image.open(os.path.join(f'{IMGS_DIR}', f'{i}', f'{name}.png')).convert('L').save(os.path.join(f'{IMGS_DIR}', f'{i}', f'{name}.png'))
 
         
-        self._PATH = IMGS_DIR
+        self._PATH = IMGS_DIR"""
  
 class Model:
-    def __init__(self, Data, hps=hps_default, overwrite=True):
-        self.X = Data.X
-        self.y = Data.y
-        #self.hps = self.set_hps(hps)
-        self.hps = hps
+    def __init__(self, data, overwrite=True):
+        self.X = data.X
+        self.y = data.y
         self.overwrite = overwrite
         self.modelBuilder = hyp_tuning_model
         self.models_list = []
@@ -265,12 +261,18 @@ class Model:
     
         print(f'Test Accuracy {test_acc}')
         print(f'Expected accuracy: {stats.mean(test_acc):.2f}+/- {stats.stdev(test_acc):.2f}')
-        print(f'best hps:{best_hps_list}')
+        print(f'best hps:')
+        for i, hps in enumerate(best_hps_list):
+            print(f'Model_{i} chosen hps:')
+            print(f'--------------------')
+            print(f"Depth: {hps.get('depth')}")
+            print(f"Conv_in: {hps.get('Conv2d_init')}")
+            print(f"Dropout: {hps.get('dropout')}")
         plt.show()
         self.retrain_and_save(self.X, self.y, best_hps_list=best_hps_list, modelBuilder=self.modelBuilder, i=i)
-        
+    
     def ensemble(self):
-        X = get_predictions(X, self.models_list)
+        X = get_predictions(self.X, self.models_list)
 
         # transform to tensors
         X = torch.from_numpy(X. astype('float32'))
