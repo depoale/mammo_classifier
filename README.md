@@ -19,15 +19,21 @@ BOH!!
 
 ## Hypermodel
 The hypermodel is created using the following architecture.
-<img src="images/schema_hypermodel.png" width="500"> 
-Default hyperparameters for search are
-|Hyperparameters|     Values    | 
-| --------------| ------------- |
-| init          |  10, 20, 30   | 
-| dropout rate  |  0., 0.05     | 
-| depth         |   1, 2, 3     |    
+<img src="images/schema_hypermodel.png" width="1500"> <br>
+Default hyperparameters space is set to be: <br>
+| Hyperparameters |     Values    | 
+| ----------------| ------------- |
+| init            |  10, 20, 30   | 
+| dropout rate    |  0, 0.05      | 
+| depth           |   1, 2, 3     |    
 
-# 
-The model selection and model assessment procedure is outlined in the following diagram: given an hypermodel an
-<img src="images/model_sel_assess.jpeg" width="500"> 
+## Training
+The model selection and model assessment procedure is presented in the diagram below: given an hypermodel an hyperparameters space, the best model is selected with an **internal Hold-out** (Validation set = 25% of development set). A **K-fold** cross-validation (K=5) procedure is chosen to evaluate the model’s performance.<br>
+<img src="images/model_sel_assess.jpeg" width="800"> 
+At this point, we are left with 5 models (one for each fold), so an ensemble learning stategy is performed: each model is treated like an *expert*, so the final response of the ensemble comes from a weighted average of the single experts' predictions. These weights are trained to maximize the accuracy of the ensemble. 
 
+## Performances
+
+## GradCAM
+The algorithm GradCAM for convolutional networks interpretability was employed to highlight which regions of the input images are relevant in the decision making process using a heatmap.
+<img src="images/gradcam.png" width="500"> 
