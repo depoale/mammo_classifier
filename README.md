@@ -43,13 +43,13 @@ The model selection and model assessment procedure is presented in the diagram b
 At this point, we are left with 5 models (one for each fold), so an ensemble learning stategy is performed: each model is treated like an *expert*, so the final response of the ensemble comes from a weighted average of the single experts' predictions. These weights are trained to maximize the accuracy of the ensemble. 
 
 ## Performances
-Using the default values for Wavelet-filtering settings and model hyperparameters the classificator's performances we obtained are represented in the following graphs:<br>
-- Training and Validation Loss curve and Accuracy Curve for one of the 5 folds
+Using the default values for Wavelet-filtering settings and model hyperparameters the classificator's performances we obtained are represented in the following graphs:<br> <ul>
+<li>Training and Validation Loss curve and Accuracy Curve for one of the 5 folds</li>
 <img src="images\Fold_1.png" width="800"> 
-- ROC curves relative to the testing data for all the 5 folds
- <img src="images\ROC_-_Testing.png" width="800">
- - Confusion Matrices compared for all the 5 folds
- <img src="images\Confusion_Matrices.png" width="800">
+<li>ROC curves relative to the testing data for all the 5 folds</li>
+<img src="images\ROC_-_Testing.png" width="800">
+<li>Confusion Matrices compared for all the 5 folds</li>
+<img src="images\Confusion_Matrices.png" width="800">
 
 
 
