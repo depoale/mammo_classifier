@@ -126,7 +126,7 @@ if __name__=='__main__':
         nargs='+',
         type=int,
         help="List of values for the hypermodel's kernel_size",
-        default=[3, 5],
+        default=[3],
     )
 
     args = parser.parse_args()
@@ -137,6 +137,6 @@ if __name__=='__main__':
     wave_settings = wave_set(args)
     Data(augmented=args.augmented, wavelet=args.wavelet, wave_settings=wave_settings)
     hps = set_hps(args)
-    Model(Data=Data,hps=hps )
+    Model(Data=Data,hps=hps)
 
 

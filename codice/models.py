@@ -32,9 +32,6 @@ img_width = 60
 split = 0.4
 
 
-train_path= os.path.join(os.getcwd(),'data_png_WAVELET' ,'Train')
-test_path=os.path.join(os.getcwd(),'data_png_WAVELET' ,'Test')
-
 def set_hyperp(hyperparam):
     global hyperp
     hyperp = hyperparam

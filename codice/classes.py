@@ -23,8 +23,22 @@ import keras
 img_width = 60
 img_height = 60
 
+wave_settings_default = {
+    'wavelet_family': 'sym3',
+    'decomposition_level': 3,
+    'threshold': 1
+}
+
+hps_default = {
+    'depth' : [1, 2, 3],
+    'Dense_units': 256,
+    'Conv2d_init': [10, 20, 30],
+    'dropout' : [0.0, 0.05],
+    'kernel_size': 3
+}
+
 class Data:
-    def __init__(self, augmented=False, wavelet=False, wave_settings={'wavelet_family':'sym3','decomposition_level':3,'threshold':1}):
+    def __init__(self, augmented=False, wavelet=False, wave_settings=wave_settings_default):
         """class used to choose and initialize dataset
         ...
         Attributes
@@ -166,10 +180,11 @@ class Data:
         self._PATH = IMGS_DIR
  
 class Model:
-    def __init__(self, Data, hps, overwrite=True):
+    def __init__(self, Data, hps=hps_default, overwrite=True):
         self.X = Data.X
         self.y = Data.y
-        self.hps = self.set_hps(hps)
+        #self.hps = self.set_hps(hps)
+        self.hps = hps
         self.overwrite = overwrite
         self.modelBuilder = hyp_tuning_model
         self.models_list = []
