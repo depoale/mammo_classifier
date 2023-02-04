@@ -15,9 +15,14 @@ Here are some examples of images generated with this procedure.
 ## Wavelet-based filtering
 Wavelet-based filters are often used in medical imaging in order to enhance images information content, which mostly means improving the visibility of features of interest. Different filters 
 can be employed to realize image denoising or to make objects edges more distinguishable (increasing image contrast). In this project we are going to process mammography image portions showing microcalcifications, therefore the objects to be preserved are microcalcifications themselves (small bright spots), whereas the noise to be filtered out is the non-uniform image background (heterogeneous breast tissue). The steps to be followed are: loading images, implementing a 2-D Wavelet decomposition, analyzing the high spatial frequency (HF) and low spatial frequency (LF) components and finally obtaining filtered images using a 2-D Wavelet reconstruction.<br> 
+Among the many Wavelet families available, the best performing ones in our case are 'sym3' and 'haar'. The decomposition level is set to be 3 and so we will manipulate images' decomposition coefficients suppressing the approximation ones at level 3 (smoothed background intensity) and the detail coefficients at level 1 (noise). We can set thresholds for coefficients in terms of the standard deviations of their distributions and, for example, set to zero the "low spatial frequency approximation" information, while keeping only the "high spatial frequency details" that exceed a certain number of standard deviations (best performances obtained within 2 stdev.).<br>
 Here are some examples of Wavelet-based filtering implememted on images from the dataset.
 <img src="images/random_wavelet.png" width="800"> <br>
-
+Default Wavelet settings are: <br>
+| Parameters     |     Values    | 
+| -------------- | ------------- |
+| Wavelet family |      'sym3'   | 
+| Threshold      |   1.5  stdev  | 
 
 
 # Model selection and model assessment
