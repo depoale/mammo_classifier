@@ -4,22 +4,22 @@ The aim of this project is to create and train a neural network able to distingu
 ## Dataset
 Dataset source: https://www.pi.infn.it/~boccali/DL_class_data.tar.gz <br>
 This dataset is made up of **797** images, **414** of which represent sane tissue and the remaining **383** diseased tissue. <br>
-<img src="images/random_images.png" width="500"> 
+<img src="images/random_images.png" width="800"> 
 
 ## Data augmentation
 Since medical datasets are usually *small* (a few hundred samples), oftentimes data augmentation procedures are performed. This should help preventing overfitting, hence it may improve both generalization and regularization of a given model. <br>
 In this project, data augmentation is implemented using **ImageDataGenerator** by Keras. This tool applies a series of random transformations to the original images (e.g. rotation, vertical/orizontal flip, contrast modification...). <br>
 Here are some examples of images generated with this procedure.
-<img src="images/augmented_images.png" width="500"> 
+<img src="images/augmented_images.png" width="800"> 
 
 ## Wavelet
 BOH!!
-
+<img src="images/random_wavelet.png" width="800"> <br>
 # Model selection and model assessment
 
 ## Hypermodel
 The hypermodel is created using the following architecture.
-<img src="images/schema_hypermodel.png" width="1500"> <br>
+<img src="images/schema_hypermodel.png" width="3000"> <br>
 Default hyperparameters space is set to be: <br>
 | Hyperparameters |     Values    | 
 | ----------------| ------------- |
@@ -36,4 +36,4 @@ At this point, we are left with 5 models (one for each fold), so an ensemble lea
 
 ## GradCAM
 The algorithm GradCAM for convolutional networks interpretability was employed to highlight which regions of the input images are relevant in the decision making process using a heatmap.
-<img src="images/gradcam.png" width="500"> 
+<img src="images/gradcam.png" width="800"> 
