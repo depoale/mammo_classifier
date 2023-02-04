@@ -43,7 +43,9 @@ The model selection and model assessment procedure is presented in the diagram b
 At this point, we are left with 5 models (one for each fold), so an ensemble learning stategy is performed: each model is treated like an *expert*, so the final response of the ensemble comes from a weighted average of the single experts' predictions. These weights are trained to maximize the accuracy of the ensemble. 
 
 ## Performances
-
+Using the default values for Wavelet-filtering settings and model hyperparameters the classificator's performances we obtained are represented in the following graphs:<br>
+- ciao
+- come stai
 
 ## GradCAM
 The algorithm GradCAM for convolutional networks interpretability was employed to highlight which regions of the input images are relevant in the decision making process using a heatmap.
