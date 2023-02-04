@@ -44,8 +44,14 @@ At this point, we are left with 5 models (one for each fold), so an ensemble lea
 
 ## Performances
 Using the default values for Wavelet-filtering settings and model hyperparameters the classificator's performances we obtained are represented in the following graphs:<br>
-- ciao
-- come stai
+- Training and Validation Loss curve and Accuracy Curve for one of the 5 folds
+<img src="images\Fold_1.png" width="800"> 
+- ROC curves relative to the testing data for all the 5 folds
+ <img src="images\ROC_-_Testing.png" width="800">
+ - Confusion Matrices compared for all the 5 folds
+ <img src="images\Confusion_Matrices.png" width="800">
+
+
 
 ## GradCAM
 The algorithm GradCAM for convolutional networks interpretability was employed to highlight which regions of the input images are relevant in the decision making process using a heatmap.
