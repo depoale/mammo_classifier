@@ -8,12 +8,15 @@ This dataset is made up of **797** images, **414** of which represent sane tissu
 
 ## Data augmentation
 Since medical datasets are usually *small* (a few hundred samples), oftentimes data augmentation procedures are performed. This should help preventing overfitting, hence it may improve both generalization and regularization of a given model. <br>
-In this project, data augmentation is implemented using **ImageDataGenerator** by Keras. This tool applies a series of random transformations to the original images (e.g. rotation, vertical/orizontal flip, contrast modification...). <br>
+In this project, data augmentation is implemented using **ImageDataGenerator** by Keras. This tool applies a series of random transformations to the original images of the dataset (e.g. rotation, vertical/orizontal flip, contrast modification...). <br>
 Here are some examples of images generated with this procedure.
 <img src="images/augmented_images.png" width="800"> 
 
-## Wavelet
-BOH!!
+## Wavelet-based filtering
+Wavelet-based filters are often used in medical imaging in order to enhance images information content, which mostly means improving the visibility of features of interest. Different filters 
+can be employed to realize image denoising or to make objects edges more distinguishable (increasing image contrast). In this project we are going to process mammography image portions showing microcalcifications, therefore the objects to be preserved are microcalcifications themselves (small bright spots), whereas the noise to be filtered out is the non-uniform image background (heterogeneous breast tissue). The steps to be followed are: loading images, implementing a 2-D Wavelet decomposition, analyzing the high spatial frequency (HF) and low spatial frequency (LF) components and finally obtaining filtered images using a 2-D Wavelet reconstruction. 
+
+
 <img src="images/random_wavelet.png" width="800"> <br>
 # Model selection and model assessment
 
