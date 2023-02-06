@@ -9,6 +9,7 @@ from sklearn.metrics import roc_curve, auc, confusion_matrix
 import seaborn as sn
 import pandas as pd
 import shutil
+from PIL import Image
 
 
 split=0.35
@@ -154,7 +155,15 @@ def comparison_plot(names, dimension, mean, std):
     #plt.legend()
     plt.show()
 
+def create_new_dir(new_dir_path):
+    os.makedirs(new_dir_path)
 
+def save_image(saving_directory_path, image_matrix):
+    plt.imsave(saving_directory_path, image_matrix, cmap='gray', format='png')
+
+def convert_to_grayscale(image_path):
+    Image.open(image_path).convert('L').save(image_path)
+                
 
 
 

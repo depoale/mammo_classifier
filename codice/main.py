@@ -114,12 +114,12 @@ if __name__=='__main__':
     data = Data(augmented=args.augmented, wavelet=args.wavelet, wave_settings=wave_settings)
 
     #2. set chosen hyperparameters and get number of trials
-    set_hyperp(args)
-    space_size = get_search_spaze_size()
-    max_trials = np.rint(args.searching_fraction*space_size)
+    #set_hyperp(args)
+    #space_size = get_search_spaze_size()
+    #max_trials = np.rint(args.searching_fraction*space_size)
 
     #3. create and train the model
-    model = Model(data=data, overwrite=args.overwrite, max_trials=max_trials)
-    model.train()
+    #model = Model(data=data, overwrite=args.overwrite, max_trials=max_trials)
+    #model.train()
 
 

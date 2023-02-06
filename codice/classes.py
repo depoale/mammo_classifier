@@ -1,11 +1,11 @@
-from utils import read_imgs, callbacks, ROC, get_confusion_matrix, plot
+from utils import read_imgs, callbacks, ROC, get_confusion_matrix, plot, create_new_dir, save_image, convert_to_grayscale
 from models import hyp_tuning_model
 import os
 from keras.preprocessing.image import ImageDataGenerator
 import numpy as np
 from matplotlib import pyplot as plt
 import shutil
-#import matlab.engine
+import matlab.engine
 from sklearn.model_selection import KFold
 from sklearn.model_selection import train_test_split
 import keras_tuner as kt
@@ -16,6 +16,7 @@ from sklearn.metrics import auc
 from tools_for_Pytorch import weights_init_ones
 from tools_for_Pytorch import get_predictions
 from ensemble import train_ensemble
+from PIL import Image
 
 img_width = 60
 img_height = 60
@@ -50,8 +51,7 @@ class Data:
         
         if wavelet:
             # create wavelet directory and set _PATH to that directory
-            #self.wave(wave_settings)
-            pass
+            self.wave(wave_settings)
         
         self.set_data(self._PATH)
     
@@ -60,8 +60,8 @@ class Data:
 
     def aug(self):
         IMGS_DIR ='augmented_data'
-        os.makedirs(os.path.join(f'{IMGS_DIR}', '0'))
-        os.makedirs(os.path.join(f'{IMGS_DIR}', '1'))
+        create_new_dir(os.path.join(f'{IMGS_DIR}', '0'))
+        create_new_dir(os.path.join(f'{IMGS_DIR}', '1'))
 
         dataset_path_0 = os.path.join(f'{self._PATH}', '0')
         dataset_path_1 = os.path.join(f'{self._PATH}', '1')
@@ -101,7 +101,7 @@ class Data:
         self._PATH = IMGS_DIR
 
     
-    """ def wave(self, wave_settings):
+    def wave(self, wave_settings):
         eng = matlab.engine.start_matlab()
         
         wave = wave_settings['wavelet_family'] 
@@ -110,8 +110,8 @@ class Data:
         
         IMGS_DIR = 'wavelet_data'
 
-        os.makedirs(os.path.join(f'{IMGS_DIR}', '0'))
-        os.makedirs(os.path.join(f'{IMGS_DIR}', '1'))
+        create_new_dir(os.path.join(f'{IMGS_DIR}', '0'))
+        create_new_dir(os.path.join(f'{IMGS_DIR}', '1'))
 
         dataset_path_0 = os.path.join(f'{self._PATH}', '0')
         dataset_path_1 = os.path.join(f'{self._PATH}', '1')
@@ -168,11 +168,14 @@ class Data:
                 I_rec = eng.waverec2(c_mod,s,wave, nargout=1)
                 I_rec = np.asarray(I_rec)
 
-                plt.imsave(os.path.join(f'{IMGS_DIR}', f'{i}', f'{name}.png'), I_rec, cmap='gray', format='png')
-                Image.open(os.path.join(f'{IMGS_DIR}', f'{i}', f'{name}.png')).convert('L').save(os.path.join(f'{IMGS_DIR}', f'{i}', f'{name}.png'))
+                #plt.imsave(os.path.join(f'{IMGS_DIR}', f'{i}', f'{name}.png'), I_rec, cmap='gray', format='png')
+                save_image(os.path.join(f'{IMGS_DIR}', f'{i}', f'{name}.png'), I_rec)
+                #Image.open(os.path.join(f'{IMGS_DIR}', f'{i}', f'{name}.png')).convert('L').save(os.path.join(f'{IMGS_DIR}', f'{i}', f'{name}.png'))
+                convert_to_grayscale(os.path.join(f'{IMGS_DIR}', f'{i}', f'{name}.png'))
+
 
         
-        self._PATH = IMGS_DIR"""
+        self._PATH = IMGS_DIR
  
 class Model:
     """Create and train ensemble"""
