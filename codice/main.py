@@ -134,10 +134,12 @@ if __name__=='__main__':
     #4. visualize test data with gradCAM
     test_data = Data()
     test_data.path='total_data'
-    X_test, y_test = test_data.get_random_images(size=args.gradcam)  #solo per provare, da cambiare ASSOLUTAMENTE
+    X_test, y_test = test_data.get_random_images(size= 10)  #solo per provare, da cambiare ASSOLUTAMENTE
+    print(X_test.shape)
     ensemble = torch.load('trained_ensemble')
     ensemble.eval()
     with torch.inference_mode():
+        X_test = torch.from_numpy(X_test.astype('float32'))
         outputs = ensemble(X_test)
         print(outputs)
         print(y_test)
