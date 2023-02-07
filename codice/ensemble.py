@@ -10,7 +10,7 @@ from torchmetrics.classification import BinaryAccuracy
 from tools_for_Pytorch import EarlyStopping, weights_init_uniform_fan_in
 import torch
 from torch import nn
-from utils import read_imgs
+from utils import create_new_dir, read_imgs
 from sklearn.model_selection import train_test_split
 from tools_for_Pytorch import EarlyStopping, weights_init_uniform_fan_in
 import keras 
@@ -125,5 +125,6 @@ def train_ensemble(model, optimizer, X_train, y_train, X_val, y_val, X_test, y_t
         plt.legend()
         plt.show(block = False)
 
+    create_new_dir('trained_ensemble')
     torch.save(model, 'trained_ensemble')
     return model.parameters(), final_acc

@@ -176,7 +176,13 @@ class Data:
 
         
         self._PATH = IMGS_DIR """
- 
+
+    def get_random_images(self, size:int):
+        rand_idx = np.random.randint(0, len(self.X), size=size)
+        X = self.X[rand_idx]
+        y = self.y[rand_idx]
+        return X, y
+    
 class Model:
     """Create and train ensemble"""
     def __init__(self, data, overwrite, max_trials):

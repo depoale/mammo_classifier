@@ -128,9 +128,16 @@ if __name__=='__main__':
     max_trials = np.rint(args.searching_fraction*space_size)
 
     #3. create and train the model
-    model = Model(data=data, overwrite=args.overwrite, max_trials=max_trials)
-    model.train()
+    #model = Model(data=data, overwrite=args.overwrite, max_trials=max_trials)
+    #model.train()
 
-    #4. visualize with gradCAM
-    #ensemble = torch.load('trained_ensemble')
-    #ensemble.eval()
+    #4. visualize test data with gradCAM
+    test_data = Data()
+    test_data.path='total_data'
+    X_test, y_test = test_data.get_random_images(size=args.gradcam)  #solo per provare, da cambiare ASSOLUTAMENTE
+    ensemble = torch.load('trained_ensemble')
+    ensemble.eval()
+    with torch.inference_mode():
+        outputs = ensemble(X_test)
+        print(outputs)
+        print(y_test)
