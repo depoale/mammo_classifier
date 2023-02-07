@@ -6,7 +6,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 from keras.utils.layer_utils import count_params
 import shutil
-#import matlab.engine
+import matlab.engine
 from sklearn.model_selection import KFold
 from sklearn.model_selection import train_test_split
 import keras_tuner as kt
@@ -65,8 +65,8 @@ class Data:
         
         if wavelet:
             # create wavelet directory and set _PATH to that directory
-            #self.wave(wave_settings)
-            pass
+            self.wave(wave_settings)
+            #pass
         
         self.set_data(self._PATH)
     
@@ -109,7 +109,7 @@ class Data:
         self._PATH = IMGS_DIR
 
     
-    """ def wave(self, wave_settings):
+    def wave(self, wave_settings):
         eng = matlab.engine.start_matlab()
         
         wave = wave_settings['wavelet_family'] 
@@ -175,7 +175,7 @@ class Data:
 
 
         
-        self._PATH = IMGS_DIR """
+        self._PATH = IMGS_DIR
  
 class Model:
     """Create and train ensemble"""
