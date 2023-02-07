@@ -128,11 +128,11 @@ if __name__=='__main__':
     max_trials = np.rint(args.searching_fraction*space_size)
 
     #3. create and train the model
-    #model = Model(data=data, overwrite=args.overwrite, max_trials=max_trials)
-    #model.train()
+    model = Model(data=data, overwrite=args.overwrite, max_trials=max_trials)
+    model.train()
 
     #4. visualize test data with gradCAM
-    test_data = Data()
+    '''test_data = Data()
     test_data.path='total_data'
     X_test, y_test = test_data.get_random_images(size= 10)  #solo per provare, da cambiare ASSOLUTAMENTE
     print(X_test.shape)
@@ -142,4 +142,4 @@ if __name__=='__main__':
         X_test = torch.from_numpy(X_test.astype('float32'))
         outputs = ensemble(X_test)
         print(outputs)
-        print(y_test)
+        print(y_test)'''
