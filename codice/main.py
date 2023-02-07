@@ -132,5 +132,5 @@ if __name__=='__main__':
     model.train()
 
     #4. visualize with gradCAM
-    ensemble = torch.load('trained_ensemble')
-    ensemble.eval()
+    #ensemble = torch.load('trained_ensemble')
+    #ensemble.eval()
