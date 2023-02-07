@@ -10,6 +10,7 @@ import seaborn as sn
 import pandas as pd
 import shutil
 from PIL import Image
+import argparse
 
 
 split=0.35
@@ -140,7 +141,7 @@ def wave_set(args):
 def delete_directory(directory_path):
     shutil.rmtree(directory_path)
 
-def comparison_plot(names, dimension, mean, std):
+def comparison_plot(names, dimension, mean):
     plt.figure('Comparison plot')
     fig, ax = plt.subplots(figsize=(10,10))
 
@@ -149,7 +150,7 @@ def comparison_plot(names, dimension, mean, std):
 
     #scatter plot
     for i, txt in enumerate(names):
-        ax.errorbar(dimension[i], mean[i], yerr=std[i], label=names[i], fmt='.')
+        ax.errorbar(dimension[i], mean[i], label=names[i], fmt='.')
         ax.annotate(txt, (dimension[i], mean[i]))
     plt.savefig(os.path.join('images', 'comparison.pdf'))
     #plt.legend()
@@ -163,6 +164,16 @@ def save_image(saving_directory_path, image_matrix):
 
 def convert_to_grayscale(image_path):
     Image.open(image_path).convert('L').save(image_path)
+
+def str2bool(v):
+    if isinstance(v, bool):
+        return v
+    if v.lower() in ('yes', 'true', 't', 'y', '1'):
+        return True
+    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
+        return False
+    else:
+        raise argparse.ArgumentTypeError('Boolean value expected.')
                 
 
 

@@ -1,11 +1,11 @@
-from utils import read_imgs, callbacks, ROC, get_confusion_matrix, plot, create_new_dir, save_image, convert_to_grayscale
+from utils import read_imgs, callbacks, ROC, get_confusion_matrix, plot, create_new_dir, save_image, convert_to_grayscale, comparison_plot, delete_directory
 from models import hyp_tuning_model
 import os
 from keras.preprocessing.image import ImageDataGenerator
 import numpy as np
 from matplotlib import pyplot as plt
 import shutil
-import matlab.engine
+#import matlab.engine
 from sklearn.model_selection import KFold
 from sklearn.model_selection import train_test_split
 import keras_tuner as kt
@@ -46,12 +46,14 @@ class Data:
         self._PATH = 'total_data'
         
         if augmented:
+            print(augmented)
             # augment data found in _PATH and set _PATH to that directory
             self.aug()
         
         if wavelet:
             # create wavelet directory and set _PATH to that directory
-            self.wave(wave_settings)
+            #self.wave(wave_settings)
+            pass
         
         self.set_data(self._PATH)
     
@@ -60,19 +62,12 @@ class Data:
 
     def aug(self):
         IMGS_DIR ='augmented_data'
-        create_new_dir(os.path.join(f'{IMGS_DIR}', '0'))
-        create_new_dir(os.path.join(f'{IMGS_DIR}', '1'))
-
-        dataset_path_0 = os.path.join(f'{self._PATH}', '0')
-        dataset_path_1 = os.path.join(f'{self._PATH}', '1')
-     
-        names_0 = os.listdir(dataset_path_0)
-        names_1 = os.listdir(dataset_path_1)
-        names = [names_0, names_1]
-
-        for i in range(0,2,1):
-            for name in names[i]:
-                shutil.copy(os.path.join(f'{self._PATH}', f'{i}', f'{name}'), os.path.join(f'{IMGS_DIR}', f'{i}'))
+        for cl in ['0', '1']:
+            create_new_dir(os.path.join(f'{IMGS_DIR}', cl))
+            dataset_path = os.path.join(f'{self._PATH}', cl)
+            names = os.listdir(dataset_path)
+            for name in names:
+                shutil.copy(os.path.join(f'{self._PATH}', cl, f'{name}'), os.path.join(f'{IMGS_DIR}', cl))
 
         datagen = ImageDataGenerator(
         rotation_range=50,
@@ -99,9 +94,10 @@ class Data:
                 gen.next()
 
         self._PATH = IMGS_DIR
+        delete_directory(f'{IMGS_DIR}')
 
     
-    def wave(self, wave_settings):
+    """ def wave(self, wave_settings):
         eng = matlab.engine.start_matlab()
         
         wave = wave_settings['wavelet_family'] 
@@ -110,20 +106,12 @@ class Data:
         
         IMGS_DIR = 'wavelet_data'
 
-        create_new_dir(os.path.join(f'{IMGS_DIR}', '0'))
-        create_new_dir(os.path.join(f'{IMGS_DIR}', '1'))
-
-        dataset_path_0 = os.path.join(f'{self._PATH}', '0')
-        dataset_path_1 = os.path.join(f'{self._PATH}', '1')
-        dataset_paths = [dataset_path_0, dataset_path_1]
-
-        names_0 = os.listdir(dataset_path_0)
-        names_1 = os.listdir(dataset_path_1)
-        names = [names_0, names_1]
-
-        for i in range(0,2,1):
-            for name in names[i]:
-                I = eng.imread(os.path.join(dataset_paths[i], f'{name}'))
+        for cl in ['0', '1']:
+            create_new_dir(os.path.join(f'{IMGS_DIR}', cl))
+            dataset_path = os.path.join(f'{self._PATH}', cl)
+            names = os.listdir(dataset_path)
+            for name in names:
+                I = eng.imread(os.path.join(dataset_path, f'{name}'))
                 I = np.asarray(I)
                 
                 c, s = eng.wavedec2(I, N, wave, nargout=2)
@@ -169,13 +157,13 @@ class Data:
                 I_rec = np.asarray(I_rec)
 
                 #plt.imsave(os.path.join(f'{IMGS_DIR}', f'{i}', f'{name}.png'), I_rec, cmap='gray', format='png')
-                save_image(os.path.join(f'{IMGS_DIR}', f'{i}', f'{name}.png'), I_rec)
+                save_image(os.path.join(f'{IMGS_DIR}', cl, f'{name}.png'), I_rec)
                 #Image.open(os.path.join(f'{IMGS_DIR}', f'{i}', f'{name}.png')).convert('L').save(os.path.join(f'{IMGS_DIR}', f'{i}', f'{name}.png'))
-                convert_to_grayscale(os.path.join(f'{IMGS_DIR}', f'{i}', f'{name}.png'))
+                convert_to_grayscale(os.path.join(f'{IMGS_DIR}', cl, f'{name}.png'))
 
 
         
-        self._PATH = IMGS_DIR
+        self._PATH = IMGS_DIR """
  
 class Model:
     """Create and train ensemble"""
@@ -227,6 +215,7 @@ class Model:
         Returs best hps list (one entry for each fold)"""
         #initialize lists to keep track of each fold's performance
         test_acc=[]
+        dimension=[]
         best_hps_list=[]
         
         #preparation for figures
@@ -254,7 +243,10 @@ class Model:
             #train best model and assess model's performance
             history = best_model.fit(X_dev, y_dev, epochs=100, validation_split=1/(k-1), callbacks=callbacks)
             accuracy= round(best_model.evaluate(X_test, y_test)[1],3)
+
+            dimension.append(best_model.trainable_weights)
             test_acc.append(accuracy)
+            self.models_list.append(f'fold_{i+1}')
             
             #add this fold's results to the plots
             plot(history=history, i=i)
@@ -263,6 +255,7 @@ class Model:
 
         # plot mean and stdev in ROC curve plot
         self.plot_mean_stdev(tprs, mean_fpr, aucs)
+        comparison_plot(names=self.models_list, dimension=dimension, mean=test_acc)
     
         print(f'Test Accuracy {test_acc}')
         print(f'Expected accuracy: {stats.mean(test_acc):.2f}+/- {stats.stdev(test_acc):.2f}')
@@ -297,7 +290,7 @@ class Model:
         w_init = weights_init_ones
         model.apply(w_init)
 
-        optimizer = torch.optim.SGD(model.parameters(), lr=0.1)
+        optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
 
         weights, final_acc = train_ensemble(model, optimizer, X_train, y_train, X_val, y_val, X_test, y_test, name='ensemble')
         print(f'Final accuracy: {final_acc}')

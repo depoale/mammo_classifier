@@ -2,7 +2,7 @@
 the same code used in models.py (where test accuracy is always above 0.93) """
 
  
-from utils import wave_set
+from utils import wave_set, str2bool
 from models import set_hyperp, get_search_spaze_size
 import numpy as np
 import argparse
@@ -20,7 +20,7 @@ if __name__=='__main__':
         "-aug",
         "--augmented",
         metavar="",
-        type=bool,
+        type=str2bool,
         help="Whether to perform data augmentation procedure",
         default=False,
     )
@@ -29,7 +29,7 @@ if __name__=='__main__':
         "-wave",
         "--wavelet",
         metavar="",
-        type=bool,
+        type=str2bool,
         help="Whether to apply wavelet filter",
         default=False,
     )
@@ -59,7 +59,7 @@ if __name__=='__main__':
         "-or",
         "--overwrite",
         metavar="",
-        type=bool,
+        type=str2bool,
         help="Whether to perform hyperparameters search or use the previously saved hyperpar",
         default=False,
     )
@@ -99,7 +99,6 @@ if __name__=='__main__':
         "-sf",
         "--searching_fraction",
         metavar="",
-        nargs='+',
         type=float,
         help="Fraction of the hyperparamiters space explored during hypermodel search",
         default=0.25,
