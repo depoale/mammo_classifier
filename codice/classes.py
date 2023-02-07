@@ -4,6 +4,7 @@ import os
 from keras.preprocessing.image import ImageDataGenerator
 import numpy as np
 from matplotlib import pyplot as plt
+from keras.utils.layer_utils import count_params
 import shutil
 #import matlab.engine
 from sklearn.model_selection import KFold
@@ -38,11 +39,23 @@ class Data:
         ...
         Attributes
         ----------
-        augmentes: bool
+        augmentes: bools
             whether to perform data augmentation
         wavelet: bool
             whether to use wavelet procedure """
         
+        @property
+        def path(self):
+            print("Getting value...")
+            return self._PATH
+        
+        @path.setter
+        def path(self, directory):
+            if type(directory) != str:
+                raise TypeError(f'Expected str type got {type(directory)}')
+            self._PATH = directory
+        
+
         self._PATH = 'total_data'
         
         if augmented:
@@ -94,7 +107,6 @@ class Data:
                 gen.next()
 
         self._PATH = IMGS_DIR
-        delete_directory(f'{IMGS_DIR}')
 
     
     """ def wave(self, wave_settings):
@@ -193,7 +205,7 @@ class Model:
             model = modelBuilder(hps)
             model.fit(X, y, epochs=100,validation_split=0.2, callbacks=callbacks)
             model.save(f'model_{i}')  
-            self.models_list.append(f'model_{i}') 
+            #self.models_list.append(f'model_{i}') 
 
     def plot_mean_stdev(self,tprs, mean_fpr, aucs ):
         mean_tpr = np.mean(tprs, axis=0)
@@ -244,9 +256,9 @@ class Model:
             history = best_model.fit(X_dev, y_dev, epochs=100, validation_split=1/(k-1), callbacks=callbacks)
             accuracy= round(best_model.evaluate(X_test, y_test)[1],3)
 
-            dimension.append(best_model.trainable_weights)
+            dimension.append(count_params(best_model.trainable_weights))
             test_acc.append(accuracy)
-            self.models_list.append(f'fold_{i+1}')
+            self.models_list.append(f'model_{i}')
             
             #add this fold's results to the plots
             plot(history=history, i=i)
@@ -255,6 +267,7 @@ class Model:
 
         # plot mean and stdev in ROC curve plot
         self.plot_mean_stdev(tprs, mean_fpr, aucs)
+        print('shapes',len(self.models_list), len(dimension), len(test_acc))
         comparison_plot(names=self.models_list, dimension=dimension, mean=test_acc)
     
         print(f'Test Accuracy {test_acc}')

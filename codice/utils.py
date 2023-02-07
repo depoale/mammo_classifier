@@ -143,13 +143,14 @@ def delete_directory(directory_path):
 
 def comparison_plot(names, dimension, mean):
     plt.figure('Comparison plot')
-    fig, ax = plt.subplots(figsize=(10,10))
-
+    fig, ax = plt.subplots(figsize=(8,8))
     plt.xlabel('Effective free parameters')
-    plt.ylabel('MEE')
+    plt.ylabel('MSE')
 
     #scatter plot
+    print('shapes_ dentro',dimension, mean, names )
     for i, txt in enumerate(names):
+       
         ax.errorbar(dimension[i], mean[i], label=names[i], fmt='.')
         ax.annotate(txt, (dimension[i], mean[i]))
     plt.savefig(os.path.join('images', 'comparison.pdf'))
@@ -174,6 +175,19 @@ def str2bool(v):
         return False
     else:
         raise argparse.ArgumentTypeError('Boolean value expected.')
+    
+def grad_plot(data, size:int):
+    rnd_idx = np.random.randint(0, 700, size = size)
+    fig = plt.figure(figsize=(8, 8))
+    columns = 3
+    rows = 2
+    images = data.X
+    labels = data.y
+    for i, idx in enumerate(rnd_idx):
+        ax=fig.add_subplot(rows, columns, i)
+        ax.title.set_text(f'Label = {labels[idx]}')
+        plt.imshow(images[idx], cmap='gray')
+    plt.show()
                 
 
 

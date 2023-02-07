@@ -2,12 +2,13 @@
 the same code used in models.py (where test accuracy is always above 0.93) """
 
  
-from utils import wave_set, str2bool
+from utils import wave_set, str2bool, grad_plot
 from models import set_hyperp, get_search_spaze_size
 import numpy as np
 import argparse
 import os
 from classes import Data, Model
+import torch
  
  
 if __name__=='__main__':
@@ -104,6 +105,15 @@ if __name__=='__main__':
         default=0.25,
     )
 
+    parser.add_argument(
+        "-gcam",
+        "--gradcam",
+        metavar="",
+        type=int,
+        help="Number of random images to visualize using gradCAM for each class",
+        default=3,
+    )
+
     args = parser.parse_args()
 
     # -----Training process---------------------
@@ -113,12 +123,14 @@ if __name__=='__main__':
     data = Data(augmented=args.augmented, wavelet=args.wavelet, wave_settings=wave_settings)
 
     #2. set chosen hyperparameters and get number of trials
-    #set_hyperp(args)
-    #space_size = get_search_spaze_size()
-    #max_trials = np.rint(args.searching_fraction*space_size)
+    set_hyperp(args)
+    space_size = get_search_spaze_size()
+    max_trials = np.rint(args.searching_fraction*space_size)
 
     #3. create and train the model
-    #model = Model(data=data, overwrite=args.overwrite, max_trials=max_trials)
-    #model.train()
+    model = Model(data=data, overwrite=args.overwrite, max_trials=max_trials)
+    model.train()
 
-
+    #4. visualize with gradCAM
+    ensemble = torch.load('trained_ensemble')
+    ensemble.eval()
