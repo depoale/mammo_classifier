@@ -324,7 +324,7 @@ class Model:
         X_train, X_val, y_train, y_val = train_test_split(X_dev, y_dev, test_size=0.2, shuffle=True, random_state=24)
 
         # model = weighted average    
-        model = nn.Sequential(nn.Linear(in_features=len(self.models_list), out_features=1),
+        model = nn.Sequential(nn.Linear(in_features=len(self.models_list), out_features=1, bias=False),
                               nn.Sigmoid())
     
         # weights initialization and bias set to zero not trainable
