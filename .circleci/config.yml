@@ -1,0 +1,16 @@
+version: 2.1
+
+jobs:
+  build-and-test:
+    docker:
+      - image: cimg/python: 3.10.7
+      
+    steps:
+      - checkout
+      - python/install-packages:
+          pkg-manager: pip
+       
+          pip-dependency-file: requirements.txt
+      - run:
+          name: Run tests
+          command: python -m unittest tests.utils_test
