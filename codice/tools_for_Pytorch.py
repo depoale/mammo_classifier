@@ -84,8 +84,8 @@ class WeightNormalizer(object):
         # normalize weights
         if hasattr(module, 'weight'):
             print('here')
+            weights = module.weight.data
             print(weights)
             print(weights.sum())
-            weights = module.weight.data
             weights/= weights.sum() 
             print(weights)

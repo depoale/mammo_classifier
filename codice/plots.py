@@ -69,6 +69,20 @@ def ROC(x_test, y_test, model, color, i, mean_fpr, tprs, aucs):
     plt.ylabel('True Positive Rate')
     plt.legend(loc='lower right')
     
+def plot_mean_stdev(tprs, mean_fpr, aucs):
+        mean_tpr = np.mean(tprs, axis=0)
+        mean_tpr[-1] = 1.0
+        mean_auc = auc(mean_fpr, mean_tpr)
+        std_auc = np.std(aucs)
+        plt.figure('ROC - Testing')
+        plt.plot(mean_fpr, mean_tpr, color="black", label=f"Mean ROC (AUC = {mean_auc:.2f} $\pm${std_auc:.2f})", lw=2, alpha=0.8)
+        
+        std_tpr = np.std(tprs, axis=0)
+        tprs_upper = np.minimum(mean_tpr + std_tpr, 1)
+        tprs_lower = np.maximum(mean_tpr - std_tpr, 0)
+        plt.figure('ROC - Testing')
+        plt.fill_between(mean_fpr, tprs_lower, tprs_upper, color="grey", alpha=0.2, label=f"$\pm$ 1 std. dev.")
+        plt.legend(loc='lower right')
 
 def get_confusion_matrix(x_test, y_test, model, i):
     preds_test = np.rint(model.predict(x_test, verbose = 1))

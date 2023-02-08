@@ -1,5 +1,5 @@
 from utils import read_imgs, callbacks, create_new_dir, save_image, convert_to_grayscale, delete_directory
-from plots import  ROC, get_confusion_matrix, plot, comparison_plot
+from plots import  ROC, get_confusion_matrix, plot, comparison_plot, plot_mean_stdev
 from models import hyp_tuning_model
 import os
 from keras.preprocessing.image import ImageDataGenerator
@@ -206,7 +206,7 @@ class Model:
             project_name = 'base'
         tuner = kt.BayesianOptimization(modelBuilder, objective='accuracy', max_trials=self.max_trials, 
                                         overwrite=self.overwrite, directory=f'tuner_{i}', project_name='tuner')
-        tuner.search(X_dev, y_dev, epochs=20, validation_split=1/(k-1), batch_size=32, 
+        tuner.search(X_dev, y_dev, epochs=20, validation_split=1/(k-1), batch_size=128, 
                     callbacks=callbacks, verbose=1)
         best_hps = tuner.get_best_hyperparameters(num_trials=1)[0]
         best_model = tuner.get_best_models()[0]
@@ -215,26 +215,11 @@ class Model:
     def retrain_and_save(self, X, y, best_hps_list, modelBuilder, i):
         for i, hps in enumerate(best_hps_list):
             model = modelBuilder(hps)
-            model.fit(X, y, epochs=100,validation_split=0.2, callbacks=callbacks)
+            model.fit(X, y, epochs=100, batch_size=128, validation_split=0.2, callbacks=callbacks)
             model.save(f'model_{i}')  
             checkpoint = tf.train.Checkpoint(model)
             checkpoint.restore(f'model_{i}').expect_partial()
             #self.models_list.append(f'model_{i}') 
-
-    def plot_mean_stdev(self, tprs, mean_fpr, aucs ):
-        mean_tpr = np.mean(tprs, axis=0)
-        mean_tpr[-1] = 1.0
-        mean_auc = auc(mean_fpr, mean_tpr)
-        std_auc = np.std(aucs)
-        plt.figure('ROC - Testing')
-        plt.plot(mean_fpr, mean_tpr, color="black", label=f"Mean ROC (AUC = {mean_auc:.2f} $\pm${std_auc:.2f})", lw=2, alpha=0.8)
-        
-        std_tpr = np.std(tprs, axis=0)
-        tprs_upper = np.minimum(mean_tpr + std_tpr, 1)
-        tprs_lower = np.maximum(mean_tpr - std_tpr, 0)
-        plt.figure('ROC - Testing')
-        plt.fill_between(mean_fpr, tprs_lower, tprs_upper, color="grey", alpha=0.2, label=f"$\pm$ 1 std. dev.")
-        plt.legend(loc='lower right')
 
     def fold(self, k=5):
         """Performs kfold & hps search in each fold.
@@ -243,7 +228,7 @@ class Model:
         test_acc=[]
         dimension=[]
         best_hps_list=[]
-        
+
         #preparation for figures
         plt.figure('ROC - Testing')
         plt.title('ROC - Testing')
@@ -280,7 +265,7 @@ class Model:
             get_confusion_matrix(X_test, y_test=y_test, model=best_model, i=i+1)
 
         # plot mean and stdev in ROC curve plot
-        self.plot_mean_stdev(tprs, mean_fpr, aucs)
+        plot_mean_stdev(tprs, mean_fpr, aucs)
         print('shapes',len(self.models_list), len(dimension), len(test_acc))
         comparison_plot(names=self.models_list, dimension=dimension, mean=test_acc)
     
@@ -331,7 +316,7 @@ class Model:
         w_init = weights_init_ones
         model.apply(w_init)
 
-        optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
+        optimizer = torch.optim.Adam(model.parameters(), lr=1e-1)
         # we want the sum of the weights to be one
         normalizer = WeightNormalizer()
 
