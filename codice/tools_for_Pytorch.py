@@ -72,9 +72,19 @@ def weights_init_ones(m):
     classname = m.__class__.__name__
     # for every Linear layer in a model..
     if classname.find('Linear') != -1:
-        m.weight.data.fill_(1)
+        m.weight.data.fill_(1/len(m.weight.data))
+        print('initializer:', len(m.weight.data))
+        print(m.weight.data)
         m.bias.data.fill_(0)
+        m.bias.requires_grad = False
 
+class WeightNormalizer():
+    def __init__(self, num_weights=5):
+        self.num_weights = num_weights
 
-    
-
+    def __call__(self, module):
+        # normalize weights
+        if hasattr(module, 'weights'):
+            print('weights', type(weights), weights.shape)
+            weights = module.weight.data
+            weights/= weights.sum() 

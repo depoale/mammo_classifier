@@ -24,7 +24,7 @@ else:
 
 global test_mse_list, epochs_list
 
-def train_ensemble(model, optimizer, X_train, y_train, X_val, y_val, X_test, y_test, name=None):
+def train_ensemble(model, optimizer, normalizer, X_train, y_train, X_val, y_val, X_test, y_test, name=None):
 
     '''Performs the forward and backwards training loop until early stopping, then computes the metric'''
 
@@ -67,6 +67,9 @@ def train_ensemble(model, optimizer, X_train, y_train, X_val, y_val, X_test, y_t
         
         # 5. Progress the optimizer
         optimizer.step()
+
+        # 6. Normalize new weights
+        model.apply(normalizer)
         
         # evaluation mode
         model.eval()
@@ -109,14 +112,14 @@ def train_ensemble(model, optimizer, X_train, y_train, X_val, y_val, X_test, y_t
     final_acc = val_acc_values[-1]
     #learning curve and accuracy plot
     if name: 
-        plt.subplot(2,2,1)
+        plt.subplot(1,2,1)
         plt.plot(epoch_count, np.array(torch.tensor(train_mse_values).numpy()), label="Training MSE")
         plt.plot(epoch_count, val_mse_values, label="Validation MSE", linestyle='dashed')
         plt.title(name  + " TR and VL MSE")
         plt.ylabel("MSE")
         plt.xlabel("Epochs")
         plt.legend()
-        plt.subplot(2,2,2)
+        plt.subplot(1,2,2)
         plt.plot(epoch_count, np.array(torch.tensor(train_acc_values).numpy()), label="Training acc")
         plt.plot(epoch_count, val_acc_values, label="Validation acc", linestyle='dashed')
         plt.title(name  + " TR and VL acc")

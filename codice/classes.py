@@ -6,6 +6,7 @@ from keras.preprocessing.image import ImageDataGenerator
 import numpy as np
 from matplotlib import pyplot as plt
 from keras.utils.layer_utils import count_params
+import tensorflow as tf
 import shutil
 #import matlab.engine
 from sklearn.model_selection import KFold
@@ -16,7 +17,7 @@ import torch
 import torch.nn as nn
 import statistics as stats
 from sklearn.metrics import auc
-from tools_for_Pytorch import weights_init_ones
+from tools_for_Pytorch import weights_init_ones, WeightNormalizer
 from ensemble import train_ensemble
 from PIL import Image
 
@@ -216,6 +217,8 @@ class Model:
             model = modelBuilder(hps)
             model.fit(X, y, epochs=100,validation_split=0.2, callbacks=callbacks)
             model.save(f'model_{i}')  
+            checkpoint = tf.train.Checkpoint(model)
+            checkpoint.restore(f'model_{i}').expect_partial()
             #self.models_list.append(f'model_{i}') 
 
     def plot_mean_stdev(self, tprs, mean_fpr, aucs ):
@@ -320,16 +323,19 @@ class Model:
         X_dev, X_test, y_dev, y_test = train_test_split(X, y, test_size=0.2, shuffle=True, random_state=42)
         X_train, X_val, y_train, y_val = train_test_split(X_dev, y_dev, test_size=0.2, shuffle=True, random_state=24)
 
-        # model = weighted average     
-        model = nn.Sequential(nn.Linear(in_features=len(self.models_list), out_features=1))
-
-        # weights initialization 
+        # model = weighted average    
+        model = nn.Sequential(nn.Linear(in_features=len(self.models_list), out_features=1),
+                              nn.Sigmoid())
+    
+        # weights initialization and bias set to zero not trainable
         w_init = weights_init_ones
         model.apply(w_init)
 
         optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
+        # we want the sum of the weights to be one
+        normalizer = WeightNormalizer()
 
-        weights, final_acc = train_ensemble(model, optimizer, X_train, y_train, X_val, y_val, X_test, y_test, name='ensemble')
+        weights, final_acc = train_ensemble(model, optimizer, normalizer, X_train, y_train, X_val, y_val, X_test, y_test, name='ensemble')
         print(f'Final accuracy: {final_acc}')
         for w in weights:
             print(w)

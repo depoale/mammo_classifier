@@ -142,6 +142,6 @@ if __name__=='__main__':
     X_test = torch.from_numpy(X_test.astype('float32'))
     X_test = X_test.unsqueeze(0)
     print(X_test.shape)
-    outputs = torch.squeeze(ensemble(X_test, training=False)).softmax(0)
+    outputs = torch.squeeze(ensemble(X_test)).softmax(0)
     print(outputs)
     print(y_test)
