@@ -61,7 +61,7 @@ def delete_directory(directory_path):
 def create_new_dir(new_dir_path):
     if os.path.isdir(new_dir_path):
         delete_directory(new_dir_path)
-        os.makedirs(new_dir_path)
+    os.makedirs(new_dir_path)
 
 def save_image(saving_directory_path, image_matrix):
     plt.imsave(saving_directory_path, image_matrix, cmap='gray', format='png')

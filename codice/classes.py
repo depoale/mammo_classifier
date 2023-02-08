@@ -1,4 +1,4 @@
-from utils import read_imgs, callbacks, create_new_dir, save_image, convert_to_grayscale, delete_directory, shuffle_data
+from utils import read_imgs, callbacks, create_new_dir, save_image, convert_to_grayscale, shuffle_data
 from plots import  ROC, get_confusion_matrix, plot, comparison_plot, plot_mean_stdev
 from models import hyp_tuning_model
 import os
@@ -9,7 +9,7 @@ from keras.utils.layer_utils import count_params
 from random import shuffle
 import tensorflow as tf
 import shutil
-#import matlab.engine
+import matlab.engine
 from sklearn.model_selection import KFold
 from sklearn.model_selection import train_test_split
 import keras_tuner as kt
@@ -29,6 +29,7 @@ wave_settings_default = {
     'wavelet_family': 'sym3',
     'threshold': 1.5
 }
+
 
 class Data:
     def __init__(self, augmented=False, wavelet=False, wave_settings=wave_settings_default):
@@ -62,8 +63,7 @@ class Data:
         
         if wavelet:
             # create wavelet directory and set _PATH to that directory
-            #self.wave(wave_settings)
-            pass
+            self.wave(wave_settings)
         
         self.set_data(self._PATH)
         self.X, self.y = shuffle_data(self.X, self.y)
@@ -107,7 +107,7 @@ class Data:
         self._PATH = IMGS_DIR
 
     
-    """ def wave(self, wave_settings):
+    def wave(self, wave_settings):
         eng = matlab.engine.start_matlab()
         
         wave = wave_settings['wavelet_family'] 
@@ -173,7 +173,7 @@ class Data:
 
 
     
-        self._PATH = IMGS_DIR  """ 
+        self._PATH = IMGS_DIR
 
     def get_random_images(self, size:int):
         rand_idx = np.random.randint(0, len(self.X), size=size)
