@@ -1,15 +1,17 @@
 version: 2.1
 
+orbs:
+  python: circleci/python@2.0.3
+  
 jobs:
-  build-and-test:
+  build-and-test: 
     docker:
-      - image: cimg/python: 3.10.7
-      
+      - image: cimg/python:3.8.10
+   
     steps:
       - checkout
       - python/install-packages:
           pkg-manager: pip
-       
           pip-dependency-file: requirements.txt
       - run:
           name: Run tests
