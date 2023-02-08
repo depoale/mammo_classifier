@@ -6,7 +6,7 @@ class EarlyStopping:
     source: https://github.com/Bjarten/early-stopping-pytorch/blob/master/pytorchtools.py
     Early stops the training if validation loss doesn't improve after a given patience.
     """
-    def __init__(self, patience=20, verbose=False, delta=0.2, path='checkpoint.pt', trace_func=print):
+    def __init__(self, patience=30, verbose=False, delta=1e-5, path='checkpoint.pt', trace_func=print):
         """
         Args:
             patience (int): How long to wait after last time validation loss improved.
@@ -56,36 +56,23 @@ class EarlyStopping:
     #     self.val_loss_min = val_loss
 
 
-def weights_init_uniform_fan_in(m):
-    '''Initizialize weights with a uniform distribution, according to fan-in rule, and set bias to 0'''
-    classname = m.__class__.__name__
+def weights_init_ones(model):
+    """Initizialize weights to be equal and normalized
+    .....
+    Parameters
+    ----------
+    model: pytorch model """
+    classname = model.__class__.__name__
     # for every Linear layer in a model..
     if classname.find('Linear') != -1:
-        # get the number of the inputs
-        fan_in = m.in_features
-        limit = np.sqrt(6 / fan_in)
-        m.weight.data.uniform_(-limit, limit)
-        m.bias.data.fill_(0)
-
-def weights_init_ones(m):
-    '''Initizialize weights with a uniform distribution, according to fan-in rule, and set bias to 0'''
-    classname = m.__class__.__name__
-    # for every Linear layer in a model..
-    if classname.find('Linear') != -1:
-        m.weight.data.fill_(1/torch.numel(m.weight.data))
-        print('initializer:', torch.numel(m.weight.data))
-        print(m.weight.data)
+        model.weight.data.fill_(100/torch.numel(model.weight.data))
 
 class WeightNormalizer(object):
-    def __init__(self, num_weights=5):
-        self.num_weights = num_weights
-
+    """Applied after each weight update, clips the weights to be in (0, 1) and normalises the sum to 1"""
     def __call__(self, module):
-        # normalize weights
         if hasattr(module, 'weight'):
-            print('here')
             weights = module.weight.data
-            print(weights)
-            print(weights.sum())
-            weights/= weights.sum() 
-            print(weights)
+            print('before', weights)
+            weights = weights.clamp(0,100)
+            weights= weights*100/weights.sum() 
+            print('after', weights)

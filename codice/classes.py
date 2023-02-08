@@ -1,4 +1,4 @@
-from utils import read_imgs, callbacks, create_new_dir, save_image, convert_to_grayscale, delete_directory
+from utils import read_imgs, callbacks, create_new_dir, save_image, convert_to_grayscale, delete_directory, shuffle_data
 from plots import  ROC, get_confusion_matrix, plot, comparison_plot, plot_mean_stdev
 from models import hyp_tuning_model
 import os
@@ -6,6 +6,7 @@ from keras.preprocessing.image import ImageDataGenerator
 import numpy as np
 from matplotlib import pyplot as plt
 from keras.utils.layer_utils import count_params
+from random import shuffle
 import tensorflow as tf
 import shutil
 #import matlab.engine
@@ -27,12 +28,6 @@ img_height = 60
 wave_settings_default = {
     'wavelet_family': 'sym3',
     'threshold': 1.5
-}
-
-hps_default = {
-    'depth' : [1, 2, 3],
-    'Conv2d_init': [10, 20, 30],
-    'dropout' : [0.0, 0.05]
 }
 
 class Data:
@@ -71,6 +66,7 @@ class Data:
             pass
         
         self.set_data(self._PATH)
+        self.X, self.y = shuffle_data(self.X, self.y)
     
     def set_data(self, directory):
         self.X, self.y = read_imgs(directory, [0,1])
@@ -204,22 +200,19 @@ class Model:
             project_name = 'tuner'
         else:
             project_name = 'base'
-        tuner = kt.BayesianOptimization(modelBuilder, objective='accuracy', max_trials=self.max_trials, 
-                                        overwrite=self.overwrite, directory=f'tuner_{i}', project_name='tuner')
-        tuner.search(X_dev, y_dev, epochs=20, validation_split=1/(k-1), batch_size=128, 
+        tuner = kt.BayesianOptimization(modelBuilder, objective='val_accuracy', max_trials=self.max_trials, 
+                                        overwrite=self.overwrite, directory=f'tuner_{i}', project_name=project_name)
+        tuner.search(X_dev, y_dev, epochs=50, validation_split=1/(k-1), batch_size=64, 
                     callbacks=callbacks, verbose=1)
         best_hps = tuner.get_best_hyperparameters(num_trials=1)[0]
         best_model = tuner.get_best_models()[0]
         return best_hps, best_model
     
-    def retrain_and_save(self, X, y, best_hps_list, modelBuilder, i):
-        for i, hps in enumerate(best_hps_list):
-            model = modelBuilder(hps)
-            model.fit(X, y, epochs=100, batch_size=128, validation_split=0.2, callbacks=callbacks)
-            model.save(f'model_{i}')  
-            checkpoint = tf.train.Checkpoint(model)
-            checkpoint.restore(f'model_{i}').expect_partial()
-            #self.models_list.append(f'model_{i}') 
+    def retrain_and_save(self, X, y, hps, modelBuilder, i):
+        model = modelBuilder(hps)
+        model.fit(X, y, epochs=100, batch_size=64, validation_split=0.2, callbacks=callbacks)
+        model.save(f'model_{i}')  
+        #self.models_list.append(f'model_{i}') 
 
     def fold(self, k=5):
         """Performs kfold & hps search in each fold.
@@ -252,7 +245,7 @@ class Model:
             best_hps_list.append(best_hps)
 
             #train best model and assess model's performance
-            history = best_model.fit(X_dev, y_dev, epochs=100, validation_split=1/(k-1), callbacks=callbacks)
+            history = best_model.fit(X_dev, y_dev, epochs=100, batch_size=64,validation_split=1/(k-1), callbacks=callbacks)
             accuracy= round(best_model.evaluate(X_test, y_test)[1],3)
 
             dimension.append(count_params(best_model.trainable_weights))
@@ -264,10 +257,12 @@ class Model:
             ROC(X_test, y_test=y_test, model=best_model, color=colors[i], i=i+1, mean_fpr=mean_fpr, tprs=tprs, aucs=aucs)
             get_confusion_matrix(X_test, y_test=y_test, model=best_model, i=i+1)
 
+            #retrain on the whole dataset and save best model 
+            self.retrain_and_save(self.X, self.y, hps=best_hps, modelBuilder=self.modelBuilder, i=i)
+
         # plot mean and stdev in ROC curve plot
         plot_mean_stdev(tprs, mean_fpr, aucs)
-        print('shapes',len(self.models_list), len(dimension), len(test_acc))
-        comparison_plot(names=self.models_list, dimension=dimension, mean=test_acc)
+        comparison_plot(names=self.models_list, dimension=dimension, accuracy=test_acc)
     
         print(f'Test Accuracy {test_acc}')
         print(f'Expected accuracy: {stats.mean(test_acc):.2f}+/- {stats.stdev(test_acc):.2f}')
@@ -281,7 +276,6 @@ class Model:
             print(f"Dropout: {hps.get('dropout')}")
             print(f'--------------------')
         plt.show(block=False)
-        self.retrain_and_save(self.X, self.y, best_hps_list=best_hps_list, modelBuilder=self.modelBuilder, i=i)
     
 
     def get_predictions(self, X=None):
@@ -309,14 +303,14 @@ class Model:
         X_train, X_val, y_train, y_val = train_test_split(X_dev, y_dev, test_size=0.2, shuffle=True, random_state=24)
 
         # model = weighted average    
-        model = nn.Sequential(nn.Linear(in_features=len(self.models_list), out_features=1, bias=False),
-                              nn.Sigmoid())
+        model = nn.Sequential(nn.Linear(in_features=len(self.models_list), out_features=1, bias=False)
+                              )
     
         # weights initialization and bias set to zero not trainable
         w_init = weights_init_ones
         model.apply(w_init)
 
-        optimizer = torch.optim.Adam(model.parameters(), lr=1e-1)
+        optimizer = torch.optim.Adam(model.parameters(), lr=0.01, betas=(0.95, 0.999))
         # we want the sum of the weights to be one
         normalizer = WeightNormalizer()
 

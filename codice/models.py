@@ -3,6 +3,7 @@
 from keras.models import Sequential
 from keras.layers import Conv2D, MaxPooling2D, Dense, Flatten, Dropout, Input, BatchNormalization
 from keras.optimizers import Adam
+from keras.initializers import GlorotNormal
 
 img_height = 60
 img_width = 60
@@ -19,7 +20,8 @@ def set_hyperp(args):
 
     }
 
-def get_search_spaze_size():
+def get_search_space_size():
+    """Calculate hyperparameters space size (based on the user-selected combinations)"""
     size = 1
     for key in hyperp:
             size*= len(hyperp[key])
@@ -31,23 +33,27 @@ def hyp_tuning_model(hp):
     model = Sequential()
     model.add(Input(shape=shape))
     hp_Dense_units = 256
+    initializer = GlorotNormal()
 
     # set hps using the user-selected values (stored in the dictionary hyperp)
     hp_depth = hp.Choice('depth', hyperp['depth'])
     hp_Conv2D_init = hp.Choice('Conv2d_init', hyperp['Conv2d_init'])
     hp_dropout = hp.Choice('dropout', hyperp['dropout'])
 
-    model.add(Conv2D(hp_Conv2D_init, (3, 3), activation='relu', padding='same', strides=1, name='conv_1', input_shape=shape))
+    model.add(Conv2D(hp_Conv2D_init, (3, 3), activation='relu', padding='same', strides=1, 
+                     name='conv_1', input_shape=shape, kernel_initializer=initializer))
     model.add(BatchNormalization())
     model.add(MaxPooling2D((2, 2), strides = 2, name='maxpool_1'))
     model.add(Dropout(hp_dropout))
 
-    model.add(Conv2D(2*hp_Conv2D_init, (3, 3), activation='relu', padding='same', strides=1, name='conv_2'))
+    model.add(Conv2D(2*hp_Conv2D_init, (3, 3), activation='relu', padding='same', 
+                     strides=1, name='conv_2', kernel_initializer=initializer))
     model.add(BatchNormalization())
     model.add(MaxPooling2D((2, 2), strides=2,  name='maxpool_2'))
     model.add(Dropout(hp_dropout))
 
-    model.add(Conv2D(4*hp_Conv2D_init, (3, 3), activation='relu', padding='same', strides=1, name='conv_3'))
+    model.add(Conv2D(4*hp_Conv2D_init, (3, 3), activation='relu', padding='same', strides=1, 
+                     name='conv_3', kernel_initializer=initializer))
     model.add(BatchNormalization())
     model.add(MaxPooling2D((2, 2), strides=2, name='maxpool_3'))
     model.add(Dropout(hp_dropout))
@@ -57,10 +63,10 @@ def hyp_tuning_model(hp):
 
     for i in range(hp_depth):
         units = hp_Dense_units/(i+1)
-        model.add(Dense(units, activation='relu', name=f'dense_{i}'))
+        model.add(Dense(units, activation='relu', name=f'dense_{i}', kernel_initializer=initializer))
 
-    model.add(Dense(1, activation='sigmoid', name='output'))
+    model.add(Dense(1, activation='sigmoid', name='output', kernel_initializer=initializer))
 
-    model.compile(optimizer=Adam(learning_rate=1e-2), loss='binary_crossentropy', metrics=['accuracy'])
+    model.compile(optimizer=Adam(learning_rate=1e-3), loss='binary_crossentropy', metrics=['accuracy'])
     
     return model

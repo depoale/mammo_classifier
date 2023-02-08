@@ -9,13 +9,12 @@ from utils import read_imgs
 from IPython.display import Image, display
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
-import matplotlib.image as mpimg
 
 
 def make_gradcam_heatmap(
     img_array, model, last_conv_layer_name, classifier_layer_names, output_path=None
 ):
-    img_array = img_array.reshape(1, 60, 60, 1)
+    #img_array = img_array.reshape(1, 60, 60, 1)
     #img_array = tf.convert_to_tensor(img_array)
     print('img',img_array.shape)
     # First, we create a model that maps the input image to the activations
@@ -94,7 +93,7 @@ def make_gradcam_heatmap(
     superimposed_img.save(output_path)
 
 if __name__=='__main__':
-    model = keras.models.load_model('best_model.h5')
+    model = keras.models.load_model(f'model_{0}')
     model.summary()
     test_path = os.path.join(os.getcwd(),'data_png' ,'Test')
     #get three healty ex
@@ -106,12 +105,12 @@ if __name__=='__main__':
     print(examples[0].shape)
     preds = model.predict(examples)
     print("Predicted:", (preds))
-    classifier_layer_names = ['batch_normalization_2','maxpool_4','flatten', 'dropout_2', 'dense_2', 'dense_3', 'output']
-    make_gradcam_heatmap(examples[0], model=model, last_conv_layer_name='conv_4', 
+    classifier_layer_names = [layer.name for idx, layer in enumerate(model.layers) if idx>8]
+    print(classifier_layer_names)
+    make_gradcam_heatmap(X_test, model=best_model, last_conv_layer_name='conv_3', 
+            classifier_layer_names=classifier_layer_names, output_path='gCAM')
+    make_gradcam_heatmap(examples, model=model, last_conv_layer_name='conv_4', 
             classifier_layer_names=classifier_layer_names, output_path='1.png')
-    make_gradcam_heatmap(examples[1], model, last_conv_layer_name='conv_4',
-                classifier_layer_names=classifier_layer_names, output_path='2.png')
-    make_gradcam_heatmap(examples[2], model, last_conv_layer_name='conv_4',
-                classifier_layer_names=classifier_layer_names, output_path='3.png')
+
     plt.show()
  

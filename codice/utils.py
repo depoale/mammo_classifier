@@ -6,6 +6,7 @@ import logging
 from skimage.io import imread
 import numpy as np
 import shutil
+from random import shuffle
 from PIL import Image
 import argparse
 
@@ -42,9 +43,10 @@ def read_imgs(dataset_path, classes):
     return np.array(tmp, dtype='float32')[..., np.newaxis]/255, np.array(labels)
 
 callbacks = [EarlyStopping(monitor='val_accuracy', min_delta=5e-3, patience=20, verbose=1),
-                ReduceLROnPlateau(monitor='val_loss', factor=0.1, min_delta=1e-4,patience=10, verbose=1)]
+                ReduceLROnPlateau(monitor='val_loss', factor=0.1, min_delta=1e-4, patience=10, verbose=1)]
 
 def wave_set(args):
+    """Creates dictionary containing wavelet settings"""
     wave_settings = {
             'wavelet_family' : args.wavelet_family,
             'threshold': args.threshold
@@ -68,6 +70,7 @@ def convert_to_grayscale(image_path):
     Image.open(image_path).convert('L').save(image_path)
 
 def str2bool(v):
+    """String to bool conversion"""
     if isinstance(v, bool):
         return v
     if v.lower() in ('yes', 'true', 't', 'y', '1'):
@@ -76,6 +79,13 @@ def str2bool(v):
         return False
     else:
         raise argparse.ArgumentTypeError('Boolean value expected.')
+    
+
+def shuffle_data(a,b):
+    assert len(a) == len(b)
+    p = np.random.permutation(len(a))
+    return a[p], b[p]
+
     
 
                 

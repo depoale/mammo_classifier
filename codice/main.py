@@ -3,15 +3,19 @@ the same code used in models.py (where test accuracy is always above 0.93) """
 
  
 from utils import wave_set, str2bool
-from models import set_hyperp, get_search_spaze_size
+from models import set_hyperp, get_search_space_size
 import numpy as np
 import argparse
 import os
 from classes import Data, Model
 import torch
+import time
+import keras
+from prova_gCAM import make_gradcam_heatmap
  
  
 if __name__=='__main__':
+    start = time.time()
     os.chdir('..')
     parser = argparse.ArgumentParser(
         description="Mammography classifier"
@@ -72,7 +76,8 @@ if __name__=='__main__':
         nargs='+',
         type=int,
         help="List of values for the hypermodel's depth",
-        default=[1,2,3,4],
+        #default=[1,2,3,4],
+        default=[1,2,3,4,5],
     )
     
     
@@ -83,7 +88,8 @@ if __name__=='__main__':
         nargs='+',
         type=int,
         help="List of values for the hypermodel's conv2d initial value",
-        default=[5, 10, 15, 20],
+        #default=[5, 10, 15, 20],
+        default=[5, 10, 15, 25],
     )
     
     parser.add_argument(
@@ -124,17 +130,17 @@ if __name__=='__main__':
 
     #2. set chosen hyperparameters and get number of trials
     set_hyperp(args)
-    space_size = get_search_spaze_size()
+    space_size = get_search_space_size()
     max_trials = np.rint(args.searching_fraction*space_size)
 
     #3. create and train the model
     model = Model(data=data, overwrite=args.overwrite, max_trials=max_trials)
     model.train() 
 
-    #4. visualize test data with gradCAM
+    #4. test ensemble on a brand new dataset
     test_data = Data()
     test_data.path='total_data'         #solo per provare, da cambiare ASSOLUTAMENTE
-    X_test, y_test = test_data.get_random_images(size=10)  #solo per provare, da cambiare ASSOLUTAMENTE
+    X_test, y_test = test_data.get_random_images(size=40)  #solo per provare, da cambiare ASSOLUTAMENTE
     print(X_test.shape)
     ensemble = torch.load('trained_ensemble')
     ensemble.eval()
@@ -143,5 +149,16 @@ if __name__=='__main__':
     X_test = X_test.unsqueeze(0)
     print(X_test.shape)
     outputs = torch.squeeze(ensemble(X_test)).softmax(0)
-    print(outputs)
+    print('out', outputs)
     print(y_test)
+    print(f'Elapsed time: {time.time()- start}')
+
+    #5. check what the most reliable model has learnt using gradCAM
+    weights = ensemble.weight.data
+    best = np.argmax(weights).index()
+    best_model = keras.load_model(f'model_{best}')
+    X_test, y_test = test_data.get_random_images(size=6)
+    preds = model.predict(X_test)
+    classifier_layer_names = [layer.name for idx, layer in enumerate(best_model.layers) if idx > 8]
+    make_gradcam_heatmap(X_test, model=best_model, last_conv_layer_name='conv_3', 
+            classifier_layer_names=classifier_layer_names, output_path='gCAM')

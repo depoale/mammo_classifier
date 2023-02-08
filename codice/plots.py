@@ -6,12 +6,14 @@ import pandas as pd
 import seaborn as sn
 
 def plot(history, i):
-    """Plot loss and accuracy
+    """Learning curve and accuracy plot.
     .....
     Parameters
     ----------
-    history: keras History obj
-        model.fit() return
+    history: keras.History 
+        returned by model.fit()
+    i: int
+        k-fold index
    """
 
     acc = history.history['accuracy']
@@ -42,18 +44,31 @@ def plot(history, i):
     #plt.show(block=False)
 
 def ROC(x_test, y_test, model, color, i, mean_fpr, tprs, aucs):
-    test_loss, test_accuracy = model.evaluate(x_test, y_test)
+    """Each fold's contribution to the ROC curve plot
+     .....
+    Parameters
+    ----------
+    x_test: np.array
+    y_test: np.array
+    model: keras.Model
+    color: str
+    i: int
+        k-fold index
+    
+    ?????? ?????? ?????? ?????? ?????? ?????? ?????? ?????? ?????? ??????
+    mean_fpr
+    tprs
+    aucs
+    """
+    _, test_accuracy = model.evaluate(x_test, y_test)
     print(f'\nTest accuracy: {test_accuracy}')
     
     preds_test = model.predict(x_test, verbose = 1)
-    fpr, tpr, thresholds = roc_curve(y_test, preds_test)
+    fpr, tpr, _ = roc_curve(y_test, preds_test)
     interp_tpr = np.interp(mean_fpr, fpr, tpr)
     interp_tpr[0] = 0.0
     tprs.append(interp_tpr)
-    #print(f'y_test: {y_test}, preds_test: {preds_test}, thresholds: {thresholds}')
-    #print(f'len fpr: {len(fpr)} and len tpr: {len(tpr)} for fold {i}')
     print(f'len x_test: {len(x_test)} and len y_test: {len(y_test)}')
-    #print(f'fpr: {fpr}, tpr: {tpr}')
     roc_auc = auc(fpr, tpr)
     aucs.append(roc_auc)
     print(f'AUC = {roc_auc}')
@@ -70,21 +85,32 @@ def ROC(x_test, y_test, model, color, i, mean_fpr, tprs, aucs):
     plt.legend(loc='lower right')
     
 def plot_mean_stdev(tprs, mean_fpr, aucs):
-        mean_tpr = np.mean(tprs, axis=0)
-        mean_tpr[-1] = 1.0
-        mean_auc = auc(mean_fpr, mean_tpr)
-        std_auc = np.std(aucs)
-        plt.figure('ROC - Testing')
-        plt.plot(mean_fpr, mean_tpr, color="black", label=f"Mean ROC (AUC = {mean_auc:.2f} $\pm${std_auc:.2f})", lw=2, alpha=0.8)
-        
-        std_tpr = np.std(tprs, axis=0)
-        tprs_upper = np.minimum(mean_tpr + std_tpr, 1)
-        tprs_lower = np.maximum(mean_tpr - std_tpr, 0)
-        plt.figure('ROC - Testing')
-        plt.fill_between(mean_fpr, tprs_lower, tprs_upper, color="grey", alpha=0.2, label=f"$\pm$ 1 std. dev.")
-        plt.legend(loc='lower right')
+    """"?????? ?????? ?????? ?????? ?????? ?????? ?????? ?????? ?????? ??????"""
+    mean_tpr = np.mean(tprs, axis=0)
+    mean_tpr[-1] = 1.0
+    mean_auc = auc(mean_fpr, mean_tpr)
+    std_auc = np.std(aucs)
+    plt.figure('ROC - Testing')
+    plt.plot(mean_fpr, mean_tpr, color="black", label=f"Mean ROC (AUC = {mean_auc:.2f} $\pm${std_auc:.2f})", lw=2, alpha=0.8)
+    
+    std_tpr = np.std(tprs, axis=0)
+    tprs_upper = np.minimum(mean_tpr + std_tpr, 1)
+    tprs_lower = np.maximum(mean_tpr - std_tpr, 0)
+    plt.figure('ROC - Testing')
+    plt.fill_between(mean_fpr, tprs_lower, tprs_upper, color="grey", alpha=0.2, label=f"$\pm$ 1 std. dev.")
+    plt.legend(loc='lower right')
 
 def get_confusion_matrix(x_test, y_test, model, i):
+    """Each fold's confusion matrix
+    .....
+    Parameters
+    ----------
+    x_test: np.array
+    y_test: np.array
+    model: keras.Model
+    i: int
+        k-fold's index
+    """
     preds_test = np.rint(model.predict(x_test, verbose = 1))
     my_confusion_matrix = confusion_matrix(y_test, preds_test)
     print(f'confusion matrix of fold {i}: {my_confusion_matrix}')
@@ -97,18 +123,29 @@ def get_confusion_matrix(x_test, y_test, model, i):
     plt.xlabel('Predicted label', fontsize=7)
     plt.ylabel('Actual label', fontsize=7)
 
-def comparison_plot(names, dimension, mean):
+def comparison_plot(names, dimension, accuracy):
+    """MSE-num_weights plot to compare visually each fold's performance in relationship with
+        that model's complexity. 
+         .....
+        Parameters
+        ----------
+        names: list of str
+                models names
+        dimension: list of int
+                list of models' number of weights
+        accuracy: list of float
+            list of models' accuracy over test set
+        """
     fig, ax = plt.subplots(figsize=(7,7))
     plt.title('Comparison plot')
     plt.xlabel('Effective free parameters')
     plt.ylabel('MSE')
 
     #scatter plot
-    print('shapes_ dentro',dimension, mean, names )
     for i, txt in enumerate(names):
        
-        ax.errorbar(dimension[i], mean[i], label=names[i], fmt='.')
-        ax.annotate(txt, (dimension[i], mean[i]))
+        ax.errorbar(dimension[i], accuracy[i], label=names[i], fmt='.')
+        ax.annotate(txt, (dimension[i], accuracy[i]))
     plt.savefig(os.path.join('images', 'comparison.pdf'))
     #plt.legend()
     plt.show(block=False)

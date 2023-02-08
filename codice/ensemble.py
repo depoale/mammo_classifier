@@ -7,26 +7,14 @@ import torch
 import torch.nn as nn
 from torchmetrics.classification import BinaryAccuracy
 
-from tools_for_Pytorch import EarlyStopping, weights_init_uniform_fan_in
+from tools_for_Pytorch import EarlyStopping
 import torch
 from torch import nn
-from utils import create_new_dir, read_imgs
-from sklearn.model_selection import train_test_split
-from tools_for_Pytorch import EarlyStopping, weights_init_uniform_fan_in
-
-if torch.cuda.is_available():
-    print('CUDA is available. Working on GPU')
-    DEVICE = torch.device('cuda')
-else:
-    print('CUDA is not available. Working on CPU')
-    DEVICE = torch.device('cpu')
-
-
-global test_mse_list, epochs_list
+from utils import create_new_dir
 
 def train_ensemble(model, optimizer, normalizer, X_train, y_train, X_val, y_val, X_test, y_test, name=None):
 
-    '''Performs the forward and backwards training loop until early stopping, then computes the metric'''
+    """Performs the forward and backwards training loop until early stopping, then computes the metric"""
 
     loss_fn = nn.MSELoss()
     acc_fn = BinaryAccuracy()
@@ -43,9 +31,8 @@ def train_ensemble(model, optimizer, normalizer, X_train, y_train, X_val, y_val,
     train_acc_values = []
     val_acc_values = []
     test_acc_values = []
-
-    print(X_train.shape)
-    print(X_test.shape)
+    print('-------------')
+    print(X_train)
 
     for epoch in range(epochs):
 
