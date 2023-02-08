@@ -13,8 +13,6 @@ from torch import nn
 from utils import create_new_dir, read_imgs
 from sklearn.model_selection import train_test_split
 from tools_for_Pytorch import EarlyStopping, weights_init_uniform_fan_in
-import keras 
-from tools_for_Pytorch import get_predictions
 
 if torch.cuda.is_available():
     print('CUDA is available. Working on GPU')
@@ -46,6 +44,8 @@ def train_ensemble(model, optimizer, X_train, y_train, X_val, y_val, X_test, y_t
     val_acc_values = []
     test_acc_values = []
 
+    print(X_train.shape)
+    print(X_test.shape)
 
     for epoch in range(epochs):
 

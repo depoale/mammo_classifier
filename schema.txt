@@ -8,7 +8,7 @@ cose da fare:
 - SOM
 • FRA: Wavelet
 • ALE: ai interpretability immagini
-- final model selection: ensemble o lotta
+• ALE: final model selection: ensemble o lotta
 - ALE: GAN internet
 • ALE: GAN nuova #meglio di no che l'autoendoder fa schifo
 • ALE: preprocessing (dim reduction: auto-encoder)
@@ -18,3 +18,8 @@ cose da fare:
 cose abbandonate:
 - autoencoder
 - dynamic range
+
+
+note per fra:
+-riscrivere hypermodel togliendo model.add
+- ho cambiato la funzione create_new_dir: gliela faccio cancellare se esiste già e poi la crea. Ha senso?

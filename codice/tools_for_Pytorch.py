@@ -76,12 +76,5 @@ def weights_init_ones(m):
         m.bias.data.fill_(0)
 
 
-def get_predictions(X, experts):
-    """Creates and returns an array of model predictions. Each column corrispond to one expert preds."""
-    y = np.empty(shape=(len(X), len(experts)))
-    for count, expert in enumerate(experts):
-        expert = keras.models.load_model(expert)
-        y[:, count] = np.squeeze(expert.predict(X))
-    return y
     
 

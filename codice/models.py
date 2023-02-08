@@ -2,16 +2,7 @@
 
 from keras.models import Sequential
 from keras.layers import Conv2D, MaxPooling2D, Dense, Flatten, Dropout, Input, BatchNormalization
-
-""" 
-used to convert dataset to 'png' estension (supported by keras.utils.image_dataset_from_directory)   
-for file in os.listdir('datasets/Mammography_micro/Test/0'):
-    filename, extension  = os.path.splitext(file)
-    if extension == ".pgm":
-        new_file = "{}.png".format(filename)
-        with Image.open(os.path.join('datasets/Mammography_micro/Test/0',file)) as im:
-            im.save(new_file)
- """
+from keras.optimizers import Adam
 
 img_height = 60
 img_width = 60
@@ -70,6 +61,6 @@ def hyp_tuning_model(hp):
 
     model.add(Dense(1, activation='sigmoid', name='output'))
 
-    model.compile(optimizer='Adam', loss='binary_crossentropy', metrics=['accuracy'])
+    model.compile(optimizer=Adam(learning_rate=1e-3), loss='binary_crossentropy', metrics=['accuracy'])
     
     return model

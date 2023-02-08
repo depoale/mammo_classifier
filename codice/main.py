@@ -2,7 +2,7 @@
 the same code used in models.py (where test accuracy is always above 0.93) """
 
  
-from utils import wave_set, str2bool, grad_plot
+from utils import wave_set, str2bool
 from models import set_hyperp, get_search_spaze_size
 import numpy as np
 import argparse
@@ -129,17 +129,19 @@ if __name__=='__main__':
 
     #3. create and train the model
     model = Model(data=data, overwrite=args.overwrite, max_trials=max_trials)
-    model.train()
+    model.train() 
 
     #4. visualize test data with gradCAM
-    '''test_data = Data()
-    test_data.path='total_data'
-    X_test, y_test = test_data.get_random_images(size= 10)  #solo per provare, da cambiare ASSOLUTAMENTE
+    test_data = Data()
+    test_data.path='total_data'         #solo per provare, da cambiare ASSOLUTAMENTE
+    X_test, y_test = test_data.get_random_images(size=10)  #solo per provare, da cambiare ASSOLUTAMENTE
     print(X_test.shape)
     ensemble = torch.load('trained_ensemble')
     ensemble.eval()
-    with torch.inference_mode():
-        X_test = torch.from_numpy(X_test.astype('float32'))
-        outputs = ensemble(X_test)
-        print(outputs)
-        print(y_test)'''
+    X_test = model.get_predictions(X_test)
+    X_test = torch.from_numpy(X_test.astype('float32'))
+    X_test = X_test.unsqueeze(0)
+    print(X_test.shape)
+    outputs = torch.squeeze(ensemble(X_test, training=False)).softmax(0)
+    print(outputs)
+    print(y_test)

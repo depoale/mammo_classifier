@@ -1,4 +1,5 @@
-from utils import read_imgs, callbacks, ROC, get_confusion_matrix, plot, create_new_dir, save_image, convert_to_grayscale, comparison_plot, delete_directory
+from utils import read_imgs, callbacks, create_new_dir, save_image, convert_to_grayscale, delete_directory
+from plots import  ROC, get_confusion_matrix, plot, comparison_plot
 from models import hyp_tuning_model
 import os
 from keras.preprocessing.image import ImageDataGenerator
@@ -6,16 +7,16 @@ import numpy as np
 from matplotlib import pyplot as plt
 from keras.utils.layer_utils import count_params
 import shutil
-import matlab.engine
+#import matlab.engine
 from sklearn.model_selection import KFold
 from sklearn.model_selection import train_test_split
 import keras_tuner as kt
+from keras.models import load_model
 import torch
 import torch.nn as nn
 import statistics as stats
 from sklearn.metrics import auc
 from tools_for_Pytorch import weights_init_ones
-from tools_for_Pytorch import get_predictions
 from ensemble import train_ensemble
 from PIL import Image
 
@@ -109,7 +110,7 @@ class Data:
         self._PATH = IMGS_DIR
 
     
-    def wave(self, wave_settings):
+    """ def wave(self, wave_settings):
         eng = matlab.engine.start_matlab()
         
         wave = wave_settings['wavelet_family'] 
@@ -175,7 +176,7 @@ class Data:
 
 
     
-        self._PATH = IMGS_DIR  
+        self._PATH = IMGS_DIR  """ 
 
     def get_random_images(self, size:int):
         rand_idx = np.random.randint(0, len(self.X), size=size)
@@ -195,9 +196,13 @@ class Model:
 
     def train(self):
         self.fold()
-        self.ensemble()
+        self.get_ensemble()
 
     def tuner(self, X_dev, y_dev, modelBuilder, i, k=5):
+        if self.overwrite :
+            project_name = 'tuner'
+        else:
+            project_name = 'base'
         tuner = kt.BayesianOptimization(modelBuilder, objective='accuracy', max_trials=self.max_trials, 
                                         overwrite=self.overwrite, directory=f'tuner_{i}', project_name='tuner')
         tuner.search(X_dev, y_dev, epochs=20, validation_split=1/(k-1), batch_size=32, 
@@ -213,7 +218,7 @@ class Model:
             model.save(f'model_{i}')  
             #self.models_list.append(f'model_{i}') 
 
-    def plot_mean_stdev(self,tprs, mean_fpr, aucs ):
+    def plot_mean_stdev(self, tprs, mean_fpr, aucs ):
         mean_tpr = np.mean(tprs, axis=0)
         mean_tpr[-1] = 1.0
         mean_auc = auc(mean_fpr, mean_tpr)
@@ -290,13 +295,26 @@ class Model:
         plt.show(block=False)
         self.retrain_and_save(self.X, self.y, best_hps_list=best_hps_list, modelBuilder=self.modelBuilder, i=i)
     
-    def ensemble(self):
+
+    def get_predictions(self, X=None):
+        """Creates and returns an array of model predictions. Each column corrispond to one expert preds.
+        Used both in training and in assessing the performance of the model (when X=None the predictions are 
+        evaluated on self.X, otherwise on whatever X is passed)"""
+        if X is None:
+            X = self.X
+        y = np.empty(shape=(len(X), len(self.models_list)))
+        for count, expert in enumerate(self.models_list):
+            expert = load_model(expert)
+            y[:, count] = np.squeeze(expert.predict(X))
+        return y
+
+    def get_ensemble(self):
         """Create and train ensemble starting from models obtained previously"""
         #get each expert's predictions
-        X = get_predictions(self.X, self.models_list)
+        X = self.get_predictions()
 
         # transform to tensors
-        X = torch.from_numpy(X. astype('float32'))
+        X = torch.from_numpy(X.astype('float32'))
         y = torch.from_numpy(self.y.astype('float32'))
 
         X_dev, X_test, y_dev, y_test = train_test_split(X, y, test_size=0.2, shuffle=True, random_state=42)
