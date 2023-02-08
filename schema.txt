@@ -21,10 +21,10 @@ cose abbandonate:
 
 
 note per fra:
-- riscrivere hypermodel togliendo model.add
-- ho cambiato la funzione create_new_dir: gliela faccio cancellare se esiste già e poi la crea. Ha senso?
+- riscrivere hypermodel togliendo model.add (il for da problemi)
+- ho cambiato la funzione create_new_dir: gliela faccio cancellare se esiste già e poi la crea. Ha senso? (si ma ho modificato un tab)
 - circleci tests (ho messo la repository pubblica)
     https://app.circleci.com/pipelines/github/depoale/cmepda_prj/3/workflows/a1c22b15-aee4-418b-8249-ae63ad755c24/jobs/1
 - ci sono i settings delle wavelet di default in classes ma non dovrebbero servire (credo) perchè se non le passa l'utente 
-    lui prende da argparse quelli di default. Se sei d'accordo togli, altrimenti se ne parla.
-- mi sa che c'è qualcosa che non va quando mettiamo -aug true: non si crea la cartella in modo corretto
+    lui prende da argparse quelli di default. Se sei d'accordo togli, altrimenti se ne parla. (utili e comode per test_classes su Data)
+- mi sa che c'è qualcosa che non va quando mettiamo -aug true: non si crea la cartella in modo corretto (a me funziona tutto bene)
