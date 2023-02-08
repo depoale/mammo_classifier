@@ -6,7 +6,7 @@ orbs:
 jobs:
   build-and-test: 
     docker:
-      - image: cimg/python:3.8.10
+      - image: cimg/python:3.10.7
    
     steps:
       - checkout
@@ -20,7 +20,6 @@ jobs:
           
           
 workflows:
-  sample: # This is the name of the workflow, feel free to change it to better match your workflow.
-    # Inside the workflow, you define the jobs you want to run.
+  sample: 
     jobs:
       - build-and-test
