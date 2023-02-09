@@ -14,7 +14,7 @@ import matplotlib.cm as cm
 def make_gradcam_heatmap(
     img_array, model, last_conv_layer_name, classifier_layer_names, output_path=None
 ):
-    #img_array = img_array.reshape(1, 60, 60, 1)
+    img_array = img_array.reshape(1, 60, 60, 1)
     #img_array = tf.convert_to_tensor(img_array)
     print('img',img_array.shape)
     # First, we create a model that maps the input image to the activations
@@ -36,7 +36,6 @@ def make_gradcam_heatmap(
     # Then, we compute the gradient of the top predicted class for our input image
     # with respect to the activations of the last conv layer
     with tf.GradientTape() as tape:
-
         # Compute activations of the last conv layer and make the tape watch it
         last_conv_layer_output = last_conv_layer_model(img_array)
         #last_conv_layer_output_2 = model(img_array).get_layer

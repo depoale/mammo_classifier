@@ -57,7 +57,7 @@ class EarlyStopping:
 
 
 def weights_init_ones(model):
-    """Initizialize weights to be equal and normalized
+    """Random weights initialisation and normalisation
     .....
     Parameters
     ----------
@@ -65,7 +65,12 @@ def weights_init_ones(model):
     classname = model.__class__.__name__
     # for every Linear layer in a model..
     if classname.find('Linear') != -1:
-        model.weight.data.fill_(100/torch.numel(model.weight.data))
+        with torch.no_grad():
+            x = np.random.uniform(0, 300, size=5)
+            print('x', x)
+            x = x*100/x.sum()
+            print('weights', x)
+            model.weight.data = torch.from_numpy(x.astype('float32'))
 
 class WeightNormalizer(object):
     """Applied after each weight update, clips the weights to be in (0, 1) and normalises the sum to 1"""

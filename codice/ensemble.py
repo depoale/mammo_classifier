@@ -1,12 +1,11 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
-
+import os
 
 import torch
 import torch.nn as nn
 from torchmetrics.classification import BinaryAccuracy
-
 from tools_for_Pytorch import EarlyStopping
 import torch
 from torch import nn
@@ -57,6 +56,8 @@ def train_ensemble(model, optimizer, normalizer, X_train, y_train, X_val, y_val,
 
         # 6. Normalize new weights
         model.apply(normalizer)
+        #params = model.parameters()
+        #print(params[0])
         
         # evaluation mode
         model.eval()
@@ -116,5 +117,5 @@ def train_ensemble(model, optimizer, normalizer, X_train, y_train, X_val, y_val,
         plt.show(block = False)
 
     create_new_dir('trained_ensemble')
-    torch.save(model, 'trained_ensemble')
+    torch.save(model, os.path.join('trained_ensemble', 'model'))
     return model.parameters(), final_acc

@@ -9,7 +9,7 @@ from keras.utils.layer_utils import count_params
 from random import shuffle
 import tensorflow as tf
 import shutil
-import matlab.engine
+#import matlab.engine
 from sklearn.model_selection import KFold
 from sklearn.model_selection import train_test_split
 import keras_tuner as kt
@@ -40,11 +40,16 @@ class Data:
         augmentes: bools
             whether to perform data augmentation
         wavelet: bool
-            whether to use wavelet procedure """
+            whether to use wavelet procedure 
+        wave_settings: dict
+            settings for wavelet procedure"""
         
+        #default path to dataset
+        self._PATH = 'total_data'
+
+        # path to dataset
         @property
         def path(self):
-            print("Getting value...")
             return self._PATH
         
         @path.setter
@@ -53,20 +58,24 @@ class Data:
                 raise TypeError(f'Expected str type got {type(directory)}')
             self._PATH = directory
         
-
-        self._PATH = 'total_data'
-        
+        # augmentation procedure
         if augmented:
-            print(augmented)
-            # augment data found in _PATH and set _PATH to that directory
             self.aug()
         
+        #wavelet procedure
         if wavelet:
-            # create wavelet directory and set _PATH to that directory
-            self.wave(wave_settings)
+            #self.wave(wave_settings)
+            pass
         
         self.set_data(self._PATH)
         self.X, self.y = shuffle_data(self.X, self.y)
+        self.len = len(self.X)
+
+    def __len__():
+        return self.len
+
+    def __getitem__(self, index):    
+        return self.X[index], self.y[index] 
     
     def set_data(self, directory):
         self.X, self.y = read_imgs(directory, [0,1])
@@ -107,7 +116,7 @@ class Data:
         self._PATH = IMGS_DIR
 
     
-    def wave(self, wave_settings):
+    """ def wave(self, wave_settings):
         eng = matlab.engine.start_matlab()
         
         wave = wave_settings['wavelet_family'] 
@@ -173,16 +182,22 @@ class Data:
 
 
     
-        self._PATH = IMGS_DIR
+        self._PATH = IMGS_DIR """
 
     def get_random_images(self, size:int):
+        """Extract random elements from the dataset
+        .....
+        Parameters
+        ----------
+        size: int
+            number of random images """
         rand_idx = np.random.randint(0, len(self.X), size=size)
         X = self.X[rand_idx]
         y = self.y[rand_idx]
         return X, y
 
 class Model:
-    """Create and train ensemble"""
+    """Perform hyperparameters search, k-fold and train ensemble"""
     def __init__(self, data, overwrite, max_trials):
         self.X = data.X
         self.y = data.y
@@ -192,10 +207,26 @@ class Model:
         self.models_list = []
 
     def train(self):
+        """Perform hyperparameters search, k-fold and train ensemble"""
         self.fold()
         self.get_ensemble()
 
     def tuner(self, X_dev, y_dev, modelBuilder, i, k=5):
+        """If overwrite is true performes hps search, else takes default hps.
+        ....
+        Parameters
+        ----------
+        X_dev: np.array
+            X for development/design set (train+validation)
+        y_dev: np.array
+            y for development/design set (train+validation)
+        modelBuilder: keras.Hypermodel
+            funtion returning the hypermodel or model if hps are fixed
+        i: int
+            k-fold index
+        k:int
+            number of folds. Default 5
+        """
         if self.overwrite :
             project_name = 'tuner'
         else:
@@ -210,7 +241,7 @@ class Model:
     
     def retrain_and_save(self, X, y, hps, modelBuilder, i):
         model = modelBuilder(hps)
-        model.fit(X, y, epochs=100, batch_size=64, validation_split=0.2, callbacks=callbacks)
+        model.fit(X, y, epochs=100, batch_size=64, validation_split=0.25, callbacks=callbacks)
         model.save(f'model_{i}')  
         #self.models_list.append(f'model_{i}') 
 
@@ -245,7 +276,7 @@ class Model:
             best_hps_list.append(best_hps)
 
             #train best model and assess model's performance
-            history = best_model.fit(X_dev, y_dev, epochs=100, batch_size=64,validation_split=1/(k-1), callbacks=callbacks)
+            history = best_model.fit(X_dev, y_dev, epochs=100, batch_size=64, validation_split=1/(k-1), callbacks=callbacks)
             accuracy= round(best_model.evaluate(X_test, y_test)[1],3)
 
             dimension.append(count_params(best_model.trainable_weights))
@@ -258,7 +289,8 @@ class Model:
             get_confusion_matrix(X_test, y_test=y_test, model=best_model, i=i+1)
 
             #retrain on the whole dataset and save best model 
-            self.retrain_and_save(self.X, self.y, hps=best_hps, modelBuilder=self.modelBuilder, i=i)
+            #self.retrain_and_save(self.X, self.y, hps=best_hps, modelBuilder=self.modelBuilder, i=i)
+            best_model.save(f'model_{i}')
 
         # plot mean and stdev in ROC curve plot
         plot_mean_stdev(tprs, mean_fpr, aucs)
@@ -291,7 +323,7 @@ class Model:
         return y
 
     def get_ensemble(self):
-        """Create and train ensemble starting from models obtained previously"""
+        """Create and train ensemble starting from models previously obtained"""
         #get each expert's predictions
         X = self.get_predictions()
 
@@ -310,7 +342,7 @@ class Model:
         w_init = weights_init_ones
         model.apply(w_init)
 
-        optimizer = torch.optim.Adam(model.parameters(), lr=0.01, betas=(0.95, 0.999))
+        optimizer = torch.optim.Adam(model.parameters(), lr=0.08, betas=(0.9, 0.9999))
         # we want the sum of the weights to be one
         normalizer = WeightNormalizer()
 

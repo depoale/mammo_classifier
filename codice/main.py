@@ -142,23 +142,25 @@ if __name__=='__main__':
     test_data.path='total_data'         #solo per provare, da cambiare ASSOLUTAMENTE
     X_test, y_test = test_data.get_random_images(size=40)  #solo per provare, da cambiare ASSOLUTAMENTE
     print(X_test.shape)
-    ensemble = torch.load('trained_ensemble')
+    ensemble = torch.load(os.path.join('trained_ensemble', 'model'))
     ensemble.eval()
     X_test = model.get_predictions(X_test)
     X_test = torch.from_numpy(X_test.astype('float32'))
     X_test = X_test.unsqueeze(0)
     print(X_test.shape)
     outputs = torch.squeeze(ensemble(X_test)).softmax(0)
-    print('out', outputs)
-    print(y_test)
-    print(f'Elapsed time: {time.time()- start}')
+    for out, y in zip(outputs, y_test):
+        print(f'pred {out:.3f} vs true {y}')
+    print(f'Elapsed time: {time.time() - start}')
 
     #5. check what the most reliable model has learnt using gradCAM
-    weights = ensemble.weight.data
-    best = np.argmax(weights).index()
+    print(type(ensemble))
+    weights = ensemble.parameters() #ensemble.weight.data
+    best = weights.index(np.argmax(weights))
     best_model = keras.load_model(f'model_{best}')
     X_test, y_test = test_data.get_random_images(size=6)
     preds = model.predict(X_test)
     classifier_layer_names = [layer.name for idx, layer in enumerate(best_model.layers) if idx > 8]
-    make_gradcam_heatmap(X_test, model=best_model, last_conv_layer_name='conv_3', 
-            classifier_layer_names=classifier_layer_names, output_path='gCAM')
+    for i, X in enumerate(X_test):
+        make_gradcam_heatmap(X_test, model=best_model, last_conv_layer_name='conv_3', 
+            classifier_layer_names=classifier_layer_names, output_path=f'gCAM_{i}.png')
