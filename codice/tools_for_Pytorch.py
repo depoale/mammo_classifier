@@ -66,9 +66,9 @@ def weights_init_ones(model):
     # for every Linear layer in a model..
     if classname.find('Linear') != -1:
         with torch.no_grad():
-            x = np.random.uniform(0, 300, size=5)
+            x = np.random.uniform(0.03, 3, size=5)
             print('x', x)
-            x = x*100/x.sum()
+            x /= x.sum()
             print('weights', x)
             model.weight.data = torch.from_numpy(x.astype('float32'))
 
@@ -78,6 +78,7 @@ class WeightNormalizer(object):
         if hasattr(module, 'weight'):
             weights = module.weight.data
             print('before', weights)
-            weights = weights.clamp(0,100)
-            weights= weights*100/weights.sum() 
+            weights = weights.clamp(0.01,1)
+            weights /= weights.sum() 
+            module.weight.data = weights
             print('after', weights)

@@ -342,7 +342,7 @@ class Model:
         w_init = weights_init_ones
         model.apply(w_init)
 
-        optimizer = torch.optim.Adam(model.parameters(), lr=0.08, betas=(0.9, 0.9999))
+        optimizer = torch.optim.Adam(model.parameters(), lr=0.01, betas=(0.9, 0.9999))
         # we want the sum of the weights to be one
         normalizer = WeightNormalizer()
 
