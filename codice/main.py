@@ -12,7 +12,7 @@ import torch
 import time
 import keras
 from prova_gCAM import make_gradcam_heatmap
- 
+from tools_for_Pytorch import pytorch_linear_model, weights_init_ones
  
 if __name__=='__main__':
     start = time.time()
@@ -140,17 +140,23 @@ if __name__=='__main__':
     #4. test ensemble on a brand new dataset
     test_data = Data()
     test_data.path='total_data'         #solo per provare, da cambiare ASSOLUTAMENTE
-    X_test, y_test = test_data.get_random_images(size=40)  #solo per provare, da cambiare ASSOLUTAMENTE
-    print(X_test.shape)
-    ensemble = torch.load(os.path.join('trained_ensemble', 'model'))
+    X_test, y_test = test_data.get_random_images(size=6)  #solo per provare, da cambiare ASSOLUTAMENTE
+    ensemble = pytorch_linear_model(5,1)
+    w_init = weights_init_ones
+    ensemble.apply(w_init)
+    for param in ensemble.parameters():
+        print('pre reload',param)
+    ensemble.load_state_dict(torch.load('trained_ensemble.pt'))
+    for param in ensemble.parameters():
+        print('reload',param)
     ensemble.eval()
-    X_test = model.get_predictions(X_test)
-    X_test = torch.from_numpy(X_test.astype('float32'))
+    X_test_np = model.get_predictions(X_test)
+    X_test = torch.from_numpy(X_test_np.astype('float32'))
     X_test = X_test.unsqueeze(0)
-    print(X_test.shape)
+    print(X_test)
     outputs = torch.squeeze(ensemble(X_test)).softmax(0)
-    for out, y in zip(outputs, y_test):
-        print(f'pred {out:.3f} vs true {y}')
+    for inpu, out, y in zip(X_test_np, outputs, y_test):
+        print(f'from {inpu} pred {out:.3f} vs true {y}')
     print(f'Elapsed time: {time.time() - start}')
 
     #5. check what the most reliable model has learnt using gradCAM

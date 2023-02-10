@@ -18,7 +18,7 @@ import torch
 import torch.nn as nn
 import statistics as stats
 from sklearn.metrics import auc
-from tools_for_Pytorch import weights_init_ones, WeightNormalizer
+from tools_for_Pytorch import weights_init_ones, WeightNormalizer, pytorch_linear_model
 from ensemble import train_ensemble
 from PIL import Image
 
@@ -71,7 +71,7 @@ class Data:
         self.X, self.y = shuffle_data(self.X, self.y)
         self.len = len(self.X)
 
-    def __len__():
+    def __len__(self):
         return self.len
 
     def __getitem__(self, index):    
@@ -198,17 +198,19 @@ class Data:
 
 class Model:
     """Perform hyperparameters search, k-fold and train ensemble"""
-    def __init__(self, data, overwrite, max_trials):
+    def __init__(self, data, overwrite, max_trials, k=5):
         self.X = data.X
         self.y = data.y
         self.max_trials = max_trials
         self.overwrite = overwrite
+        self.k = k
         self.modelBuilder = hyp_tuning_model
         self.models_list = []
 
     def train(self):
         """Perform hyperparameters search, k-fold and train ensemble"""
-        self.fold()
+        #self.fold()
+        self.set_models_list()
         self.get_ensemble()
 
     def tuner(self, X_dev, y_dev, modelBuilder, i, k=5):
@@ -239,11 +241,15 @@ class Model:
         best_model = tuner.get_best_models()[0]
         return best_hps, best_model
     
+    def set_models_list(self):
+        for i in range(self.k):
+            self.models_list.append(f'model_{i}') 
+
+    
     def retrain_and_save(self, X, y, hps, modelBuilder, i):
         model = modelBuilder(hps)
         model.fit(X, y, epochs=100, batch_size=64, validation_split=0.25, callbacks=callbacks)
         model.save(f'model_{i}')  
-        #self.models_list.append(f'model_{i}') 
 
     def fold(self, k=5):
         """Performs kfold & hps search in each fold.
@@ -264,7 +270,7 @@ class Model:
         colors = ['green', 'red', 'blue', 'darkorange', 'gold']
 
         # here model selection and model assessment are peformed (k-fold + hold-out)
-        fold  = KFold(n_splits=k, shuffle=True, random_state=42)
+        fold  = KFold(n_splits=self.k, shuffle=True, random_state=42)
         for i, (dev_idx, test_idx) in enumerate(fold.split(self.X, self.y)):
             #divide development and test sets
             X_dev, X_test = self.X[dev_idx], self.X[test_idx]
@@ -281,7 +287,6 @@ class Model:
 
             dimension.append(count_params(best_model.trainable_weights))
             test_acc.append(accuracy)
-            self.models_list.append(f'model_{i}')
             
             #add this fold's results to the plots
             plot(history=history, i=i)
@@ -334,9 +339,8 @@ class Model:
         X_dev, X_test, y_dev, y_test = train_test_split(X, y, test_size=0.2, shuffle=True, random_state=42)
         X_train, X_val, y_train, y_val = train_test_split(X_dev, y_dev, test_size=0.2, shuffle=True, random_state=24)
 
-        # model = weighted average    
-        model = nn.Sequential(nn.Linear(in_features=len(self.models_list), out_features=1, bias=False)
-                              )
+        # model = weighted average 
+        model = pytorch_linear_model(in_features=len(self.models_list), out_features=1)   
     
         # weights initialization and bias set to zero not trainable
         w_init = weights_init_ones

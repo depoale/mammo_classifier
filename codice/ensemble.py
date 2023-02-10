@@ -24,7 +24,7 @@ def train_ensemble(model, optimizer, normalizer, X_train, y_train, X_val, y_val,
     early_stopping = EarlyStopping()
 
     torch.manual_seed(42)
-    batch_size=128
+    batch_size=80
     epochs = 500
     epoch_count = []
 
@@ -39,6 +39,8 @@ def train_ensemble(model, optimizer, normalizer, X_train, y_train, X_val, y_val,
 
         #shuffle before creating mini-batches
         permutation = torch.randperm(X_train.size()[0])
+        batch_mse=[]
+        batch_acc = []
         for i in range(0,X_train.size()[0], batch_size):
             optimizer.zero_grad()
 
@@ -56,8 +58,8 @@ def train_ensemble(model, optimizer, normalizer, X_train, y_train, X_val, y_val,
             train_acc = acc_fn(train_pred, batch_y)
 
             # append current batch results
-            train_mse_values.append(train_mse)
-            train_acc_values.append(train_acc)
+            batch_mse.append(train_mse)
+            batch_acc.append(train_acc)
 
             # 3. Zero grad of the optimizer
             optimizer.zero_grad()
@@ -91,8 +93,10 @@ def train_ensemble(model, optimizer, normalizer, X_train, y_train, X_val, y_val,
 
         # append current epoch results
         epoch_count.append(epoch)
+        train_mse_values.append(np.mean(np.array(torch.tensor(train_mse_values).numpy())))
         val_mse_values.append(val_mse)
         test_mse_values.append(test_mse)
+        train_acc_values.append(np.mean(np.array(torch.tensor(train_acc_values).numpy())))
         val_acc_values.append(val_acc)
         test_acc_values.append(test_acc)
 
@@ -102,6 +106,7 @@ def train_ensemble(model, optimizer, normalizer, X_train, y_train, X_val, y_val,
         
         if early_stopping.early_stop:
             print("Early stopping")
+            print(len(train_acc_values))
             break
             
         if epoch % 10 == 0:
@@ -113,14 +118,14 @@ def train_ensemble(model, optimizer, normalizer, X_train, y_train, X_val, y_val,
     #learning curve and accuracy plot
     if name: 
         plt.subplot(1,2,1)
-        plt.plot(epochs_array(np.array(torch.tensor(train_mse_values).numpy()), len(epoch_count)-1), np.array(torch.tensor(train_mse_values).numpy()), label="Training MSE")
+        plt.plot(epoch_count, np.array(torch.tensor(train_mse_values).numpy()), label="Training MSE")
         plt.plot(epoch_count, val_mse_values, label="Validation MSE", linestyle='dashed')
         plt.title(name  + " TR and VL MSE")
         plt.ylabel("MSE")
         plt.xlabel("Epochs")
         plt.legend()
         plt.subplot(1,2,2)
-        plt.plot(epochs_array(np.array(torch.tensor(train_acc_values).numpy()), len(epoch_count)-1), np.array(torch.tensor(train_acc_values).numpy()), label="Training acc")
+        plt.plot(epoch_count, np.array(torch.tensor(train_acc_values).numpy()), label="Training acc")
         plt.plot(epoch_count, val_acc_values, label="Validation acc", linestyle='dashed')
         plt.title(name  + " TR and VL acc")
         plt.ylabel("acc")
@@ -128,6 +133,5 @@ def train_ensemble(model, optimizer, normalizer, X_train, y_train, X_val, y_val,
         plt.legend()
         plt.show(block = False)
 
-    create_new_dir('trained_ensemble')
-    torch.save(model, os.path.join('trained_ensemble', 'model'))
+    torch.save(model.state_dict(),'trained_ensemble.pt')
     return model.parameters(), final_acc
