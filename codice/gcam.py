@@ -2,7 +2,7 @@ import tensorflow as tf
 from tensorflow import keras
 import numpy as np
 import os
-from utils import read_imgs
+from utils import read_imgs, create_new_dir
 
 
 # Display
@@ -92,25 +92,10 @@ def make_gradcam_heatmap(
     #Save the the superimposed image to the output path
     superimposed_img.save(output_path)
 
-if __name__=='__main__':
-    model = keras.models.load_model(f'model_{0}')
-    model.summary()
-    test_path = os.path.join(os.getcwd(),'data_png' ,'Test')
-    #get three healty ex
-    img_array, labels = read_imgs(test_path, classes=[1])
-    print(labels.shape)
-    print(img_array.shape)
-    rnd_idx = np.random.randint(0, 100, size = 3)
-    examples = img_array[rnd_idx]
-    print(examples[0].shape)
-    preds = model.predict(examples)
-    print("Predicted:", (preds))
-    classifier_layer_names = [layer.name for idx, layer in enumerate(model.layers) if idx>8]
-    print(classifier_layer_names)
-    make_gradcam_heatmap(X_test, model=best_model, last_conv_layer_name='conv_3', 
-            classifier_layer_names=classifier_layer_names, output_path='gCAM')
-    make_gradcam_heatmap(examples, model=model, last_conv_layer_name='conv_4', 
-            classifier_layer_names=classifier_layer_names, output_path='1.png')
-
-    plt.show()
- 
+def get_gcam_images(images, best_model):
+    classifier_layer_names = [layer.name for idx, layer in enumerate(best_model.layers) if idx > 8]
+    create_new_dir('gCam')
+    for i, image in enumerate(images):
+        output_path = os.path.join('gCam', f'gCAM_{i}.png')
+        make_gradcam_heatmap(image, model=best_model, last_conv_layer_name='conv_3', 
+            classifier_layer_names=classifier_layer_names, output_path=output_path)

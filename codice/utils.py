@@ -87,13 +87,15 @@ def shuffle_data(a,b):
     return a[p], b[p]
 
 def nearest_square(limit):
+    """Returns the highest square less or equal to limit"""
     answer = 0
     while (answer+1)**2 <= limit:
         answer += 1
-    return answer**2
+    return answer
     
 def get_rows_columns(size):
-    n = np.sqrt(nearest_square(size))
+    """Create a matrix starting from the nearest square"""
+    n = nearest_square(size)
     rows = n
     columns = n
     while rows*columns < size:

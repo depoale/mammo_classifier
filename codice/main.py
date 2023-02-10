@@ -8,12 +8,10 @@ import numpy as np
 import argparse
 import os
 from classes import Data, Model
-import torch
 import time
 import keras
-from prova_gCAM import make_gradcam_heatmap
-from tools_for_Pytorch import pytorch_linear_model, weights_init_ones
-from plots import gCAM_plot
+from gcam import get_gcam_images
+from plots import gCAM_images
 import shutup
 import warnings 
 warnings.filterwarnings('ignore')
@@ -121,7 +119,7 @@ if __name__=='__main__':
         metavar="",
         type=int,
         help="Number of random images to visualize using gradCAM",
-        default=3,
+        default=6,
     )
 
     args = parser.parse_args()
@@ -147,13 +145,7 @@ if __name__=='__main__':
     if num_images > 25:
         print('Showing 25 images using gradCAM')
         num_images = 25
-    X_test, y_test = data.get_random_images(size=num_images, classes=[1])
-    preds = best_model.predict(X_test)
-    classifier_layer_names = [layer.name for idx, layer in enumerate(best_model.layers) if idx > 8]
-    create_new_dir('gCam')
-    for i, X in enumerate(X_test):
-        output_path = os.path.join('gCam', f'gCAM_{i}.png')
-        make_gradcam_heatmap(X, model=best_model, last_conv_layer_name='conv_3', 
-            classifier_layer_names=classifier_layer_names, output_path=output_path) 
-    
-    gCAM_plot(size=num_images, preds=preds)
+    rand_images, _ = data.get_random_images(size=num_images, classes=[1])
+    preds = best_model.predict(rand_images)
+    get_gcam_images(rand_images, best_model)
+    gCAM_images(size=num_images, preds=preds)

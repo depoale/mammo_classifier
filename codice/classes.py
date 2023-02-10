@@ -1,6 +1,6 @@
 from utils import read_imgs, callbacks, create_new_dir, save_image, convert_to_grayscale, shuffle_data
 from plots import  ROC, get_confusion_matrix, plot, comparison_plot, plot_mean_stdev
-from models import hyp_tuning_model
+from hypermodel import hyp_tuning_model
 import os
 from keras.preprocessing.image import ImageDataGenerator
 import numpy as np
@@ -18,7 +18,7 @@ import torch
 import torch.nn as nn
 import statistics as stats
 from sklearn.metrics import auc
-from tools_for_Pytorch import weights_init_ones, WeightNormalizer, pytorch_linear_model
+from tools_for_Pytorch import weights_init, WeightNormalizer, pytorch_linear_model
 from ensemble import train_ensemble
 from PIL import Image
 import warnings 
@@ -97,7 +97,7 @@ class Data:
         height_shift_range=3,
         horizontal_flip=True,
         vertical_flip=True,
-        fill_mode='reflect', #  nearest?
+        fill_mode='reflect',
         validation_split=0)
         
         for i, one_class in enumerate(os.listdir(self._PATH)):
@@ -332,13 +332,6 @@ class Model:
         for i in range(self.k):
             self.models_list.append(f'model_{i}') 
 
-    
-    def retrain_and_save(self, X, y, hps, modelBuilder, i):
-        model = modelBuilder(hps)
-        model.fit(X, y, epochs=100, batch_size=64, validation_split=0.25, callbacks=callbacks)
-        model_path = os.path.join('models', f'model_{i}')
-        model.save(model_path)  
-
     def fold(self, k=5):
         """Performs kfold & hps search in each fold.
         Returs best hps list (one entry for each fold)"""
@@ -382,7 +375,6 @@ class Model:
             get_confusion_matrix(X_test, y_test=y_test, model=best_model, i=i+1)
 
             #retrain on the whole dataset and save best model 
-            #self.retrain_and_save(self.X, self.y, hps=best_hps, modelBuilder=self.modelBuilder, i=i)
             best_model.save(f'model_{i}')
 
         # plot mean and stdev in ROC curve plot
@@ -439,7 +431,7 @@ class Model:
         model = pytorch_linear_model(in_features=len(self.models_list), out_features=1)   
     
         # weights initialization and bias set to zero not trainable
-        w_init = weights_init_ones
+        w_init = weights_init
         model.apply(w_init)
 
         optimizer = torch.optim.Adam(model.parameters(), lr=0.005, betas=(0.9, 0.9999))
