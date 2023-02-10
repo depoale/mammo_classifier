@@ -6,7 +6,7 @@ The aim of this project is to create and train a neural network able to distingu
 
 ## Dataset
 Dataset source: https://www.pi.infn.it/~boccali/DL_class_data.tar.gz <br>
-This dataset is made up of **797** images, **414** of which represent sane tissue and the remaining **383** diseased tissue. <br>
+This dataset is made up of **797** images, **414** of which represent sane tissue (Label = 0) and the remaining **383** diseased tissue (Label =). <br>
 <img src="images/random_images.png" width="800"> 
 
 ## Data augmentation
