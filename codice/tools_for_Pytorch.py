@@ -68,9 +68,7 @@ def weights_init_ones(model):
     if classname.find('Linear') != -1:
         with torch.no_grad():
             x = np.random.uniform(0.03, 3, size=5)
-            print('x', x)
             x /= x.sum()
-            print('weights', x)
             model.weight.data = torch.from_numpy(x.astype('float32'))
 
 class WeightNormalizer(object):
@@ -78,11 +76,12 @@ class WeightNormalizer(object):
     def __call__(self, module):
         if hasattr(module, 'weight'):
             weights = module.weight.data
-            print('before', weights)
+            # weights clipping
             weights = weights.clamp(0.01,1)
+            #weights normalization
             weights /= weights.sum() 
+            #re-assignment
             module.weight.data = weights
-            print('after', weights)
 
 def pytorch_linear_model(in_features=5, out_features=1):
     model = nn.Sequential(nn.Linear(in_features=in_features, out_features=out_features, bias=False)
