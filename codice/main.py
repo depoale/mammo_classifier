@@ -2,7 +2,7 @@
 the same code used in models.py (where test accuracy is always above 0.93) """
 
  
-from utils import wave_set, str2bool
+from utils import wave_set, str2bool, create_new_dir
 from models import set_hyperp, get_search_space_size
 import numpy as np
 import argparse
@@ -13,9 +13,11 @@ import time
 import keras
 from prova_gCAM import make_gradcam_heatmap
 from tools_for_Pytorch import pytorch_linear_model, weights_init_ones
+from plots import gCAM_plot
+import shutup
 import warnings 
 warnings.filterwarnings('ignore')
- 
+shutup.please()
 if __name__=='__main__':
     start = time.time()
     os.chdir('..')
@@ -118,7 +120,7 @@ if __name__=='__main__':
         "--gradcam",
         metavar="",
         type=int,
-        help="Number of random images to visualize using gradCAM for each class",
+        help="Number of random images to visualize using gradCAM",
         default=3,
     )
 
@@ -140,13 +142,18 @@ if __name__=='__main__':
     model.train() 
 
     #4. check what the most reliable model has learnt using gradCAM
-    #print(model.selected_model)
-    print(model._SELECTED_MODEL)
-
     best_model = keras.models.load_model(model._SELECTED_MODEL)
-    X_test, y_test = data.get_random_images(size=6, classes=[1])
+    num_images = args.gradcam
+    if num_images > 25:
+        print('Showing 25 images using gradCAM')
+        num_images = 25
+    X_test, y_test = data.get_random_images(size=num_images, classes=[1])
     preds = best_model.predict(X_test)
     classifier_layer_names = [layer.name for idx, layer in enumerate(best_model.layers) if idx > 8]
+    create_new_dir('gCam')
     for i, X in enumerate(X_test):
+        output_path = os.path.join('gCam', f'gCAM_{i}.png')
         make_gradcam_heatmap(X, model=best_model, last_conv_layer_name='conv_3', 
-            classifier_layer_names=classifier_layer_names, output_path=f'gCAM_{i}.png') 
+            classifier_layer_names=classifier_layer_names, output_path=output_path) 
+    
+    gCAM_plot(size=num_images, preds=preds)

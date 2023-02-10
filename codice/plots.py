@@ -4,6 +4,9 @@ import os
 from sklearn.metrics import roc_curve, auc, confusion_matrix
 import pandas as pd
 import seaborn as sn
+import glob
+from utils import read_imgs, get_rows_columns
+from skimage.io import imread
 
 def plot(history, i):
     """Learning curve and accuracy plot.
@@ -150,15 +153,21 @@ def comparison_plot(names, dimension, accuracy):
     #plt.legend()
     plt.show(block=False)
 
-def grad_plot(data, size:int):
-    rnd_idx = np.random.randint(0, 700, size = size)
+def gCAM_plot(size, preds):
+    """Plots """
     fig = plt.figure(figsize=(8, 8))
-    columns = 3
-    rows = 2
-    images = data.X
-    labels = data.y
-    for i, idx in enumerate(rnd_idx):
-        ax=fig.add_subplot(rows, columns, i)
-        ax.title.set_text(f'Label = {labels[idx]}')
-        plt.imshow(images[idx], cmap='gray')
+    rows, columns = get_rows_columns(size)
+    tmp = []
+    fnames = glob.glob(os.path.join('gCam', '*.png'))
+    tmp += [imread(fname) for fname in fnames]
+    images = np.array(tmp, dtype='float32')[...]/255
+    #plt.title('GradCAM plots')
+    plt.axis('off')
+    for i in range(size):
+        ax = fig.add_subplot(rows, columns, i+1)
+        ax.set_axis_off()
+        ax.title.set_text(f'Label=1 Pred={preds[i][0]:.1f}')
+        plt.imshow(images[i])
+
+    plt.savefig('gcam.pdf')
     plt.show()

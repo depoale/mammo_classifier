@@ -18,7 +18,7 @@ from sklearn.metrics import roc_curve, auc, confusion_matrix
 import seaborn as sn
 import pandas as pd
 import shutil
-from utils import read_imgs
+from utils import read_imgs, get_rows_columns
 from keras.utils import image_dataset_from_directory
 
 def plottino():
@@ -31,7 +31,7 @@ def plottino():
     classes = [[0],[1]]
     i=1
     for cl in classes:
-        img_array, labels = read_imgs('total_data', cl)
+        img_array, labels = read_imgs('', cl)
         for idx in rnd_idx:
             ax=fig.add_subplot(rows, columns, i)
             ax.title.set_text(f'Label = {labels[idx]}')
@@ -39,5 +39,20 @@ def plottino():
             i+=1
     plt.show()
 
+
+def gCAM_plot(size, preds):
+    fig = plt.figure(figsize=(8, 8))
+    rows, columns = get_rows_columns(size)
+    tmp = []
+    fnames = glob.glob(os.path.join('gradCAM', '*.png'))
+    tmp += [imread(fname) for fname in fnames]
+    images = np.array(tmp, dtype='float32')[...]/255
+
+    for i in range(size):
+        ax = fig.add_subplot(rows, columns, i+1)
+        ax.title.set_text(f'Label=1 Pred={np.rint(preds[i])}')
+        plt.imshow(images[i])
+
+    plt.show()
 if __name__=='__main__':
-    plottino()
+    plottino2(size=6, preds=[1,1,1,0,1,1])

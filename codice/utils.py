@@ -86,7 +86,21 @@ def shuffle_data(a,b):
     p = np.random.permutation(len(a))
     return a[p], b[p]
 
+def nearest_square(limit):
+    answer = 0
+    while (answer+1)**2 <= limit:
+        answer += 1
+    return answer**2
     
+def get_rows_columns(size):
+    n = np.sqrt(nearest_square(size))
+    rows = n
+    columns = n
+    while rows*columns < size:
+        columns += 1
+    return rows.astype(int), columns.astype(int)
+
+
 
                 
 
