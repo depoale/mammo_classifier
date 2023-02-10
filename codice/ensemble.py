@@ -10,12 +10,14 @@ from tools_for_Pytorch import EarlyStopping
 import torch
 from torch import nn
 from utils import create_new_dir
+import warnings 
+warnings.filterwarnings('ignore')
 
 def epochs_array(array, max):
     epochs_count = np.linspace(0, max, len(array))
     return epochs_count
 
-def train_ensemble(model, optimizer, normalizer, X_train, y_train, X_val, y_val, X_test, y_test, name=None):
+def train_ensemble(model, optimizer, normalizer, X_train, y_train, X_val, y_val, X_test, y_test, batch_size=80,name=None):
 
     """Performs the forward and backwards training loop until early stopping, then computes the metric"""
 
@@ -24,7 +26,6 @@ def train_ensemble(model, optimizer, normalizer, X_train, y_train, X_val, y_val,
     early_stopping = EarlyStopping()
 
     torch.manual_seed(42)
-    batch_size=80
     epochs = 500
     epoch_count = []
 
@@ -42,7 +43,7 @@ def train_ensemble(model, optimizer, normalizer, X_train, y_train, X_val, y_val,
         batch_mse=[]
         batch_acc = []
         for i in range(0,X_train.size()[0], batch_size):
-            optimizer.zero_grad()
+            #optimizer.zero_grad()
 
             indices = permutation[i:i+batch_size]
             batch_x, batch_y = X_train[indices], y_train[indices]
@@ -51,7 +52,8 @@ def train_ensemble(model, optimizer, normalizer, X_train, y_train, X_val, y_val,
             model.train()
 
             # 1. Forward pass on train data
-            train_pred = model.forward(batch_x)
+            train_pred = model(batch_x)
+            print('preds', train_pred)
 
             # 2. Calculate the loss and accuracy
             train_mse = loss_fn(train_pred, batch_y)
@@ -93,10 +95,10 @@ def train_ensemble(model, optimizer, normalizer, X_train, y_train, X_val, y_val,
 
         # append current epoch results
         epoch_count.append(epoch)
-        train_mse_values.append(np.mean(np.array(torch.tensor(train_mse_values).numpy())))
+        train_mse_values.append(np.mean(np.array(torch.tensor(batch_mse).numpy())))
         val_mse_values.append(val_mse)
         test_mse_values.append(test_mse)
-        train_acc_values.append(np.mean(np.array(torch.tensor(train_acc_values).numpy())))
+        train_acc_values.append(np.mean(np.array(torch.tensor(batch_acc).numpy())))
         val_acc_values.append(val_acc)
         test_acc_values.append(test_acc)
 
@@ -106,7 +108,6 @@ def train_ensemble(model, optimizer, normalizer, X_train, y_train, X_val, y_val,
         
         if early_stopping.early_stop:
             print("Early stopping")
-            print(len(train_acc_values))
             break
             
         if epoch % 10 == 0:
@@ -115,11 +116,13 @@ def train_ensemble(model, optimizer, normalizer, X_train, y_train, X_val, y_val,
     print(f"Epoch is {epoch:<3} \nTraining MSE: {train_mse:.3f} | Validation MSE: {val_mse:.3f} | Test MSE: {test_mse:.3f} | Training acc: {train_acc:.3f} | Validation acc: {val_acc:.3f}")
    
     final_acc = val_acc_values[-1]
+    test_acc = test_acc_values[-1]
     #learning curve and accuracy plot
     if name: 
         plt.subplot(1,2,1)
         plt.plot(epoch_count, np.array(torch.tensor(train_mse_values).numpy()), label="Training MSE")
         plt.plot(epoch_count, val_mse_values, label="Validation MSE", linestyle='dashed')
+        plt.plot(epoch_count, test_mse_values, label="External test MSE", linestyle='dotted')
         plt.title(name  + " TR and VL MSE")
         plt.ylabel("MSE")
         plt.xlabel("Epochs")
@@ -127,6 +130,7 @@ def train_ensemble(model, optimizer, normalizer, X_train, y_train, X_val, y_val,
         plt.subplot(1,2,2)
         plt.plot(epoch_count, np.array(torch.tensor(train_acc_values).numpy()), label="Training acc")
         plt.plot(epoch_count, val_acc_values, label="Validation acc", linestyle='dashed')
+        plt.plot(epoch_count, test_acc_values, label="Extermal test acc", linestyle='dotted')
         plt.title(name  + " TR and VL acc")
         plt.ylabel("acc")
         plt.xlabel("Epochs")
@@ -134,4 +138,4 @@ def train_ensemble(model, optimizer, normalizer, X_train, y_train, X_val, y_val,
         plt.show(block = False)
 
     torch.save(model.state_dict(),'trained_ensemble.pt')
-    return model.parameters(), final_acc
+    return model.parameters(), final_acc, test_acc

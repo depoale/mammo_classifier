@@ -21,6 +21,8 @@ from sklearn.metrics import auc
 from tools_for_Pytorch import weights_init_ones, WeightNormalizer, pytorch_linear_model
 from ensemble import train_ensemble
 from PIL import Image
+import warnings 
+warnings.filterwarnings('ignore')
 
 img_width = 60
 img_height = 60
@@ -184,14 +186,28 @@ class Data:
     
         self._PATH = IMGS_DIR """
 
-    def get_random_images(self, size:int):
+    def get_random_images(self, size:int, classes=None):
         """Extract random elements from the dataset
         .....
         Parameters
         ----------
         size: int
             number of random images """
-        rand_idx = np.random.randint(0, len(self.X), size=size)
+        
+        if classes is not None:
+            idx = []
+            for cl in classes:
+                print(cl)
+                idx.append(np.where(self.y == cl)[0])
+            
+            print(idx)
+            idx = np.squeeze(np.array(idx))
+            rand_idx = np.random.randint(0, len(idx), size=size)
+            rand_idx = idx[rand_idx]
+            print('rand:',rand_idx)
+        else:
+            rand_idx = np.random.randint(0, len(self.X), size=size)
+            
         X = self.X[rand_idx]
         y = self.y[rand_idx]
         return X, y
@@ -206,6 +222,18 @@ class Model:
         self.k = k
         self.modelBuilder = hyp_tuning_model
         self.models_list = []
+        self._SELECTED_MODEL = ''
+
+        @property
+        def selected_model(self):
+            return self._SELECTED_MODEL
+        
+        @selected_model.setter
+        def selected_model(self, model_name):
+            if type(model_name) != str:
+                raise TypeError(f'Expected str type got {type(model_name)}')
+            self._SELECTED_MODEL = model_name
+
 
     def train(self):
         """Perform hyperparameters search, k-fold and train ensemble"""
@@ -336,8 +364,16 @@ class Model:
         X = torch.from_numpy(X.astype('float32'))
         y = torch.from_numpy(self.y.astype('float32'))
 
-        X_dev, X_test, y_dev, y_test = train_test_split(X, y, test_size=0.2, shuffle=True, random_state=42)
-        X_train, X_val, y_train, y_val = train_test_split(X_dev, y_dev, test_size=0.2, shuffle=True, random_state=24)
+        # split train and validation
+        X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2, shuffle=True, random_state=24)
+        
+        # create dataset for external test
+        test_data = Data()
+        test_data.path=os.path.join('New_dataset', 'NEW_DATA')
+        X_test, y_test = test_data.get_random_images(size=25)
+        X_test = self.get_predictions(X_test)
+        X_test = torch.from_numpy(X_test.astype('float32'))
+        y_test = torch.from_numpy(y_test.astype('float32'))
 
         # model = weighted average 
         model = pytorch_linear_model(in_features=len(self.models_list), out_features=1)   
@@ -346,14 +382,22 @@ class Model:
         w_init = weights_init_ones
         model.apply(w_init)
 
-        optimizer = torch.optim.Adam(model.parameters(), lr=0.01, betas=(0.9, 0.9999))
+        optimizer = torch.optim.Adam(model.parameters(), lr=0.005, betas=(0.9, 0.9999))
         # we want the sum of the weights to be one
         normalizer = WeightNormalizer()
 
-        weights, final_acc = train_ensemble(model, optimizer, normalizer, X_train, y_train, X_val, y_val, X_test, y_test, name='ensemble')
+        weights, final_acc, test_acc = train_ensemble(model, optimizer, normalizer, X_train, y_train, X_val, y_val, X_test, y_test, batch_size=20, name='ensemble')
         print(f'Final accuracy: {final_acc}')
+        print(f'Test accuracy: {test_acc}')
         for w in weights:
-            print(w)
+            weights = torch.tensor(w.data).numpy()
+            print(type(weights))
+            print(type(weights.max()))
+            best_idx = np.where(weights==weights.max())[0][0]
+            print(best_idx)
+            print(type(best_idx))
+            self._SELECTED_MODEL = f'model_{best_idx}'
+
         plt.show()
 
 
