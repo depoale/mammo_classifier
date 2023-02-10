@@ -315,12 +315,13 @@ class Model:
         k:int
             number of folds. Default 5
         """
+        tuner_dir = os.path.join('tuner', f'tuner_{i}')
         if self.overwrite :
             project_name = 'tuner'
         else:
             project_name = 'base'
         tuner = kt.BayesianOptimization(modelBuilder, objective='val_accuracy', max_trials=self.max_trials, 
-                                        overwrite=self.overwrite, directory=f'tuner_{i}', project_name=project_name)
+                                        overwrite=self.overwrite, directory=tuner_dir, project_name=project_name)
         tuner.search(X_dev, y_dev, epochs=50, validation_split=1/(k-1), batch_size=64, 
                     callbacks=callbacks, verbose=1)
         best_hps = tuner.get_best_hyperparameters(num_trials=1)[0]
@@ -335,7 +336,8 @@ class Model:
     def retrain_and_save(self, X, y, hps, modelBuilder, i):
         model = modelBuilder(hps)
         model.fit(X, y, epochs=100, batch_size=64, validation_split=0.25, callbacks=callbacks)
-        model.save(f'model_{i}')  
+        model_path = os.path.join('models', f'model_{i}')
+        model.save(model_path)  
 
     def fold(self, k=5):
         """Performs kfold & hps search in each fold.
