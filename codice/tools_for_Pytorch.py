@@ -1,5 +1,6 @@
 import numpy as np
 import torch
+from torch import nn
 
 class EarlyStopping:
     """
@@ -82,3 +83,8 @@ class WeightNormalizer(object):
             weights /= weights.sum() 
             module.weight.data = weights
             print('after', weights)
+
+def pytorch_linear_model(in_features=5, out_features=1):
+    model = nn.Sequential(nn.Linear(in_features=in_features, out_features=out_features, bias=False)
+                              )
+    return model

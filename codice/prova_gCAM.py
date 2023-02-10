@@ -14,9 +14,10 @@ import matplotlib.cm as cm
 def make_gradcam_heatmap(
     img_array, model, last_conv_layer_name, classifier_layer_names, output_path=None
 ):
+    
     img_array = img_array.reshape(1, 60, 60, 1)
     #img_array = tf.convert_to_tensor(img_array)
-    print('img',img_array.shape)
+    
     # First, we create a model that maps the input image to the activations
     # of the last conv layer
     last_conv_layer = model.get_layer(last_conv_layer_name)

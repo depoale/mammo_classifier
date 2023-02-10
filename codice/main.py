@@ -12,7 +12,9 @@ import torch
 import time
 import keras
 from prova_gCAM import make_gradcam_heatmap
- 
+from tools_for_Pytorch import pytorch_linear_model, weights_init_ones
+import warnings 
+warnings.filterwarnings('ignore')
  
 if __name__=='__main__':
     start = time.time()
@@ -137,30 +139,14 @@ if __name__=='__main__':
     model = Model(data=data, overwrite=args.overwrite, max_trials=max_trials)
     model.train() 
 
-    #4. test ensemble on a brand new dataset
-    test_data = Data()
-    test_data.path='total_data'         #solo per provare, da cambiare ASSOLUTAMENTE
-    X_test, y_test = test_data.get_random_images(size=40)  #solo per provare, da cambiare ASSOLUTAMENTE
-    print(X_test.shape)
-    ensemble = torch.load(os.path.join('trained_ensemble', 'model'))
-    ensemble.eval()
-    X_test = model.get_predictions(X_test)
-    X_test = torch.from_numpy(X_test.astype('float32'))
-    X_test = X_test.unsqueeze(0)
-    print(X_test.shape)
-    outputs = torch.squeeze(ensemble(X_test)).softmax(0)
-    for out, y in zip(outputs, y_test):
-        print(f'pred {out:.3f} vs true {y}')
-    print(f'Elapsed time: {time.time() - start}')
+    #4. check what the most reliable model has learnt using gradCAM
+    #print(model.selected_model)
+    print(model._SELECTED_MODEL)
 
-    #5. check what the most reliable model has learnt using gradCAM
-    print(type(ensemble))
-    weights = ensemble.parameters() #ensemble.weight.data
-    best = weights.index(np.argmax(weights))
-    best_model = keras.load_model(f'model_{best}')
-    X_test, y_test = test_data.get_random_images(size=6)
-    preds = model.predict(X_test)
+    best_model = keras.models.load_model(model._SELECTED_MODEL)
+    X_test, y_test = data.get_random_images(size=6, classes=[1])
+    preds = best_model.predict(X_test)
     classifier_layer_names = [layer.name for idx, layer in enumerate(best_model.layers) if idx > 8]
     for i, X in enumerate(X_test):
-        make_gradcam_heatmap(X_test, model=best_model, last_conv_layer_name='conv_3', 
-            classifier_layer_names=classifier_layer_names, output_path=f'gCAM_{i}.png')
+        make_gradcam_heatmap(X, model=best_model, last_conv_layer_name='conv_3', 
+            classifier_layer_names=classifier_layer_names, output_path=f'gCAM_{i}.png') 

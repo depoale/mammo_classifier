@@ -18,9 +18,11 @@ import torch
 import torch.nn as nn
 import statistics as stats
 from sklearn.metrics import auc
-from tools_for_Pytorch import weights_init_ones, WeightNormalizer
+from tools_for_Pytorch import weights_init_ones, WeightNormalizer, pytorch_linear_model
 from ensemble import train_ensemble
 from PIL import Image
+import warnings 
+warnings.filterwarnings('ignore')
 
 img_width = 60
 img_height = 60
@@ -71,7 +73,7 @@ class Data:
         self.X, self.y = shuffle_data(self.X, self.y)
         self.len = len(self.X)
 
-    def __len__():
+    def __len__(self):
         return self.len
 
     def __getitem__(self, index):    
@@ -184,31 +186,59 @@ class Data:
     
         self._PATH = IMGS_DIR """
 
-    def get_random_images(self, size:int):
+    def get_random_images(self, size:int, classes=None):
         """Extract random elements from the dataset
         .....
         Parameters
         ----------
         size: int
             number of random images """
-        rand_idx = np.random.randint(0, len(self.X), size=size)
+        
+        if classes is not None:
+            idx = []
+            for cl in classes:
+                print(cl)
+                idx.append(np.where(self.y == cl)[0])
+            
+            print(idx)
+            idx = np.squeeze(np.array(idx))
+            rand_idx = np.random.randint(0, len(idx), size=size)
+            rand_idx = idx[rand_idx]
+            print('rand:',rand_idx)
+        else:
+            rand_idx = np.random.randint(0, len(self.X), size=size)
+            
         X = self.X[rand_idx]
         y = self.y[rand_idx]
         return X, y
 
 class Model:
     """Perform hyperparameters search, k-fold and train ensemble"""
-    def __init__(self, data, overwrite, max_trials):
+    def __init__(self, data, overwrite, max_trials, k=5):
         self.X = data.X
         self.y = data.y
         self.max_trials = max_trials
         self.overwrite = overwrite
+        self.k = k
         self.modelBuilder = hyp_tuning_model
         self.models_list = []
+        self._SELECTED_MODEL = ''
+
+        @property
+        def selected_model(self):
+            return self._SELECTED_MODEL
+        
+        @selected_model.setter
+        def selected_model(self, model_name):
+            if type(model_name) != str:
+                raise TypeError(f'Expected str type got {type(model_name)}')
+            self._SELECTED_MODEL = model_name
+
 
     def train(self):
         """Perform hyperparameters search, k-fold and train ensemble"""
-        self.fold()
+        #self.fold()
+        self.set_models_list()
         self.get_ensemble()
 
     def tuner(self, X_dev, y_dev, modelBuilder, i, k=5):
@@ -239,11 +269,15 @@ class Model:
         best_model = tuner.get_best_models()[0]
         return best_hps, best_model
     
+    def set_models_list(self):
+        for i in range(self.k):
+            self.models_list.append(f'model_{i}') 
+
+    
     def retrain_and_save(self, X, y, hps, modelBuilder, i):
         model = modelBuilder(hps)
         model.fit(X, y, epochs=100, batch_size=64, validation_split=0.25, callbacks=callbacks)
         model.save(f'model_{i}')  
-        #self.models_list.append(f'model_{i}') 
 
     def fold(self, k=5):
         """Performs kfold & hps search in each fold.
@@ -264,7 +298,7 @@ class Model:
         colors = ['green', 'red', 'blue', 'darkorange', 'gold']
 
         # here model selection and model assessment are peformed (k-fold + hold-out)
-        fold  = KFold(n_splits=k, shuffle=True, random_state=42)
+        fold  = KFold(n_splits=self.k, shuffle=True, random_state=42)
         for i, (dev_idx, test_idx) in enumerate(fold.split(self.X, self.y)):
             #divide development and test sets
             X_dev, X_test = self.X[dev_idx], self.X[test_idx]
@@ -281,7 +315,6 @@ class Model:
 
             dimension.append(count_params(best_model.trainable_weights))
             test_acc.append(accuracy)
-            self.models_list.append(f'model_{i}')
             
             #add this fold's results to the plots
             plot(history=history, i=i)
@@ -331,25 +364,40 @@ class Model:
         X = torch.from_numpy(X.astype('float32'))
         y = torch.from_numpy(self.y.astype('float32'))
 
-        X_dev, X_test, y_dev, y_test = train_test_split(X, y, test_size=0.2, shuffle=True, random_state=42)
-        X_train, X_val, y_train, y_val = train_test_split(X_dev, y_dev, test_size=0.2, shuffle=True, random_state=24)
+        # split train and validation
+        X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2, shuffle=True, random_state=24)
+        
+        # create dataset for external test
+        test_data = Data()
+        test_data.path=os.path.join('New_dataset', 'NEW_DATA')
+        X_test, y_test = test_data.get_random_images(size=25)
+        X_test = self.get_predictions(X_test)
+        X_test = torch.from_numpy(X_test.astype('float32'))
+        y_test = torch.from_numpy(y_test.astype('float32'))
 
-        # model = weighted average    
-        model = nn.Sequential(nn.Linear(in_features=len(self.models_list), out_features=1, bias=False)
-                              )
+        # model = weighted average 
+        model = pytorch_linear_model(in_features=len(self.models_list), out_features=1)   
     
         # weights initialization and bias set to zero not trainable
         w_init = weights_init_ones
         model.apply(w_init)
 
-        optimizer = torch.optim.Adam(model.parameters(), lr=0.01, betas=(0.9, 0.9999))
+        optimizer = torch.optim.Adam(model.parameters(), lr=0.005, betas=(0.9, 0.9999))
         # we want the sum of the weights to be one
         normalizer = WeightNormalizer()
 
-        weights, final_acc = train_ensemble(model, optimizer, normalizer, X_train, y_train, X_val, y_val, X_test, y_test, name='ensemble')
+        weights, final_acc, test_acc = train_ensemble(model, optimizer, normalizer, X_train, y_train, X_val, y_val, X_test, y_test, batch_size=20, name='ensemble')
         print(f'Final accuracy: {final_acc}')
+        print(f'Test accuracy: {test_acc}')
         for w in weights:
-            print(w)
+            weights = torch.tensor(w.data).numpy()
+            print(type(weights))
+            print(type(weights.max()))
+            best_idx = np.where(weights==weights.max())[0][0]
+            print(best_idx)
+            print(type(best_idx))
+            self._SELECTED_MODEL = f'model_{best_idx}'
+
         plt.show()
 
 
