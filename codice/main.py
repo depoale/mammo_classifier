@@ -3,7 +3,7 @@ the same code used in models.py (where test accuracy is always above 0.93) """
 
  
 from utils import wave_set, str2bool, create_new_dir
-from models import set_hyperp, get_search_space_size
+from hypermodel import set_hyperp, get_search_space_size
 import numpy as np
 import argparse
 import os
@@ -140,7 +140,7 @@ if __name__=='__main__':
     model.train() 
 
     #4. check what the most reliable model has learnt using gradCAM
-    best_model = keras.models.load_model(model._SELECTED_MODEL)
+    best_model = keras.models.load_model(model.selected_model())
     num_images = args.gradcam
     if num_images > 25:
         print('Showing 25 images using gradCAM')

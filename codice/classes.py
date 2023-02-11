@@ -39,7 +39,7 @@ class Data:
         ...
         Attributes
         ----------
-        augmentes: bools
+        augmented: bool
             whether to perform data augmentation
         wavelet: bool
             whether to use wavelet procedure 
@@ -54,7 +54,7 @@ class Data:
         def path(self):
             return self._PATH
         
-        @path.setter
+        @path.setter    ##controllare se la cartella esiste prima
         def path(self, directory):
             if type(directory) != str:
                 raise TypeError(f'Expected str type got {type(directory)}')
@@ -258,13 +258,11 @@ class Data:
                 print(cl)
                 idx.append(np.where(self.y == cl)[0])
             
-            print(idx)
             idx = np.squeeze(np.array(idx))
             rand_idx = np.random.randint(0, len(idx), size=size)
             rand_idx = idx[rand_idx]
-            print('rand:',rand_idx)
         else:
-            rand_idx = np.random.randint(0, len(self.X), size=size)
+            rand_idx = np.random.randint(0, self.len, size=size)
             
         X = self.X[rand_idx]
         y = self.y[rand_idx]
@@ -396,7 +394,7 @@ class Model:
     
 
     def get_predictions(self, X=None):
-        """Creates and returns an array of model predictions. Each column corrispond to one expert preds.
+        """Creates and returns an array of model predictions. Each column corrispond to one expert's preds.
         Used both in training and in assessing the performance of the model (when X=None the predictions are 
         evaluated on self.X, otherwise on whatever X is passed)"""
         if X is None:
@@ -421,7 +419,7 @@ class Model:
         
         # create dataset for external test
         test_data = Data()
-        test_data.path=os.path.join('New_dataset', 'NEW_DATA')
+        test_data.path(os.path.join('New_dataset', 'NEW_DATA'))
         X_test, y_test = test_data.get_random_images(size=25)
         X_test = self.get_predictions(X_test)
         X_test = torch.from_numpy(X_test.astype('float32'))
@@ -446,8 +444,6 @@ class Model:
             print(type(weights))
             print(type(weights.max()))
             best_idx = np.where(weights==weights.max())[0][0]
-            print(best_idx)
-            print(type(best_idx))
             self._SELECTED_MODEL = f'model_{best_idx}'
 
         plt.show()
