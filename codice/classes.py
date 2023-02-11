@@ -1,4 +1,4 @@
-from utils import read_imgs, callbacks, create_new_dir, save_image, convert_to_grayscale, shuffle_data
+from utils import read_imgs, callbacks, create_new_dir, save_image, convert_to_grayscale
 from plots import  ROC, get_confusion_matrix, plot, comparison_plot, plot_mean_stdev
 from hypermodel import hyp_tuning_model
 import os
@@ -6,7 +6,6 @@ from keras.preprocessing.image import ImageDataGenerator
 import numpy as np
 from matplotlib import pyplot as plt
 from keras.utils.layer_utils import count_params
-from random import shuffle
 import tensorflow as tf
 import shutil
 #import matlab.engine
@@ -18,7 +17,7 @@ import torch
 import torch.nn as nn
 import statistics as stats
 from sklearn.metrics import auc
-from tools_for_Pytorch import weights_init, WeightNormalizer, pytorch_linear_model
+from tools_for_Pytorch import WeightInitializer, WeightNormalizer, pytorch_linear_model
 from ensemble import train_ensemble
 from PIL import Image
 import warnings 
@@ -70,7 +69,7 @@ class Data:
             pass
         
         self.set_data(self._PATH)
-        self.X, self.y = shuffle_data(self.X, self.y)
+        self.X, self.y = self.shuffle_data()
         self.len = len(self.X)
 
     def __len__(self):
@@ -81,6 +80,11 @@ class Data:
     
     def set_data(self, directory):
         self.X, self.y = read_imgs(directory, [0,1])
+    
+    def shuffle_data(self):
+        assert len(self.X) == len(self.y)
+        p = np.random.permutation(len(self.X))
+        return self.X[p], self.y[p]
 
     def aug(self):
         IMGS_DIR ='augmented_data'
@@ -328,7 +332,8 @@ class Model:
     
     def set_models_list(self):
         for i in range(self.k):
-            self.models_list.append(f'model_{i}') 
+            model_path = os.path.join('models', f'model_{i}')
+            self.models_list.append(model_path) 
 
     def fold(self, k=5):
         """Performs kfold & hps search in each fold.
@@ -373,7 +378,8 @@ class Model:
             get_confusion_matrix(X_test, y_test=y_test, model=best_model, i=i+1)
 
             #retrain on the whole dataset and save best model 
-            best_model.save(f'model_{i}')
+            model_path = os.path.join('models', f'model_{i}')
+            best_model.save(model_path)
 
         # plot mean and stdev in ROC curve plot
         plot_mean_stdev(tprs, mean_fpr, aucs)
@@ -419,7 +425,8 @@ class Model:
         
         # create dataset for external test
         test_data = Data()
-        test_data.path(os.path.join('New_dataset', 'NEW_DATA'))
+        test_data.path=os.path.join('New_dataset', 'NEW_DATA')
+        print(test_data.path)
         X_test, y_test = test_data.get_random_images(size=25)
         X_test = self.get_predictions(X_test)
         X_test = torch.from_numpy(X_test.astype('float32'))
@@ -428,9 +435,9 @@ class Model:
         # model = weighted average 
         model = pytorch_linear_model(in_features=len(self.models_list), out_features=1)   
     
-        # weights initialization and bias set to zero not trainable
-        w_init = weights_init
-        model.apply(w_init)
+        # weights initialization 
+        initializer=WeightInitializer()
+        model.apply(initializer)
 
         optimizer = torch.optim.Adam(model.parameters(), lr=0.005, betas=(0.9, 0.9999))
         # we want the sum of the weights to be one

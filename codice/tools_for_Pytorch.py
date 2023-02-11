@@ -56,20 +56,18 @@ class EarlyStopping:
     #     torch.save(model.state_dict(), self.path)
     #     self.val_loss_min = val_loss
 
+class WeightInitializer(object):
+    """Random weights normalization and initialization"""
+    def __call__(self, module):
+        if hasattr(module, 'weight'):
+            with torch.no_grad():
+                # random initialization
+                in_weights = np.random.uniform(0.03, 3, size=torch.numel(module.weight.data))
+                # normalization
+                in_weights /= in_weights.sum()
+                #assignment
+                module.weight.data = torch.from_numpy(in_weights.astype('float32'))
 
-def weights_init(model):
-    """Random weights initialisation and normalisation
-    .....
-    Parameters
-    ----------
-    model: pytorch model """
-    classname = model.__class__.__name__
-    # for every Linear layer in a model..
-    if classname.find('Linear') != -1:
-        with torch.no_grad():
-            x = np.random.uniform(0.03, 3, size=5)
-            x /= x.sum()
-            model.weight.data = torch.from_numpy(x.astype('float32'))
 
 class WeightNormalizer(object):
     """Applied after each weight update, clips the weights to be in (0.01, 1) and normalises the sum to 1"""
@@ -84,7 +82,7 @@ class WeightNormalizer(object):
             module.weight.data = weights
 
 def pytorch_linear_model(in_features=5, out_features=1):
-    """Linear model builder"""
+    """Linear model builder no bias"""
     model = nn.Sequential(nn.Linear(in_features=in_features, out_features=out_features, bias=False)
                               )
     return model

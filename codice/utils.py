@@ -81,11 +81,6 @@ def str2bool(v):
         raise argparse.ArgumentTypeError('Boolean value expected.')
     
 
-def shuffle_data(a,b):
-    assert len(a) == len(b)
-    p = np.random.permutation(len(a))
-    return a[p], b[p]
-
 def nearest_square(limit):
     """Returns the highest square less or equal to limit"""
     answer = 0
