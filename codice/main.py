@@ -2,7 +2,7 @@
 the same code used in models.py (where test accuracy is always above 0.93) """
 
  
-from utils import wave_set, str2bool, create_new_dir
+from utils import wave_set, str2bool, create_new_dir, rate
 from hypermodel import set_hyperp, get_search_space_size
 import numpy as np
 import argparse
@@ -58,7 +58,7 @@ if __name__=='__main__':
         metavar="",
         type=float,
         help="threshold of wavelet coefficients in terms of the standard deviation of their distributions (do not go over 2!)",
-        default=[1.5],
+        default=1.5,
 
     )
     
@@ -99,7 +99,7 @@ if __name__=='__main__':
         "--dropout_rate",
         metavar="",
         nargs='+',
-        type=float,
+        type=rate,
         help="List of values for the hypermodel's dropout rate",
         default=[0.1, 0.05, 0.0],
     )
@@ -108,7 +108,7 @@ if __name__=='__main__':
         "-sf",
         "--searching_fraction",
         metavar="",
-        type=float,
+        type=rate,
         help="Fraction of the hyperparamiters space explored during hypermodel search",
         default=0.25,
     )

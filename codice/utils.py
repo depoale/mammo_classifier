@@ -83,7 +83,15 @@ def str2bool(v):
         return False
     else:
         raise argparse.ArgumentTypeError('Boolean value expected.')
-    
+
+def rate(values):
+    """Check type and value of rate quantities"""
+    for v in values:
+        if isinstance(v, float):
+            if not 0. <= v <= 1.:
+                raise ValueError(f'Rate value should be between 0 and 1 not {v}')
+        else: raise TypeError(f'Argument invalid: expected float got {type(v)}')
+                
 
 # functions for gCAM plot
 def nearest_square(limit:int):
