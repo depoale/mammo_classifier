@@ -11,7 +11,7 @@ from classes import Data, Model
 import time
 import keras
 from gcam import get_gcam_images
-from plots import gCAM_images
+from plots import gCAM_show
 import shutup
 import warnings 
 warnings.filterwarnings('ignore')
@@ -137,10 +137,12 @@ if __name__=='__main__':
 
     #3. create and train the model
     model = Model(data=data, overwrite=args.overwrite, max_trials=max_trials)
-    model.train() 
+    model.train()
+    print(model._selected_model)
+    print(model.selected_model)
 
     #4. check what the most reliable model has learnt using gradCAM
-    best_model = keras.models.load_model(model.selected_model())
+    best_model = keras.models.load_model(model.selected_model)
     num_images = args.gradcam
     if num_images > 25:
         print('Showing 25 images using gradCAM')
@@ -148,4 +150,4 @@ if __name__=='__main__':
     rand_images, _ = data.get_random_images(size=num_images, classes=[1])
     preds = best_model.predict(rand_images)
     get_gcam_images(rand_images, best_model)
-    gCAM_images(size=num_images, preds=preds)
+    gCAM_show(preds=preds)

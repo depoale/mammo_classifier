@@ -33,7 +33,7 @@ wave_settings_default = {
 
 
 class Data:
-    def __init__(self, augmented=False, wavelet=False, wave_settings=wave_settings_default):
+    def __init__(self, augmented=False, wavelet=False, wave_settings=wave_settings_default, path='total_data'):
         """class used to choose and initialize dataset
         ...
         Attributes
@@ -46,18 +46,7 @@ class Data:
             settings for wavelet procedure"""
         
         #default path to dataset
-        self._PATH = 'total_data'
-
-        # path to dataset
-        @property
-        def path(self):
-            return self._PATH
-        
-        @path.setter    ##controllare se la cartella esiste prima
-        def path(self, directory):
-            if type(directory) != str:
-                raise TypeError(f'Expected str type got {type(directory)}')
-            self._PATH = directory
+        self._path = path
         
         # augmentation procedure
         if augmented:
@@ -68,9 +57,11 @@ class Data:
             #self.wave(wave_settings)
             pass
         
-        self.set_data(self._PATH)
+        # set self.X and self.y according to self._PATH
+        self.set_data(self._path)
         self.X, self.y = self.shuffle_data()
         self.len = len(self.X)
+
 
     def __len__(self):
         return self.len
@@ -87,14 +78,20 @@ class Data:
         return self.X[p], self.y[p]
 
     def aug(self):
+        """Augmentation procedure"""
+        # setting new dataset directory
         IMGS_DIR ='augmented_data'
-        for cl in ['0', '1']:
-            create_new_dir(os.path.join(f'{IMGS_DIR}', cl))
-            dataset_path = os.path.join(f'{self._PATH}', cl)
-            names = os.listdir(dataset_path)
-            for name in names:
-                shutil.copy(os.path.join(f'{self._PATH}', cl, f'{name}'), os.path.join(f'{IMGS_DIR}', cl))
 
+        for cl in ['0', '1']:
+            #create a sub-dir for each class
+            create_new_dir(os.path.join(f'{IMGS_DIR}', cl))
+            dataset_path = os.path.join(f'{self._path}', cl)
+            names = os.listdir(dataset_path)
+            #copy each image of the original dataset into the new direcrory
+            for name in names:
+                shutil.copy(os.path.join(f'{self._path}', cl, f'{name}'), os.path.join(f'{IMGS_DIR}', cl))
+
+        #set augmentation transformations
         datagen = ImageDataGenerator(
         rotation_range=50,
         width_shift_range=3,
@@ -104,10 +101,11 @@ class Data:
         fill_mode='reflect',
         validation_split=0)
         
-        for i, one_class in enumerate(os.listdir(self._PATH)):
+        #create new images class-wise
+        for one_class in os.listdir(self._path):
             dir_path = os.path.join(f'{IMGS_DIR}', one_class)
             gen = datagen.flow_from_directory(
-                self._PATH,
+                self._path,
                 target_size = (img_width, img_height),
                 batch_size = 1,
                 color_mode = 'grayscale',
@@ -115,11 +113,12 @@ class Data:
                 classes = [one_class],
                 save_to_dir = dir_path
             )
+
             #generate & save the images
             for k in range(len(gen)):
                 gen.next()
 
-        self._PATH = IMGS_DIR
+        self._path = IMGS_DIR
 
     
     '''def wave(self, wave_settings):
@@ -144,7 +143,7 @@ class Data:
             #creating a new directory for wavelet images
             create_new_dir(os.path.join(f'{IMGS_DIR}', cl))
             #setting the path to images which will be processed
-            dataset_path = os.path.join(f'{self._PATH}', cl)
+            dataset_path = os.path.join(f'{self._path}', cl)
             names = os.listdir(dataset_path)
             
             for name in names:
@@ -246,7 +245,7 @@ class Data:
 
 
         #setting the self path to the new wavelet-filtered images dataset
-        self._PATH = IMGS_DIR'''
+        self._path = IMGS_DIR'''
 
     def get_random_images(self, size:int, classes=None):
         """Extract random elements from the dataset
@@ -254,20 +253,27 @@ class Data:
         Parameters
         ----------
         size: int
-            number of random images """
+            number of random images 
+        classes: list
+            list of classes from which we want to extract random images
+            default: None means that images will be extracted regardless from the class"""
         
+        #extract images from the user-given list
         if classes is not None:
             idx = []
             for cl in classes:
-                print(cl)
+                # create a list patterns belonging to classes list 
                 idx.append(np.where(self.y == cl)[0])
             
             idx = np.squeeze(np.array(idx))
+            # extract random indices from that list
             rand_idx = np.random.randint(0, len(idx), size=size)
             rand_idx = idx[rand_idx]
         else:
+            # random indices regardless of the class the patter belongs to
             rand_idx = np.random.randint(0, self.len, size=size)
-            
+
+        # setting the random indices
         X = self.X[rand_idx]
         y = self.y[rand_idx]
         return X, y
@@ -279,20 +285,20 @@ class Model:
         self.y = data.y
         self.max_trials = max_trials
         self.overwrite = overwrite
-        self.k = k
-        self.modelBuilder = hyp_tuning_model
-        self.models_list = []
-        self._SELECTED_MODEL = ''
+        self.k = k   # k-fold parameter
+        self.modelBuilder = hyp_tuning_model  #hypermodel
+        self.models_list = []  # list of path to pretrained model (ensemble feeder)
+        self._selected_model = ''    #path to a selected model (default: ensemble winner)
 
-        @property
-        def selected_model(self):
-            return self._SELECTED_MODEL
-        
-        @selected_model.setter
-        def selected_model(self, model_name):
-            if type(model_name) != str:
-                raise TypeError(f'Expected str type got {type(model_name)}')
-            self._SELECTED_MODEL = model_name
+    @property
+    def selected_model(self):
+        return self._selected_model
+    
+    @selected_model.setter
+    def selected_model(self, model_name):
+        if not os.path.isdir(model_name):
+            raise FileNotFoundError(f'No such file or directory {model_name}')
+        self._selected_model = model_name
 
 
     def train(self):
@@ -302,7 +308,9 @@ class Model:
         self.get_ensemble()
 
     def tuner(self, X_dev, y_dev, modelBuilder, i, k=5):
-        """If overwrite is true performes hps search, else takes default hps.
+        """ Performs hyperparameters search for the current fold (i) using keras-tuner if overwrite is true, 
+        else takes default hps.
+        Then builds the model, returns the best hyperparameters and the model.
         ....
         Parameters
         ----------
@@ -316,12 +324,24 @@ class Model:
             k-fold index
         k:int
             number of folds. Default 5
+        
+        Returns
+        -------
+        best_hps: dict
+            Dictionary with hps name and selected values
+        best_model: keras.Model
+            Model built using those hps
         """
+        # set path for tuner
         tuner_dir = os.path.join('tuner', f'tuner_{i}')
         if self.overwrite :
             project_name = 'tuner'
         else:
+            # pre-made search
             project_name = 'base'
+        
+        # tuner settings and search
+        # score: val_accuracy so that model with good generalization capability are selected 
         tuner = kt.BayesianOptimization(modelBuilder, objective='val_accuracy', max_trials=self.max_trials, 
                                         overwrite=self.overwrite, directory=tuner_dir, project_name=project_name)
         tuner.search(X_dev, y_dev, epochs=50, validation_split=1/(k-1), batch_size=64, 
@@ -336,8 +356,12 @@ class Model:
             self.models_list.append(model_path) 
 
     def fold(self, k=5):
-        """Performs kfold & hps search in each fold.
-        Returs best hps list (one entry for each fold)"""
+        """Performs kfold & hps search in each fold. Shows some plots to assess the performance of each fold.
+        ...
+        Parameters
+        ----------
+        k: int
+            k-fold parameter. Default 5"""
         #initialize lists to keep track of each fold's performance
         test_acc=[]
         dimension=[]
@@ -362,13 +386,15 @@ class Model:
             print('--------------')
             print(f'FOLD {i+1}')
             print('--------------')
+            #tuner search
             best_hps, best_model = self.tuner(X_dev, y_dev, self.modelBuilder, i, k=5)
             best_hps_list.append(best_hps)
 
-            #train best model and assess model's performance
+            #train best model and assess its performance onto test set
             history = best_model.fit(X_dev, y_dev, epochs=100, batch_size=64, validation_split=1/(k-1), callbacks=callbacks)
             accuracy= round(best_model.evaluate(X_test, y_test)[1],3)
 
+            # append this fold's number of trainable parmaters and its accuracy on test set
             dimension.append(count_params(best_model.trainable_weights))
             test_acc.append(accuracy)
             
@@ -377,14 +403,16 @@ class Model:
             ROC(X_test, y_test=y_test, model=best_model, color=colors[i], i=i+1, mean_fpr=mean_fpr, tprs=tprs, aucs=aucs)
             get_confusion_matrix(X_test, y_test=y_test, model=best_model, i=i+1)
 
-            #retrain on the whole dataset and save best model 
+            #save the model and add its path to self.models_list 
             model_path = os.path.join('models', f'model_{i}')
             best_model.save(model_path)
+            #self.models_list.append(model_path) 
 
         # plot mean and stdev in ROC curve plot
         plot_mean_stdev(tprs, mean_fpr, aucs)
         comparison_plot(names=self.models_list, dimension=dimension, accuracy=test_acc)
     
+        # print stats and chosen hyperparametrs
         print(f'Test Accuracy {test_acc}')
         print(f'Expected accuracy: {stats.mean(test_acc):.2f}+/- {stats.stdev(test_acc):.2f}')
         print(f'best hps:')
@@ -400,12 +428,27 @@ class Model:
     
 
     def get_predictions(self, X=None):
-        """Creates and returns an array of model predictions. Each column corrispond to one expert's preds.
-        Used both in training and in assessing the performance of the model (when X=None the predictions are 
-        evaluated on self.X, otherwise on whatever X is passed)"""
+        """Creates and returns an array of model predictions. Each column corrispond to one expert's 
+        predictions. When X=None the predictions are evaluated on self.X, otherwise on whatever 
+        X is passed.
+        ...
+        Parameters
+        ----------
+        X: np.array
+            Array to predict. Default None means that self.X is predicted
+        
+        Returns
+        -------
+        y: np.array
+            Array of predictions"""
+        
         if X is None:
             X = self.X
+        
+        #initialise predictions array
         y = np.empty(shape=(len(X), len(self.models_list)))
+
+        # add each expert predictions column-wise
         for count, expert in enumerate(self.models_list):
             expert = load_model(expert)
             y[:, count] = np.squeeze(expert.predict(X))
@@ -423,35 +466,43 @@ class Model:
         # split train and validation
         X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2, shuffle=True, random_state=24)
         
-        # create dataset for external test
-        test_data = Data()
-        test_data.path=os.path.join('New_dataset', 'NEW_DATA')
-        print(test_data.path)
+        # create dataset for external test (data stored in 'New_dataset/NEW_DATA')
+        test_data = Data(path = os.path.join('New_dataset', 'NEW_DATA'))
+
+        # get random images from this dataset and get each expert's predictions
         X_test, y_test = test_data.get_random_images(size=25)
         X_test = self.get_predictions(X_test)
+
+        # transform to tensors
         X_test = torch.from_numpy(X_test.astype('float32'))
         y_test = torch.from_numpy(y_test.astype('float32'))
 
-        # model = weighted average 
+        # linear model performs weighted average 
         model = pytorch_linear_model(in_features=len(self.models_list), out_features=1)   
     
-        # weights initialization 
+        # random weights initialization (and normalisation)
+        # the weights represent the "reliability" of a model among the comitee, so they are bound 
+        # in range (0.01, 1) and their sum must add up to 1
         initializer=WeightInitializer()
         model.apply(initializer)
 
         optimizer = torch.optim.Adam(model.parameters(), lr=0.005, betas=(0.9, 0.9999))
-        # we want the sum of the weights to be one
+
+        # applied after each optimiser step to clip and normalise the updated weights
         normalizer = WeightNormalizer()
 
-        weights, final_acc, test_acc = train_ensemble(model, optimizer, normalizer, X_train, y_train, X_val, y_val, X_test, y_test, batch_size=20, name='ensemble')
+        #ensemble trainibg
+        weights, final_acc, test_acc = train_ensemble(model, optimizer, normalizer, X_train, y_train, X_val, y_val, X_test, y_test, batch_size=20)
+        
+        #Ensemble stats
         print(f'Final accuracy: {final_acc}')
         print(f'Test accuracy: {test_acc}')
+
+        # set selected_model to be the most reliable in the comitee
         for w in weights:
             weights = torch.tensor(w.data).numpy()
-            print(type(weights))
-            print(type(weights.max()))
             best_idx = np.where(weights==weights.max())[0][0]
-            self._SELECTED_MODEL = f'model_{best_idx}'
+            self._selected_model = os.path.join('models',f'model_{best_idx}')
 
         plt.show()
 

@@ -151,7 +151,7 @@ def comparison_plot(names, dimension, accuracy):
     #plt.legend()
     plt.show(block=False)
 
-def gCAM_images(preds, cam_path='gCam'):
+def gCAM_show(preds, cam_path='gCam'):
     """Shows gradCAM images comparing lables and model predictions
      .....
     Parameters

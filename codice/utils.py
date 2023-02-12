@@ -34,6 +34,8 @@ def read_imgs(dataset_path, classes):
     tmp = []
     labels = []
     for cls in classes:
+        if not os.path.isdir(os.path.join(dataset_path, str(cls))):
+            raise FileNotFoundError(f'No such file or directory {os.path.join(dataset_path, str(cls))}') 
         fnames = glob.glob(os.path.join(dataset_path, str(cls), '*.png'))
         logging.info(f'Read images from class {cls}')
         tmp += [imread(fname) for fname in fnames]
@@ -81,21 +83,22 @@ def str2bool(v):
         raise argparse.ArgumentTypeError('Boolean value expected.')
     
 
-def nearest_square(limit):
-    """Returns the highest square less or equal to limit"""
+# functions for gCAM plot
+def nearest_square(limit:int):
+    """Returns the sqrt of the highest square less or equal than limit"""
     answer = 0
     while (answer+1)**2 <= limit:
         answer += 1
     return answer
     
-def get_rows_columns(size):
+def get_rows_columns(size:int):
     """Create a matrix starting from the nearest square"""
     n = nearest_square(size)
     rows = n
     columns = n
     while rows*columns < size:
         columns += 1
-    return rows.astype(int), columns.astype(int)
+    return rows, columns
 
 
 
