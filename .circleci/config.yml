@@ -16,12 +16,12 @@ jobs:
       - run:
           name: Run tests utils
           command: python -m unittest tests.utils_test
-      -run:
+      - run:
           name: Run tests tools_for_pytorch
           command: python -m unittest tests.toold_test
-      -run:    
+      - run:    
           command: python -m unittest tests.hypermodel_test
-      -run:    
+      - run:    
           command: python -m unittest tests.classes_test
           
           
