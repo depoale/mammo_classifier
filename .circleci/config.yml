@@ -1,7 +1,7 @@
 version: 2.1
 
 orbs:
-  python: circleci/python@2.0.3
+  python: circleci/python@2.1.1
   
 jobs:
   build-and-test: 
@@ -16,7 +16,9 @@ jobs:
       - run:
           name: Run tests
           command: python -m unittest tests.utils_test
-          
+          command: python -m unittest tests.toold_test
+          command: python -m unittest tests.hypermodel_test
+          command: python -m unittest tests.classes_test
           
           
 workflows:
