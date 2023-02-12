@@ -75,6 +75,8 @@ def str2bool(v):
     """String to bool conversion"""
     if isinstance(v, bool):
         return v
+    if not isinstance(v, str):
+        raise argparse.ArgumentTypeError('Boolean value expected.')
     if v.lower() in ('yes', 'true', 't', 'y', '1'):
         return True
     elif v.lower() in ('no', 'false', 'f', 'n', '0'):
@@ -86,6 +88,8 @@ def str2bool(v):
 # functions for gCAM plot
 def nearest_square(limit:int):
     """Returns the sqrt of the highest square less or equal than limit"""
+    if not isinstance(limit, int):
+        raise TypeError(f'Expected type int got {type(limit)}')
     answer = 0
     while (answer+1)**2 <= limit:
         answer += 1
@@ -93,6 +97,8 @@ def nearest_square(limit:int):
     
 def get_rows_columns(size:int):
     """Create a matrix starting from the nearest square"""
+    if not isinstance(size, int):
+        raise TypeError(f'Expected type int got {type(size)}')
     n = nearest_square(size)
     rows = n
     columns = n

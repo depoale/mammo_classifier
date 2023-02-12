@@ -10,13 +10,17 @@ img_width = 60
 
 
 def set_hyperp(args):
-    """Create a dictionary containg the user-selected hps. It is set to be a 
-    global variable so that it is accessible to the hypermodel aswell."""
+    """Create a dictionary containg the user-selected hps keeping only unique values in each list. 
+    It is set to be a global variable so that it is accessible to the hypermodel aswell.
+    ...
+    Parameters
+    ----------
+    args: arg"""
     global hyperp
     hyperp  = {
-            'depth' : args.net_depth,
-            'Conv2d_init': args.Conv2d_init,
-            'dropout' : args.dropout_rate
+            'depth' : list(set(args.net_depth)),
+            'Conv2d_init': list(set(args.Conv2d_init)),
+            'dropout' : list(set(args.dropout_rate))
 
     }
 

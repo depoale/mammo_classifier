@@ -57,25 +57,52 @@ class Data:
             #self.wave(wave_settings)
             pass
         
-        # set self.X and self.y according to self._PATH
+        # set self._X and self._y according to self._PATH
         self.set_data(self._path)
-        self.X, self.y = self.shuffle_data()
-        self.len = len(self.X)
+        self._X, self._y = self.shuffle_data()
+        self.len = len(self._X)
+    
+    @property
+    def X(self):
+        return self._X
+    
+    #X not settable
+    @X.setter
+    def X(self, X_new):
+        pass
 
+    @property
+    def y(self):
+        return self._y
+    
+    #y not settable
+    @y.setter
+    def y(self, y_new):
+        pass
+
+    @property
+    def path(self):
+        return self._path
+    
+    @path.setter
+    def path(self, directory):
+        if not os.path.isdir(directory):
+            raise FileNotFoundError(f'No such file or directory {directory}')
+        self._path = directory
 
     def __len__(self):
         return self.len
 
     def __getitem__(self, index):    
-        return self.X[index], self.y[index] 
+        return self._X[index], self._y[index] 
     
     def set_data(self, directory):
-        self.X, self.y = read_imgs(directory, [0,1])
+        self._X, self._y = read_imgs(directory, [0,1])
     
     def shuffle_data(self):
-        assert len(self.X) == len(self.y)
-        p = np.random.permutation(len(self.X))
-        return self.X[p], self.y[p]
+        assert len(self._X) == len(self._y)
+        p = np.random.permutation(len(self._X))
+        return self._X[p], self._y[p]
 
     def aug(self):
         """Augmentation procedure"""
@@ -263,7 +290,7 @@ class Data:
             idx = []
             for cl in classes:
                 # create a list patterns belonging to classes list 
-                idx.append(np.where(self.y == cl)[0])
+                idx.append(np.where(self._y == cl)[0])
             
             idx = np.squeeze(np.array(idx))
             # extract random indices from that list
@@ -274,21 +301,39 @@ class Data:
             rand_idx = np.random.randint(0, self.len, size=size)
 
         # setting the random indices
-        X = self.X[rand_idx]
-        y = self.y[rand_idx]
+        X = self._X[rand_idx]
+        y = self._y[rand_idx]
         return X, y
 
 class Model:
     """Perform hyperparameters search, k-fold and train ensemble"""
-    def __init__(self, data, overwrite, max_trials, k=5):
-        self.X = data.X
-        self.y = data.y
+    def __init__(self, data, overwrite=False, max_trials=10, k=5):
+        self._X = data.X
+        self._y = data.y
         self.max_trials = max_trials
         self.overwrite = overwrite
         self.k = k   # k-fold parameter
         self.modelBuilder = hyp_tuning_model  #hypermodel
         self.models_list = []  # list of path to pretrained model (ensemble feeder)
         self._selected_model = ''    #path to a selected model (default: ensemble winner)
+
+    @property
+    def X(self):
+        return self._X
+    
+    #X not settable
+    @X.setter
+    def X(self, X_new):
+        pass
+
+    @property
+    def y(self):
+        return self._y
+    
+    #y not settable
+    @y.setter
+    def y(self, y_new):
+        pass
 
     @property
     def selected_model(self):
@@ -379,10 +424,10 @@ class Model:
 
         # here model selection and model assessment are peformed (k-fold + hold-out)
         fold  = KFold(n_splits=self.k, shuffle=True, random_state=42)
-        for i, (dev_idx, test_idx) in enumerate(fold.split(self.X, self.y)):
+        for i, (dev_idx, test_idx) in enumerate(fold.split(self._X, self._y)):
             #divide development and test sets
-            X_dev, X_test = self.X[dev_idx], self.X[test_idx]
-            y_dev, y_test = self.y[dev_idx], self.y[test_idx]
+            X_dev, X_test = self._X[dev_idx], self._X[test_idx]
+            y_dev, y_test = self._y[dev_idx], self._y[test_idx]
             print('--------------')
             print(f'FOLD {i+1}')
             print('--------------')
@@ -427,26 +472,41 @@ class Model:
         plt.show(block=False)
     
 
-    def get_predictions(self, X=None):
+    def get_predictions(self, X=None, models_list=None):
         """Creates and returns an array of model predictions. Each column corrispond to one expert's 
-        predictions. When X=None the predictions are evaluated on self.X, otherwise on whatever 
+        predictions. When X=None the predictions are evaluated on self._X, otherwise on whatever 
         X is passed.
         ...
         Parameters
         ----------
         X: np.array
-            Array to predict. Default None means that self.X is predicted
+            Array to predict. Default None means that self._X is predicted
+
+        models_list: list
+            list of paths to pre-trained models that will give predictions 
         
         Returns
         -------
         y: np.array
             Array of predictions"""
         
+        #check parameters' types
         if X is None:
-            X = self.X
+            X = self._X
+        elif not isinstance(X, np.ndarray):
+            raise TypeError(f'Expected np.ndarray got {type(X)}')
+
+        if models_list is None:
+            models_list = self.models_list
+        elif isinstance(models_list, list):
+            for element in models_list:
+                if not os.path.isdir(element):
+                    raise FileNotFoundError(f'No such file or directory {element}')
+        else: raise TypeError(f'Expected list got {type(models_list)}')
+                
         
         #initialise predictions array
-        y = np.empty(shape=(len(X), len(self.models_list)))
+        y = np.full(shape=(len(X), len(self.models_list)), fill_value=42.)
 
         # add each expert predictions column-wise
         for count, expert in enumerate(self.models_list):
@@ -461,7 +521,7 @@ class Model:
 
         # transform to tensors
         X = torch.from_numpy(X.astype('float32'))
-        y = torch.from_numpy(self.y.astype('float32'))
+        y = torch.from_numpy(self._y.astype('float32'))
 
         # split train and validation
         X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2, shuffle=True, random_state=24)
