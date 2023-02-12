@@ -14,10 +14,15 @@ jobs:
           pkg-manager: pip
           pip-dependency-file: requirements.txt
       - run:
-          name: Run tests
+      
+          name: Run tests utils
           command: python -m unittest tests.utils_test
+      -run:
+          name: Run tests tools_for_pytorch
           command: python -m unittest tests.toold_test
+      -run:    
           command: python -m unittest tests.hypermodel_test
+      -run:    
           command: python -m unittest tests.classes_test
           
           
