@@ -110,6 +110,9 @@ def rate(values):
                 raise argparse.ArgumentTypeError(f'Argument invalid: expected float got {type(v)}')
     elif isinstance(values, float):
         check_rate(values)
+    else:
+        raise argparse.ArgumentTypeError(f'Argument invalid: expected float got {type(values)}')
+
     return values
 
 # functions for gCAM plot
