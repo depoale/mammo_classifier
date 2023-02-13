@@ -5,14 +5,13 @@ matplotlib
 torch
 sklearn
 argparse
-torchmetrics.classification
+torchmetrics-classification
 sys
 errno
 glob
-skimage.io 
+skimage-io 
 seaborn
 pandas
-random
 torchvision
-torch.utils.data
+torch-utils-data
 tensorflow
