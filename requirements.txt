@@ -7,3 +7,4 @@ sklearn
 argparse
 torchmetrics
 torchvision
+skimage
