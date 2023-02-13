@@ -2,13 +2,11 @@ import unittest
 import numpy as np
 import os
 import sys
-import shutup
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "codice")))
 from classes import Data, Model
 from utils import delete_directory
 
-shutup.please()
 
 
 class DataTests(unittest.TestCase):
