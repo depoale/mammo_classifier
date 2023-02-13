@@ -3,8 +3,8 @@ keras
 numpy
 matplotlib
 torch
-sklearn
+scikit-learn
 argparse
 torchmetrics
 torchvision
-scikit-learn
+

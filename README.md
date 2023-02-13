@@ -1,6 +1,7 @@
 # Classificator for microcalcification in mammographies
 [![Documentation Status](https://readthedocs.org/projects/cmepda-prj/badge/?version=latest)](https://cmepda-prj.readthedocs.io/en/latest/?badge=latest)
-![GitHub repo size](https://img.shields.io/github/repo-size/depoale/cmepda_prj)      
+![GitHub repo size](https://img.shields.io/github/repo-size/depoale/cmepda_prj) 
+[![CircleCI](https://dl.circleci.com/status-badge/img/gh/depoale/cmepda_prj/tree/main.svg?style=shield)](https://dl.circleci.com/status-badge/redirect/gh/depoale/cmepda_prj/tree/main)     
 
 The aim of this project is to create and train a neural network able to distinguish between benign and malign microcalcification masses in mammographies.
 
