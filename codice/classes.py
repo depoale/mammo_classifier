@@ -526,8 +526,8 @@ class Model:
         # split train and validation
         X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2, shuffle=True, random_state=24)
         
-        # create dataset for external test (data stored in 'New_dataset/NEW_DATA')
-        test_data = Data(path = os.path.join('New_dataset', 'NEW_DATA'))
+        # create dataset for external test (data stored in 'New_dataset/External_test')
+        test_data = Data(path = os.path.join('New_dataset', 'External_test'))
 
         # get random images from this dataset and get each expert's predictions
         X_test, y_test = test_data.get_random_images(size=25)

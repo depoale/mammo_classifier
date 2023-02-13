@@ -7,7 +7,7 @@ class EarlyStopping:
     source: https://github.com/Bjarten/early-stopping-pytorch/blob/master/pytorchtools.py
     Early stops the training if validation loss doesn't improve after a given patience.
     """
-    def __init__(self, patience=30, verbose=False, delta=1e-5, path='checkpoint.pt', trace_func=print):
+    def __init__(self, patience=15, verbose=False, delta=1e-3, path='checkpoint.pt', trace_func=print):
         """
         Args:
             patience (int): How long to wait after last time validation loss improved.
