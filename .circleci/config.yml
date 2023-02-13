@@ -18,7 +18,7 @@ jobs:
           command: python -m unittest tests.utils_test
       - run:
           name: Run tests tools_for_pytorch
-          command: python -m unittest tests.toold_test
+          command: python -m unittest tests.tools_test
       - run:    
           command: python -m unittest tests.hypermodel_test
       - run:    

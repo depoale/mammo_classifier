@@ -1,8 +1,4 @@
-"""kfold code: really don't get how test accuracy is this shitty since it is basically 
-the same code used in models.py (where test accuracy is always above 0.93) """
-
- 
-from utils import wave_set, str2bool, create_new_dir, rate
+from utils import wave_dict, hyperp_dict, str2bool, rate
 from hypermodel import set_hyperp, get_search_space_size
 import numpy as np
 import argparse
@@ -91,7 +87,7 @@ if __name__=='__main__':
         type=int,
         help="List of values for the hypermodel's conv2d initial value",
         #default=[5, 10, 15, 20],
-        default=[5, 10, 15, 25],
+        default=[15, 25],
     )
     
     parser.add_argument(
@@ -127,19 +123,17 @@ if __name__=='__main__':
     # -----Training process---------------------
 
     #1. initialize dataset using user picked values
-    wave_settings = wave_set(args)
+    wave_settings = wave_dict(args.wavelet_family, args.threshold)
     data = Data(augmented=args.augmented, wavelet=args.wavelet, wave_settings=wave_settings)
 
     #2. set chosen hyperparameters and get number of trials
-    set_hyperp(args)
+    hyperp_dict=hyperp_dict(args.net_depth, args.Conv2d_init, args.dropout_rate)
     space_size = get_search_space_size()
     max_trials = np.rint(args.searching_fraction*space_size)
 
     #3. create and train the model
     model = Model(data=data, overwrite=args.overwrite, max_trials=max_trials)
     model.train()
-    print(model._selected_model)
-    print(model.selected_model)
 
     #4. check what the most reliable model has learnt using gradCAM
     best_model = keras.models.load_model(model.selected_model)

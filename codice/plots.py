@@ -58,8 +58,11 @@ def ROC(x_test, y_test, model, color, i, mean_fpr, tprs, aucs):
     i: int
         k-fold index
     mean_fpr: np.array
+        mean false positive rate
     tprs: np.array
+        true positive rates
     aucs: np.array
+        areas under curve
     """
     _, test_accuracy = model.evaluate(x_test, y_test)
     print(f'\nTest accuracy: {test_accuracy}')
@@ -86,7 +89,17 @@ def ROC(x_test, y_test, model, color, i, mean_fpr, tprs, aucs):
     plt.legend(loc='lower right')
     
 def plot_mean_stdev(tprs, mean_fpr, aucs):
-    """"?????? ?????? ?????? ?????? ?????? ?????? ?????? ?????? ?????? ??????"""
+    """"Add mean and stdev to ROC curve plot
+    ...
+    Parameters
+    ----------
+    mean_fpr: np.array
+        mean false positive rate
+    tprs: np.array
+        true positive rates
+    aucs: np.array
+        areas under curve
+    """
     mean_tpr = np.mean(tprs, axis=0)
     mean_tpr[-1] = 1.0
     mean_auc = auc(mean_fpr, mean_tpr)
@@ -137,7 +150,8 @@ def comparison_plot(names, dimension, accuracy):
         accuracy: list of float
             list of models' accuracy over test set
         """
-    fig, ax = plt.subplots(figsize=(7,7))
+    plt.figure('Comparison plot')
+    plt.subplots(figsize=(7,7))
     plt.title('Comparison plot')
     plt.xlabel('Effective free parameters')
     plt.ylabel('MSE')
@@ -145,11 +159,10 @@ def comparison_plot(names, dimension, accuracy):
     #scatter plot
     for i, txt in enumerate(names):
        
-        ax.errorbar(dimension[i], accuracy[i], label=names[i], fmt='.')
-        ax.annotate(txt, (dimension[i], accuracy[i]))
+        plt.errorbar(dimension[i], accuracy[i], label=names[i], fmt='.')
+        plt.annotate(txt, (dimension[i], accuracy[i]))
     plt.savefig(os.path.join('images', 'comparison.pdf'))
     #plt.legend()
-    plt.show(block=False)
 
 def gCAM_show(preds, cam_path='gCam'):
     """Shows gradCAM images comparing lables and model predictions

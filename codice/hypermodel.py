@@ -9,7 +9,7 @@ img_height = 60
 img_width = 60
 
 
-def set_hyperp(args):
+def set_hyperp(hyperp_dict):
     """Create a dictionary containg the user-selected hps keeping only unique values in each list. 
     It is set to be a global variable so that it is accessible to the hypermodel aswell.
     ...
@@ -17,12 +17,7 @@ def set_hyperp(args):
     ----------
     args: arg"""
     global hyperp
-    hyperp  = {
-            'depth' : list(set(args.net_depth)),
-            'Conv2d_init': list(set(args.Conv2d_init)),
-            'dropout' : list(set(args.dropout_rate))
-
-    }
+    hyperp  = hyperp_dict
 
 def get_search_space_size():
     """Calculate hyperparameters space size (based on the user-selected combinations)"""
@@ -71,6 +66,6 @@ def hyp_tuning_model(hp):
 
     model.add(Dense(1, activation='sigmoid', name='output', kernel_initializer=initializer))
 
-    model.compile(optimizer=Adam(learning_rate=1e-3), loss='binary_crossentropy', metrics=['accuracy'])
+    model.compile(optimizer=Adam(learning_rate=1e-3, beta_1=0.9, beta_2=0.9999), loss='binary_crossentropy', metrics=['accuracy'])
     
     return model

@@ -36,7 +36,6 @@ def make_gradcam_heatmap(
         last_conv_layer_output = last_conv_layer_model(img_array)
         #last_conv_layer_output_2 = model(img_array).get_layer
         tape.watch(last_conv_layer_output)
-        #print("DIOCAN: ", last_conv_layer_output_2)
         # Compute class predictions
         preds = classifier_model(last_conv_layer_output)
         top_pred_index = tf.argmax(preds[0])

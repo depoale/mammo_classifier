@@ -84,11 +84,10 @@ class Data:
     def path(self):
         return self._path
     
+    #path not settable
     @path.setter
     def path(self, directory):
-        if not os.path.isdir(directory):
-            raise FileNotFoundError(f'No such file or directory {directory}')
-        self._path = directory
+        pass
 
     def __len__(self):
         return self.len
@@ -348,7 +347,7 @@ class Model:
 
     def train(self):
         """Perform hyperparameters search, k-fold and train ensemble"""
-        #self.fold()
+        self.fold()
         self.set_models_list()
         self.get_ensemble()
 
@@ -386,10 +385,10 @@ class Model:
             project_name = 'base'
         
         # tuner settings and search
-        # score: val_accuracy so that model with good generalization capability are selected 
+        # score: val_accuracy so that model with good generalization capability are rewarded 
         tuner = kt.BayesianOptimization(modelBuilder, objective='val_accuracy', max_trials=self.max_trials, 
                                         overwrite=self.overwrite, directory=tuner_dir, project_name=project_name)
-        tuner.search(X_dev, y_dev, epochs=50, validation_split=1/(k-1), batch_size=64, 
+        tuner.search(X_dev, y_dev, epochs=50, validation_split=1/(k-1), batch_size=60, 
                     callbacks=callbacks, verbose=1)
         best_hps = tuner.get_best_hyperparameters(num_trials=1)[0]
         best_model = tuner.get_best_models()[0]
@@ -436,10 +435,10 @@ class Model:
             best_hps_list.append(best_hps)
 
             #train best model and assess its performance onto test set
-            history = best_model.fit(X_dev, y_dev, epochs=100, batch_size=64, validation_split=1/(k-1), callbacks=callbacks)
+            history = best_model.fit(X_dev, y_dev, epochs=100, batch_size=60, validation_split=1/(k-1), callbacks=callbacks)
             accuracy= round(best_model.evaluate(X_test, y_test)[1],3)
 
-            # append this fold's number of trainable parmaters and its accuracy on test set
+            # append this fold's number of trainable parameters and its accuracy on test set
             dimension.append(count_params(best_model.trainable_weights))
             test_acc.append(accuracy)
             
@@ -474,7 +473,7 @@ class Model:
 
     def get_predictions(self, X=None, models_list=None):
         """Creates and returns an array of model predictions. Each column corrispond to one expert's 
-        predictions. When X=None the predictions are evaluated on self._X, otherwise on whatever 
+        predictions (ensemble input). When X=None the predictions are evaluated on self._X, otherwise on whatever 
         X is passed.
         ...
         Parameters
@@ -483,16 +482,16 @@ class Model:
             Array to predict. Default None means that self._X is predicted
 
         models_list: list
-            list of paths to pre-trained models that will give predictions 
+            list of paths to pre-trained models (experts) that will give predictions 
         
         Returns
         -------
         y: np.array
             Array of predictions"""
         
-        #check parameters' types
         if X is None:
             X = self._X
+            #check parameters' types
         elif not isinstance(X, np.ndarray):
             raise TypeError(f'Expected np.ndarray got {type(X)}')
 

@@ -9,6 +9,7 @@ import shutil
 from random import shuffle
 from PIL import Image
 import argparse
+from hypermodel import set_hyperp
 
 def read_imgs(dataset_path, classes):
     """Function reading all the images in a given folder which already contains
@@ -47,14 +48,25 @@ def read_imgs(dataset_path, classes):
 callbacks = [EarlyStopping(monitor='val_accuracy', min_delta=5e-3, patience=20, verbose=1),
                 ReduceLROnPlateau(monitor='val_loss', factor=0.1, min_delta=1e-4, patience=10, verbose=1)]
 
-def wave_set(args):
+def wave_dict(wavelet_family, threshold):
     """Creates dictionary containing wavelet settings"""
-    wave_settings = {
-            'wavelet_family' : args.wavelet_family,
-            'threshold': args.threshold
+    wave_dict = {
+            'wavelet_family' : wavelet_family,
+            'threshold': threshold
 
     }
-    return wave_settings
+    return wave_dict
+
+def hyperp_dict(net_depth, Conv2d_init, dropout_rate):
+    """Creates dictionary containing wavelet settings"""
+    hyperp_dict = {
+            'depth' : list(set(net_depth)),
+            'Conv2d_init': list(set(Conv2d_init)),
+            'dropout' : list(set(dropout_rate))
+
+    }
+    set_hyperp(hyperp_dict)
+    return hyperp_dict
 
     
 def delete_directory(directory_path):
