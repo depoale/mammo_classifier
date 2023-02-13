@@ -1,17 +1,9 @@
-keras_tuner == 1.1.3
+keras_tuner
 keras
-numpy == 1.23.4
+numpy
 matplotlib
 torch
 sklearn
 argparse
-torchmetrics-classification
-sys
-errno
-glob
-skimage-io 
-seaborn
-pandas
+torchmetrics
 torchvision
-torch-utils-data
-tensorflow
