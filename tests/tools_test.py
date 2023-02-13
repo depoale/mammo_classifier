@@ -4,14 +4,12 @@ from matplotlib import pyplot as plt
 import os
 import sys
 import torch
-import shutup
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "codice")))
 from classes import Data, Model
 from utils import delete_directory
 import tools_for_Pytorch as tools
 
-shutup.please()
 
 
 class ToolsTests(unittest.TestCase):

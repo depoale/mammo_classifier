@@ -37,14 +37,13 @@ def plot(history, i):
     plt.title('Training and Validation Accuracy')
     #Train and validation loss 
     plt.subplot(1, 2, 2)
-    #plt.yscale('log')
     plt.xlabel('Epochs')
     plt.ylabel('Loss')
     plt.plot(epochs_range, loss, label='Training Loss', color='blue')
     plt.plot(epochs_range, val_loss, label='Validation Loss', color='darkorange')
     plt.legend(loc='upper right')
     plt.title('Training and Validation Loss')
-    #plt.show(block=False)
+    plt.show(block=False)
 
 def ROC(x_test, y_test, model, color, i, mean_fpr, tprs, aucs):
     """Each fold's contribution to the ROC curve plot
@@ -87,6 +86,7 @@ def ROC(x_test, y_test, model, color, i, mean_fpr, tprs, aucs):
     plt.xlabel('False Positive Rate')
     plt.ylabel('True Positive Rate')
     plt.legend(loc='lower right')
+    plt.show(block=False)
     
 def plot_mean_stdev(tprs, mean_fpr, aucs):
     """"Add mean and stdev to ROC curve plot
@@ -113,6 +113,7 @@ def plot_mean_stdev(tprs, mean_fpr, aucs):
     plt.figure('ROC - Testing')
     plt.fill_between(mean_fpr, tprs_lower, tprs_upper, color="grey", alpha=0.2, label=f"$\pm$ 1 std. dev.")
     plt.legend(loc='lower right')
+    plt.show(block=False)
 
 def get_confusion_matrix(x_test, y_test, model, i):
     """Each fold's confusion matrix
@@ -136,6 +137,7 @@ def get_confusion_matrix(x_test, y_test, model, i):
     sn.heatmap(df_cm, annot=True)
     plt.xlabel('Predicted label', fontsize=7)
     plt.ylabel('Actual label', fontsize=7)
+    plt.show(block=False)
 
 def comparison_plot(names, dimension, accuracy):
     """MSE-num_weights plot to compare visually each fold's performance in relationship with
@@ -161,8 +163,9 @@ def comparison_plot(names, dimension, accuracy):
        
         plt.errorbar(dimension[i], accuracy[i], label=names[i], fmt='.')
         plt.annotate(txt, (dimension[i], accuracy[i]))
-    plt.savefig(os.path.join('images', 'comparison.pdf'))
+    #plt.savefig(os.path.join('images', 'comparison.pdf'))
     #plt.legend()
+    plt.show(block=False)
 
 def gCAM_show(preds, cam_path='gCam'):
     """Shows gradCAM images comparing lables and model predictions
