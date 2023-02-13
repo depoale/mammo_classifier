@@ -2,18 +2,13 @@ keras_tuner == 1.1.3
 keras
 numpy == 1.23.4
 matplotlib
-matlab.engine
 torch
-statistics
 sklearn
-PIL
 argparse
 torchmetrics.classification
 sys
-time
 errno
 glob
-logging
 skimage.io 
 seaborn
 pandas
