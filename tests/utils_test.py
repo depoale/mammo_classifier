@@ -1,5 +1,4 @@
 import unittest
-import numpy as np
 import os
 import sys
 import argparse
@@ -24,6 +23,19 @@ class UtilsTests(unittest.TestCase):
             utils.str2bool(18)
         with self.assertRaises(argparse.ArgumentTypeError):
             utils.str2bool('test')
+
+    def test_rate(self):
+        self.assertEqual(utils.rate(0.2), 0.2)
+        self.assertEqual(utils.rate([0.2, 0.3]), [0.2, 0.3])
+        with self.assertRaises(argparse.ArgumentTypeError):
+            utils.rate('test')
+        with self.assertRaises(argparse.ArgumentTypeError):
+            utils.rate([0.4,'test'])
+        with self.assertRaises(ValueError):
+            utils.rate(18)
+        with self.assertRaises(ValueError):
+            utils.rate([0.2,18])
+
 
     
     def test_nearest_square(self):

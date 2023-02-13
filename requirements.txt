@@ -8,3 +8,5 @@ argparse
 torchmetrics
 torchvision
 scikit-image
+pandas
+seaborn
