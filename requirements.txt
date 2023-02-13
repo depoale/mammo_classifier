@@ -7,4 +7,4 @@ sklearn
 argparse
 torchmetrics
 torchvision
-skimage
+scikit-learn
