@@ -4,6 +4,7 @@ import sys
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "codice")))
 from hypermodel import set_hyperp, get_search_space_size
+from utils import hyperp_dict
 
 class set_args():
     """Fake user-selected arguments"""
@@ -11,15 +12,16 @@ class set_args():
         self.net_depth = net_depth
         self.Conv2d_init = Conv2d_init
         self.dropout_rate = dropout_rate
+    
 
 class HypermodelTests(unittest.TestCase):
     def test_count_combinations(self):
         args=set_args([1, 1], [1, 2], [1, 2, 3])
-        set_hyperp(args)
+        _ = hyperp_dict(args.net_depth,args.Conv2d_init, args.dropout_rate)
         self.assertEqual(get_search_space_size(), 6)
 
         args=set_args([1], [1, 2], [1, 2, 3])
-        set_hyperp(args)
+        _ = hyperp_dict(args.net_depth,args.Conv2d_init, args.dropout_rate)
         self.assertEqual(get_search_space_size(), 6)
 
     
