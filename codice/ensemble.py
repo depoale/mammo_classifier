@@ -145,4 +145,4 @@ def train_ensemble(model, optimizer, normalizer, X_train, y_train, X_val, y_val,
 
     #save ensemble weights
     torch.save(model.state_dict(),'trained_ensemble.pt')
-    return model.parameters(), final_acc, test_acc
+    return model[0].weight.data, final_acc, test_acc

@@ -1,8 +1,7 @@
 import tensorflow as tf
-from tensorflow import keras
 import numpy as np
 import os
-from utils import read_imgs, create_new_dir
+from utils import create_new_dir
 
 
 # Display
@@ -16,23 +15,19 @@ def make_gradcam_heatmap(
 ):
     
     img_array = img_array.reshape(1, 60, 60, 1)
-    #img_array = tf.convert_to_tensor(img_array)
     
     # First, we create a model that maps the input image to the activations
     # of the last conv layer
     last_conv_layer = model.get_layer(last_conv_layer_name)
     last_conv_layer_model = tf.keras.Model(model.input, last_conv_layer.output)
-    last_conv_layer_model.summary()
 
     # Second, we create a model that maps the activations of the last conv
     # layer to the final class predictions
-    print('shape:',last_conv_layer.output.shape)
     classifier_input = tf.keras.Input(shape=last_conv_layer.output.shape[1:])
     x = classifier_input
     for layer_name in classifier_layer_names:
         x = model.get_layer(layer_name)(x)
     classifier_model = tf.keras.Model(classifier_input, x)
-    classifier_model.summary()
 
     # Then, we compute the gradient of the top predicted class for our input image
     # with respect to the activations of the last conv layer

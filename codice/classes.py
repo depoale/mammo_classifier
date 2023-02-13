@@ -530,7 +530,9 @@ class Model:
         test_data = Data(path = os.path.join('New_dataset', 'External_test'))
 
         # get random images from this dataset and get each expert's predictions
-        X_test, y_test = test_data.get_random_images(size=25)
+        X_test, y_test = test_data.get_random_images(size=25, classes=[1])
+        """ X_test = test_data.X
+        y_test = test_data.y """
         X_test = self.get_predictions(X_test)
 
         # transform to tensors
@@ -546,23 +548,21 @@ class Model:
         initializer=WeightInitializer()
         model.apply(initializer)
 
-        optimizer = torch.optim.Adam(model.parameters(), lr=0.005, betas=(0.9, 0.9999))
+        optimizer = torch.optim.Adam(model.parameters(), lr=0.001, betas=(0.9, 0.9999))
 
         # applied after each optimiser step to clip and normalise the updated weights
         normalizer = WeightNormalizer()
 
         #ensemble trainibg
         weights, final_acc, test_acc = train_ensemble(model, optimizer, normalizer, X_train, y_train, X_val, y_val, X_test, y_test, batch_size=20)
-        
         #Ensemble stats
         print(f'Final accuracy: {final_acc}')
         print(f'Test accuracy: {test_acc}')
 
         # set selected_model to be the most reliable in the comitee
-        for w in weights:
-            weights = torch.tensor(w.data).numpy()
-            best_idx = np.where(weights==weights.max())[0][0]
-            self._selected_model = os.path.join('models',f'model_{best_idx}')
+        weights = torch.tensor(weights.data).numpy()
+        best_idx = np.where(weights == weights.max())[0][0]
+        self._selected_model = os.path.join('models', f'model_{best_idx}')
 
         plt.show()
 
