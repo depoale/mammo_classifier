@@ -31,10 +31,10 @@ class UtilsTests(unittest.TestCase):
             utils.rate('test')
         with self.assertRaises(argparse.ArgumentTypeError):
             utils.rate([0.4,'test'])
-        with self.assertRaises(ValueError):
+        with self.assertRaises(argparse.ArgumentTypeError):
             utils.rate(18)
         with self.assertRaises(ValueError):
-            utils.rate([0.2,18])
+            utils.rate([0.2,1.32])
 
 
     
