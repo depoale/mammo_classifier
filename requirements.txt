@@ -10,4 +10,3 @@ torchvision
 scikit-image
 pandas
 seaborn
-matlabengine
