@@ -73,13 +73,13 @@ In order to implement the workflow described so far, two costum-made classes wer
 # Performances
 Using the default values for Wavelet-filtering settings and model hyperparameters, the classificator's performances we obtained are represented in the following graphs: <ul>
 <li> Learning curves: here are the diagrams representing the Training and Validation Accuracy and the Training and Validation Loss recorded for one of the five total folds:
-<img src="images/Fold_1.png" width="800"> <br>
+<img src="images/Fold_1.png" width="1000"> <br>
 </li>
 <li> ROC (Receiver Operating Characteristic) curves and AUC (Area Under the Curve): ROC curves are graphs which show the performance of a classification model at all classification thresholds, while the AUC measures the entire two-dimensional area underneath the entire ROC curve. In a ROC curve we plot the True Positive Rate (TPR) VS the False Positive Rate (FPR) at different classification thresholds: lowering the classification threshold the classifier will rank more items as positive, thus increasing both False Positives and True Positives Rates. <br> Here are the ROC curves relative to the testing data for each of the five folds, toghetere with their *MEAN* ROC Curve and its standard deviation: 
-<img src="images/ROC_-_Testing_new.png" width="800"> <br>
+<img src="images/ROC_-_Testing_new.png" width="1000"> <br>
 </li>
 <li> Confusion Matrices: also called Error Matrices, they are specific table layouts that allow a fast visualization of the performances of an algorithm used for statistical classification.  Each row of a Confusion Matrix represents the instances in an actual class, while each column represents the instances in a predicted class, so that we can easily figure out the True or False Positive and the True or False Negative cases. Here are the five Confusion Matrices obtained for each of the 5 folds: 
-<img src="images/Confusion_Matrices_new.png" width="800"> <br>
+<img src="images/Confusion_Matrices_new.png" width="1000"> <br>
 </li>
 <li> Ensamble' learning curves: here are the diagrams represenitng the Training, Validation and (external) Test accuracy and the Training, Validation and (external) Test Loss recorded for the final ensamble of the 5 models: 
 
