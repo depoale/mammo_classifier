@@ -43,7 +43,7 @@ if __name__=='__main__':
         metavar="",
         type=str,
         help="Which wavelet family (between 'sym3' and 'haar') has to be used to realize the filter",
-        default=['sym3'],
+        default='sym3',
 
     )
 
