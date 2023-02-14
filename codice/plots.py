@@ -137,6 +137,7 @@ def get_confusion_matrix(x_test, y_test, model, i):
     sn.heatmap(df_cm, annot=True)
     plt.xlabel('Predicted label', fontsize=7)
     plt.ylabel('Actual label', fontsize=7)
+    plt.savefig(os.path.join('images', 'ciao.pdf'))
     plt.show(block=False)
 
 def comparison_plot(names, dimension, accuracy):
@@ -164,7 +165,7 @@ def comparison_plot(names, dimension, accuracy):
         plt.errorbar(dimension[i], accuracy[i], label=names[i], fmt='.')
         plt.annotate(txt, (dimension[i], accuracy[i]))
     #plt.savefig(os.path.join('images', 'comparison.pdf'))
-    #plt.legend()
+    plt.legend()
     plt.show(block=False)
 
 def gCAM_show(preds, cam_path='gCam'):
