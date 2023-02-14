@@ -33,13 +33,14 @@ Default Wavelet settings are: <br>
 
 ## Hypermodel
 The hypermodel is created using the following architecture.
+xfun::embed_file("images/schema_hypermodel.pdf")
 <img src="images/schema_hypermodel.pdf" width="1000"> <br>
 Default hyperparameters space is set to be: <br>
 | Hyperparameters |     Values    | 
 | ----------------| ------------- |
-| init            |  10, 20, 30   | 
-| dropout rate    |  0, 0.05      | 
-| depth           |   1, 2, 3     |    
+| init            |  15, 25       | 
+| dropout rate    |  0, 0.05,0.1  | 
+| depth           |  1,3,5        |    
 
 ## Training
 The model selection and model assessment procedure is presented in the diagram below: given an hypermodel an hyperparameters space, the best model is selected with an **internal Hold-out** (Validation set = 25% of development set). A **K-fold** cross-validation (K=5) procedure is chosen to evaluate the model’s performance.<br>
