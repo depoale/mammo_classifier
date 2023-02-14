@@ -30,8 +30,9 @@ def plottino():
     rows = 2
     classes = [[0],[1]]
     i=1
+    print(os.getcwd())
     for cl in classes:
-        img_array, labels = read_imgs('', cl)
+        img_array, labels = read_imgs('total_data', cl)
         for idx in rnd_idx:
             ax=fig.add_subplot(rows, columns, i)
             ax.title.set_text(f'Label = {labels[idx]}')
@@ -40,7 +41,7 @@ def plottino():
     plt.show()
 
 
-def gCAM_plot(size, preds):
+'''def gCAM_plot(size, preds):
     fig = plt.figure(figsize=(8, 8))
     rows, columns = get_rows_columns(size)
     tmp = []
@@ -53,6 +54,8 @@ def gCAM_plot(size, preds):
         ax.title.set_text(f'Label=1 Pred={np.rint(preds[i])}')
         plt.imshow(images[i])
 
-    plt.show()
+    plt.show()'''
+
+
 if __name__=='__main__':
-    plottino2(size=6, preds=[1,1,1,0,1,1])
+    plottino()
