@@ -33,7 +33,7 @@ Default Wavelet settings are: <br>
 
 ## Hypermodel
 The hypermodel is created using the following architecture.
-<img src="images/schema_hypermodel.png" width="5000"> <br>
+<img src="images/schema_hypermodel.pdf" width="1000"> <br>
 Default hyperparameters space is set to be: <br>
 | Hyperparameters |     Values    | 
 | ----------------| ------------- |
