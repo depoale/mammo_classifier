@@ -7,26 +7,26 @@ The aim of this project is to build and train a Convolutional Neural Network (CN
 
 # Dataset
 The dataset of mammograms' sections that we are going to process in order to train our CNN is available on the INFN website, and is downloadable at the following link: https://www.pi.infn.it/~boccali/DL_class_data.tar.gz. This dataset is made up of 797 images, 414 of which represent normal breast tissue (they are labelled with "0") while the remaining 383 show breast tissue presenting microcalcification masses (they are labelled with "1"). They all are 60x60 pixels images extracted from real mammograms and converted into 8-bit grayscale. Here are some examples:
-<img src="images/random_images.pdf" width="800"> 
+<img src="images/random_images.png" width="800"> 
 
 ## Data augmentation
  Since medical datasets are usually *small* (a few hundred samples), oftentimes performing data augmentation procedures is essential. This should help preventing overfitting during the training process of the neural network, hence it may improve both generalization and regularization of the given model.
 In our case data augmentation procedures are implemented using **ImageDataGenerator** by Keras. This tool applies a series of random transformations to the original images of the dataset, such as rotations, vertical and orizontal flips, contrast modifications, rescalings, zoomings, brightness modifications and many others. 
 Here we  report some examples of "augmented" images generated with this procedure starting from the initial dataset. 
-<img src="images/augmented_images.pdf" width="800">
+<img src="images/augmented_images.png" width="800">
 In this project the user can choose whether to perform or not the data augmentation procedures (by default the will not be performed). If the user's choice is affirmative, a new "augmented" dataset will be automatically created (it will be much ampler than the original one) and the CNN will be trained on its images.
 
 ## Wavelet-based filtering
 Wavelet-based filters are often used in medical imaging in order to enhance images' information content, which mostly means improving the visibility of features of interest. Different filters 
 can be employed to realize image denoising or to make objects' edges more distinguishable (increasing image contrast). In this project we are going to process mammograms' portions showing microcalcifications, therefore the objects to be preserved are microcalcifications themselves (small bright spots), whereas the noise to be filtered out is the non-uniform image background (heterogeneous breast tissue). The steps to be followed are: loading the images to be processed, implementing a 2-D Wavelet decomposition, analyzing the high spatial frequency (HF) and low spatial frequency (LF) components and finally obtaining the filtered images using a 2-D Wavelet reconstruction. <br>
  Among the many Wavelet families available, the best performing ones in our case are $sym3$ and $haar$. The decomposition level is set to be 3 and so we can set thresholds for decomposition coefficients in terms of the standard deviations of their distributions. In this case we will set to zero the "low spatial frequency approximation information", while keeping only the "high spatial frequency details" that exceed a certain number of standard deviations (best performances are obtained within 2 stdev). <br>> Here you can find some examples of Wavelet-based filtering procedures implemented on mammograms' portions from the original images' dataset (both normal and troubling breast tissue): \newpage 
-<img src="images/random_wavelet.pdf" width="800"> <br>
+<img src="images/random_wavelet.png" width="800"> <br>
 In this project the user can choose whether to perform or not a Wavelet-based filtering procedure (by default it won't be performed), which Wavelet Transforms family has to be used to realize the filters between $sym3$ and $haar$ (the default one is $sym3$) and which threshold has to be set for the decomposition coefficients in terms of the standard deviations of their distributions (the default value is 1.5 stdev, anyway you are recommended not to go over 2 stdev). If the user's choice is affirmative, a new "wavelet" dataset will be automatically created (starting from the original dataset or from the "augmented" one) and the CNN will be trained on its images.
 
 ## External dataset
 At the end of the training phase, the final model for the CNN breast tissue's classifier will be tested on an external dataset of mammograms' portions, in order to assess its generalization capability and its overall performances. The 60x60 pixels mammography sections, that will be processed in this conclusive testing stage, have been obtained cutting some mammograms contained in the dataset downloadable from Mendeley Data website at the following link: https://data.mendeley.com/datasets/ywsbh3ndr8/2. <br>
 Here you can find some examples of mammograms' portions from the external dataset, representing both sane breast tissue and microcalcifications clusters. 
-<img src="images/new_dataset.pdf" width="800"> <br>
+<img src="images/new_dataset.png" width="800"> <br>
 
 # Hypermodel
 The deisgned hypermodel for the CNN classifier is made up of three
