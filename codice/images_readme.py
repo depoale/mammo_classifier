@@ -22,7 +22,7 @@ from utils import read_imgs, get_rows_columns
 from keras.utils import image_dataset_from_directory
 
 def plottino():
-    rnd_idx = np.random.randint(0, 200, size = 3)
+    rnd_idx = np.random.randint(0, 20, size = 3)
     w = 10
     h = 10
     fig = plt.figure(figsize=(8, 8))
@@ -32,13 +32,17 @@ def plottino():
     i=1
     print(os.getcwd())
     for cl in classes:
-        img_array, labels = read_imgs('total_data', cl)
+        img_array, labels = read_imgs('New_dataset/External_test', cl)
         for idx in rnd_idx:
             ax=fig.add_subplot(rows, columns, i)
             ax.title.set_text(f'Label = {labels[idx]}')
             plt.imshow(img_array[idx], cmap='gray')
             i+=1
+    plt.savefig('images/new_dataset.pdf', format='pdf')
+    plt.savefig('images/new_dataset.png', format='png')
     plt.show()
+    
+
 
 
 '''def gCAM_plot(size, preds):
