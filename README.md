@@ -33,8 +33,7 @@ Default Wavelet settings are: <br>
 
 ## Hypermodel
 The hypermodel is created using the following architecture.
-xfun::embed_file("images/schema_hypermodel.pdf")
-<img src="images/schema_hypermodel.pdf" width="1000"> <br>
+<img src="images/schema_hypermodel.jpg" width="1000"> <br>
 Default hyperparameters space is set to be: <br>
 | Hyperparameters |     Values    | 
 | ----------------| ------------- |
