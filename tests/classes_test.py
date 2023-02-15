@@ -26,7 +26,7 @@ class DataTests(unittest.TestCase):
         self.assertEqual(len(X), len(y), 4)
         d_aug_1.X = X
         self.assertFalse(np.array_equal(d_aug_1.X, X))
-        delete_directory(d_aug_1.path) 
+        delete_directory(d_aug_1.path)
    
         d_wave_0 = Data(augmented = 0, wavelet = 1)
         self.assertEqual(len(d_wave_0.X), len(d_wave_0.y))
