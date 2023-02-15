@@ -66,7 +66,6 @@ The model selection and model assessment procedure is presented in the diagram b
 Using **keras-tuner.BayesianOptimizator**, hyperparameters search is performed, exploring the user-selected **searching_fraction** of the space (default fraction = 25%), so that suitable hyperparameters values are chosen for each of the five folds. <br>
 Since this step is computationally expensive, it is possible to skip it if the user sets the **fast_execution** parameter to be *True*. By doing so, the hyperparameters for each fold will be set to pre-saved values without any search.
 
-
 # Models'ensamble
 At this point we are left with 5 trained models or "experts" (one for each fold),
 so an ensemble learning strategy is implemented using *PyTorch*.
@@ -75,6 +74,7 @@ of the single predictions. The weights of the ensamble are trained to maximise
 its accuracy and represent the reliability of each expert
 among the committee.
 Finally, the ensemble’s performance is tested on the external dataset of mammograms' portions that we have already introduced. 
+
 # Classes
 In order to implement the workflow described so far, two costum-made classes were built: *Data* and *Model*. <br>
 • *Data* class is used to handle and manage the datasets of mammography gray-scale images to be processed: it is called to perform data augmentation and Wavelet-based filtering procedures and contains the **get_random_images method**, a useful funcion which returns random images’ patterns from one or both classes (Label = 0 and Label = 1) of a certain dataset. <br>
@@ -83,7 +83,6 @@ In order to implement the workflow described so far, two costum-made classes wer
 – **fold**, which performs K-fold (in our case K = 5) for cross validation <br>
 – **get_predictions**, which returns each model’s prediction for all the images’ patterns (used as input for the ensemble model <br> 
 – **get_ensemble**, which trains and then saves the ensembl
-
 
 # Results
 Using the default values for the hyperparameters, an example of the classificator's performance is shown in the following plots: <br>
@@ -95,7 +94,6 @@ Using the default values for the hyperparameters, an example of the classificato
 <img src="images/Confusion_Matrices_new.png" width="1500"> <br>
 - Learning and Testing curves for the models' ensamble
 <img src="images/ensemble_plot_new.png" width="1500"> <br>
-
 
 # GradCAM and interpretability
 Neural network interpretability, especially in medical physics, is a crucial topic. That's why, as part of the analysis, we included the possibility to "visualise" what the model has learnt using GradCAM algorithm (Gradient-weighted Class Activation Mapping). Selecting the most reliable of the five model (according to the ensemble's weights), the GradCAM algorithm was employed to highlight which regions of an input image are relevant in the decision making
