@@ -34,7 +34,7 @@ Here are some examples of images obtained with Wavelet-based filtering:
 
 The user can choose which Wavelet Transforms family has to be used to realize the filters between *sym3* (the default one) and *haar* and which threshold has to be set for the decomposition coefficients in terms of the standard deviations of their distributions (the default value is 1.5 stdev, anyway you are recommended not to go over 2 stdev). <br>
 
-**NOTES FOR THE USER**: Before performing Wavelet-based filtering procedures be sure you have MATLAB (latest version: R2022b) and the *python* module **matlabengine** already installed on your device (they are not included in the project's requirements). <br>
+**NOTES FOR THE USER**: Before performing Wavelet-based filtering procedures be sure you have MATLAB (latest version: R2022b) and the python module **matlabengine** already installed on your device (they are not included in the project's requirements). <br>
 
 ## External dataset
 At the end of the training phase, the final model will be tested on an external dataset (source: https://data.mendeley.com/datasets/ywsbh3ndr8/2) of mammograms' portions, in order to assess its generalization capability and its overall performance. Here are some hand-selected 60x60 sections from this dataset:   
