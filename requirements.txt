@@ -10,4 +10,7 @@ torchvision
 scikit-image
 pandas
 seaborn
-matlabengine
+statistics
+tensorflow
+shutup
+sklearn
