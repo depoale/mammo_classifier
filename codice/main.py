@@ -59,12 +59,12 @@ if __name__=='__main__':
     )
     
     parser.add_argument(
-        "-or",
-        "--overwrite",
+        "-fast",
+        "--fast_execution",
         metavar="",
         type=str2bool,
-        help="Whether to perform hyperparameters search or use the previously saved hyperpar",
-        default=False,
+        help="Whether to avoid hyperparameters search and use the pre-saved hyperpar",
+        default=True,
     )
     
     parser.add_argument(
@@ -86,8 +86,7 @@ if __name__=='__main__':
         nargs='+',
         type=int,
         help="List of values for the hypermodel's conv2d initial value",
-        #default=[5, 10, 15, 20],
-        default=[15, 25],
+        default=[15,20, 25],
     )
     
     parser.add_argument(
@@ -132,7 +131,7 @@ if __name__=='__main__':
     max_trials = np.rint(args.searching_fraction*space_size)
 
     #3. create and train the model
-    model = Model(data=data, overwrite=args.overwrite, max_trials=max_trials)
+    model = Model(data=data, fast=args.fast_execution, max_trials=max_trials)
     model.train()
 
     #4. check what the most reliable model has learnt using gradCAM

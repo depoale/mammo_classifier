@@ -10,3 +10,4 @@ torchvision
 scikit-image
 pandas
 seaborn
+shutup

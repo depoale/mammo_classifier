@@ -6,7 +6,6 @@ import logging
 from skimage.io import imread
 import numpy as np
 import shutil
-from random import shuffle
 from PIL import Image
 import argparse
 from hypermodel import set_hyperp

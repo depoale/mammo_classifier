@@ -2,17 +2,25 @@ import tensorflow as tf
 import numpy as np
 import os
 from utils import create_new_dir
-
-
-# Display
-from IPython.display import Image, display
-import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 
 
 def make_gradcam_heatmap(
     img_array, model, last_conv_layer_name, classifier_layer_names, output_path=None
 ):
+    """Overlays gradCAM onto input image and saves it.
+        Source. https://keras.io/examples/vision/grad_cam/
+        ...
+        Parameters
+        ----------
+        img_array: np.array
+            input image
+        model: keras.Model
+        last_conv_layer_name: str
+        classifier_layer_names: list
+            list of layers after last_conv_layer_name
+        output_path: str
+            path where overlaid image will be saved"""
     
     img_array = img_array.reshape(1, 60, 60, 1)
     
@@ -87,6 +95,7 @@ def make_gradcam_heatmap(
     superimposed_img.save(output_path)
 
 def get_gcam_images(images, best_model):
+    """Creates and saves overlaid images using gradCAM and calling make_gradcam_heatmap function."""
     classifier_layer_names = [layer.name for idx, layer in enumerate(best_model.layers) if idx > 8]
     create_new_dir('gCam')
     for i, image in enumerate(images):
