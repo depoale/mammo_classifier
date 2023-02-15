@@ -23,6 +23,10 @@ jobs:
           command: python -m unittest tests.hypermodel_test
       - run:    
           command: python -m unittest tests.classes_test
+      - run:    
+          command: python -m unittest tests.plots_test
+      - run:    
+          command: python -m unittest tests.gcam_test
           
           
 workflows:
