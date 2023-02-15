@@ -6,19 +6,15 @@ from keras.preprocessing.image import ImageDataGenerator
 import numpy as np
 from matplotlib import pyplot as plt
 from keras.utils.layer_utils import count_params
-import tensorflow as tf
 import shutil
 from sklearn.model_selection import KFold
 from sklearn.model_selection import train_test_split
 import keras_tuner as kt
 from keras.models import load_model
 import torch
-import torch.nn as nn
 import statistics as stats
-from sklearn.metrics import auc
 from tools_for_Pytorch import WeightInitializer, WeightNormalizer, pytorch_linear_model
 from ensemble import train_ensemble
-from PIL import Image
 import warnings 
 warnings.filterwarnings('ignore')
 
@@ -33,8 +29,7 @@ wave_settings_default = {
 
 
 class Data:
-    def __init__(self, augmented=False, wavelet=False, wave_settings=wave_settings_default, path='total_data'):
-        """class used to choose and initialize dataset
+    """class used to choose and initialize dataset
         ...
         Attributes
         ----------
@@ -43,8 +38,27 @@ class Data:
         wavelet: bool
             whether to use wavelet procedure 
         wave_settings: dict
-            settings for wavelet procedure"""
+            settings for wavelet procedure
+        path: str
+            path to dataset directory
+            
+        Methods
+        -------
+        set_data(directory) -> X, y
+            returns arrays of images and lables from path in directory
+        shuffle_data -> X, y
+            returns shuffled data
+        aug
+            performes data augmentation
+        wave
+            performs wavelet filtering
+        get_random_images(size, classes=None) -> X, y
+            returns random images from one or both classes
         
+    """
+     
+    def __init__(self, augmented=False, wavelet=False, wave_settings=wave_settings_default, path='total_data'):
+       
         #default path to dataset
         self._path = path
         
@@ -58,7 +72,7 @@ class Data:
             
         
         # set self._X and self._y according to self._PATH
-        self.set_data(self._path)
+        self._X, self._y = self.set_data(self._path)
         self._X, self._y = self.shuffle_data()
         self.len = len(self._X)
     
@@ -96,7 +110,8 @@ class Data:
         return self._X[index], self._y[index] 
     
     def set_data(self, directory):
-        self._X, self._y = read_imgs(directory, [0,1])
+        X, y = read_imgs(directory, [0,1])
+        return X, y
     
     def shuffle_data(self):
         assert len(self._X) == len(self._y)
@@ -306,12 +321,43 @@ class Data:
         return X, y
 
 class Model:
-    """Perform hyperparameters search, k-fold and train ensemble"""
-    def __init__(self, data, overwrite=False, max_trials=10, k=5):
+    """Perform hyperparameters search, k-fold and train ensemble
+    ...
+    Attributes
+    ----------
+    X: np.array
+    y:np.array
+    max_trials: int
+        maximum number of trials in tuner search
+    overwrite: bool
+        overwrite means make hps search (not fast)
+    k: int
+        k-fold parameter. Default 5
+    modelBuilder: keras.Hypermodel
+        hypermodel
+    models_list:list
+        list of path to pretrained model (ensemble feeder)
+    selected_model: str
+        path to one model
+    
+    Methods
+    -------
+    train
+        performs hyperparameters search, k-fold and trains ensemble
+    tuner(X_dev, y_dev, modelBuilder, i, k=5)->best_hps, best_model
+        performs hyperparameters search for the current fold (i)
+    fold(k=5)
+        performs kfold & hps search in each fold
+    get_predictions(self, X=None, models_list=None) -> y
+        returns an array of model predictions
+    get_ensemble
+        create and train ensemble starting from previously obtained models
+    """
+    def __init__(self, data, fast=True, max_trials=10, k=5):
         self._X = data.X
         self._y = data.y
         self.max_trials = max_trials
-        self.overwrite = overwrite
+        self.overwrite = ~fast  #overwrite means make hps search (not fast)
         self.k = k   # k-fold parameter
         self.modelBuilder = hyp_tuning_model  #hypermodel
         self.models_list = []  # list of path to pretrained model (ensemble feeder)
@@ -347,9 +393,8 @@ class Model:
 
 
     def train(self):
-        """Perform hyperparameters search, k-fold and train ensemble"""
+        """Performs hyperparameters search, k-fold and trains ensemble"""
         self.fold()
-        self.set_models_list()
         self.get_ensemble()
 
     def tuner(self, X_dev, y_dev, modelBuilder, i, k=5):
@@ -394,11 +439,6 @@ class Model:
         best_hps = tuner.get_best_hyperparameters(num_trials=1)[0]
         best_model = tuner.get_best_models()[0]
         return best_hps, best_model
-    
-    def set_models_list(self):
-        for i in range(self.k):
-            model_path = os.path.join('models', f'model_{i}')
-            self.models_list.append(model_path) 
 
     def fold(self, k=5):
         """Performs kfold & hps search in each fold. Shows some plots to assess the performance of each fold.
@@ -451,7 +491,7 @@ class Model:
             #save the model and add its path to self.models_list 
             model_path = os.path.join('models', f'model_{i}')
             best_model.save(model_path)
-            #self.models_list.append(model_path) 
+            self.models_list.append(model_path) 
 
         # plot mean and stdev in ROC curve plot
         plot_mean_stdev(tprs, mean_fpr, aucs)
@@ -515,7 +555,7 @@ class Model:
         return y
 
     def get_ensemble(self):
-        """Create and train ensemble starting from models previously obtained"""
+        """Create and train ensemble starting from previously obtained models"""
         #get each expert's predictions
         X = self.get_predictions()
 
