@@ -48,7 +48,7 @@ This architecture can be modified by the user by setting different values to the
 - *rate*: dropout rate <br>
 <br>
 Note that these parameters influence the model’s complexity, its generalisation capability and its performance.
-The default hyperparameters values are shown in the following tab:
+The default hyperparameters values are shown in the following tab: <br>
 
 | Hyperparameters   |     Values    | 
 | ----------------  | ------------- |
