@@ -47,7 +47,8 @@ This architecture can be modified by the user by setting different values to the
 - *depht*: the number of Dense layers in the fully connected block <br>
 - *rate*: dropout rate <br>
 Note that these parameters influence the model’s complexity, its generalisation capability and its performance.
-The default hyperparameters values are shown in the following tab
+The default hyperparameters values are shown in the following tab:
+
 | Hyperparameters   |     Values    | 
 | ----------------  | ------------- |
 | *dim*             |  15, 25       | 
@@ -79,7 +80,7 @@ In order to implement the workflow described so far, two costum-made classes wer
 • *Model* class is used to carry out the aforementioned models’ training and ensamble strategy. It is equipped with many methods, such as: <br>
 – **tuner**, which performs the hyperparameters search in the hyperparameters space set by the user <br>
 – **fold**, which performs K-fold (in our case K = 5) for cross validation <br>
-– get_predictions, which returns each model’s prediction for all the images’ patterns (used as input for the ensemble model <br> 
+– **get_predictions**, which returns each model’s prediction for all the images’ patterns (used as input for the ensemble model <br> 
 – **get_ensemble**, which trains and then saves the ensembl
 
 
