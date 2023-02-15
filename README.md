@@ -46,6 +46,7 @@ This architecture can be modified by the user by setting different values to the
 - *dim*: the number of output filters in the first convolution (this number doubles after each Conv2D layer) <br>  
 - *depht*: the number of Dense layers in the fully connected block <br>
 - *rate*: dropout rate <br>
+<br>
 Note that these parameters influence the model’s complexity, its generalisation capability and its performance.
 The default hyperparameters values are shown in the following tab:
 
