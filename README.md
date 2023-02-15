@@ -1,9 +1,9 @@
 # Mammograms classifier
 Ensemble of CNN models for microcalcifications detection.
 
-[![Documentation Status](https://readthedocs.org/projects/cmepda-prj/badge/?version=latest)](https://cmepda-prj.readthedocs.io/en/latest/?badge=latest)
-![GitHub repo size](https://img.shields.io/github/repo-size/depoale/cmepda_prj) 
-[![CircleCI](https://dl.circleci.com/status-badge/img/gh/depoale/cmepda_prj/tree/main.svg?style=shield)](https://dl.circleci.com/status-badge/redirect/gh/depoale/cmepda_prj/tree/main)     
+[![Documentation Status](https://readthedocs.org/projects/mammo_classifier/badge/?version=latest)](https://mammo_classifier.readthedocs.io/en/latest/?badge=latest)
+![GitHub repo size](https://img.shields.io/github/repo-size/depoale/mammo_classifier) 
+[![CircleCI](https://dl.circleci.com/status-badge/img/gh/depoale/mammo_classifier/tree/main.svg?style=shield)](https://dl.circleci.com/status-badge/redirect/gh/depoale/mammo_classifier/tree/main)     
 
 The aim of this project is to build and train an ensemble of Convolutional Neural Network (**CNN**) models for a deep-learning based classification of normal breast tissue VS breast tissue containing microcalcification clusters in mammograms’ small portions. The neural networks will be developed using mainly `keras` and `PyTorch` libraries. <br>
 

@@ -2,7 +2,7 @@ import unittest
 import os
 import sys
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "codice")))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "mammo_classifier")))
 from hypermodel import get_search_space_size
 from utils import hyperp_dict
 

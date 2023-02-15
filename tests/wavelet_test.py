@@ -3,7 +3,7 @@ import numpy as np
 import os
 import sys
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "codice")))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "mammo_classifier")))
 from classes import Data
 from utils import delete_directory
 
