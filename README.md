@@ -93,7 +93,7 @@ Using the default values for the hyperparameters, an example of the classificato
 <img src="images/ROC_-_Testing_new.png" width="1500"> <br>
 - Confusion Matrices for each of the 5 folds
 <img src="images/Confusion_Matrices_new.png" width="1500"> <br>
-- Learning and Testing curves for the models'ensamble
+- Learning and Testing curves for the models' ensamble
 <img src="images/ensemble_plot_new.png" width="1500"> <br>
 
 
