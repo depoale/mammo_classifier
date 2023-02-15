@@ -1,5 +1,5 @@
-from utils import wave_dict, hyperp_dict, str2bool, rate
-from hypermodel import set_hyperp, get_search_space_size
+from utils import wave_dict, hyperp_dict, str2bool, rate, delete_directory
+from hypermodel import get_search_space_size
 import numpy as np
 import argparse
 import os
@@ -24,7 +24,7 @@ if __name__=='__main__':
         "--augmented",
         metavar="",
         type=str2bool,
-        help="Whether to perform data augmentation procedure",
+        help="Whether to perform data augmentation procedure. Default: False",
         default=False,
     )
     
@@ -33,27 +33,27 @@ if __name__=='__main__':
         "--wavelet",
         metavar="",
         type=str2bool,
-        help="Whether to apply wavelet filter",
+        help="Whether to apply wavelet filter. Default: False",
         default=False,
     )
 
     parser.add_argument(
-        "-wave_family",
+        "-wave_fam",
         "--wavelet_family",
         metavar="",
         type=str,
-        help="Which wavelet family (between 'sym3' and 'haar') has to be used to realize the filter",
+        help="Wavelet family choice (between 'sym3' and 'haar'). Default: 'sym3'",
         default='sym3',
 
     )
 
 
     parser.add_argument(
-        "-threshold",
+        "-thr",
         "--threshold",
         metavar="",
         type=float,
-        help="threshold of wavelet coefficients in terms of the standard deviation of their distributions (do not go over 2!)",
+        help="Threshold of wavelet coefficients in terms of the stdev of their distributions (do not go over 2!). Default: 1.5",
         default=1.5,
 
     )
@@ -63,7 +63,7 @@ if __name__=='__main__':
         "--fast_execution",
         metavar="",
         type=str2bool,
-        help="Whether to avoid hyperparameters search and use the pre-saved hyperpar",
+        help="If True avoid hyperparameters search and use the pre-saved hyperpar. Default: True",
         default=True,
     )
     
@@ -75,13 +75,13 @@ if __name__=='__main__':
         type=int,
         help="List of values for the hypermodel's depth",
         #default=[1,2,3,4],
-        default=[1,2,3,4,5],
+        default=[1,3,5],
     )
     
     
     parser.add_argument(
-        "-conv_in",
-        "--Conv2d_init",
+        "-dim",
+        "--Conv2d_dim",
         metavar="",
         nargs='+',
         type=int,
@@ -126,7 +126,7 @@ if __name__=='__main__':
     data = Data(augmented=args.augmented, wavelet=args.wavelet, wave_settings=wave_settings)
 
     #2. set chosen hyperparameters and get number of trials
-    hyperp_dict=hyperp_dict(args.net_depth, args.Conv2d_init, args.dropout_rate)
+    hyperp_dict=hyperp_dict(args.net_depth, args.Conv2d_dim, args.dropout_rate)
     space_size = get_search_space_size()
     max_trials = np.rint(args.searching_fraction*space_size)
 
@@ -144,3 +144,4 @@ if __name__=='__main__':
     preds = best_model.predict(rand_images)
     get_gcam_images(rand_images, best_model)
     gCAM_show(preds=preds)
+    delete_directory('models')
