@@ -8,7 +8,7 @@ from matplotlib import pyplot as plt
 from keras.utils.layer_utils import count_params
 import tensorflow as tf
 import shutil
-import matlab.engine
+from matlab import engine
 from sklearn.model_selection import KFold
 from sklearn.model_selection import train_test_split
 import keras_tuner as kt
@@ -154,7 +154,7 @@ class Data:
         directory"""
         
         #calling MATLAB as a computational engine
-        eng = matlab.engine.start_matlab()
+        eng = engine.start_matlab()
         
         #setting the Wavelet family to be used 
         wave = wave_settings['wavelet_family']
