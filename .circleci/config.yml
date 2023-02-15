@@ -12,7 +12,7 @@ jobs:
       - checkout
       - python/install-packages:
           pkg-manager: pip
-          pip-dependency-file: requirements.txt
+          pip-dependency-file: tests/tests_requirements.txt
       - run:
           name: Run tests utils
           command: python -m unittest tests.utils_test

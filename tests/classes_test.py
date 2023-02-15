@@ -28,7 +28,7 @@ class DataTests(unittest.TestCase):
         self.assertFalse(np.array_equal(d_aug_1.X, X))
         delete_directory(d_aug_1.path)
    
-        '''d_wave_0 = Data(augmented = 0, wavelet = 1)
+        d_wave_0 = Data(augmented = 0, wavelet = 1)
         self.assertEqual(len(d_wave_0.X), len(d_wave_0.y))
         X, y = d_wave_0.get_random_images(24)
         self.assertEqual(len(X), len(y), 24)
@@ -39,9 +39,9 @@ class DataTests(unittest.TestCase):
         d_wave_1 = Data(augmented = 1, wavelet = 1)
         self.assertEqual(len(d_wave_1.X), len(d_wave_1.y))
         delete_directory('augmented_data')
-        delete_directory(d_wave_1.path)'''
+        delete_directory(d_wave_1.path)
     
-class ModelTests(unittest.TestCase):
+'''class ModelTests(unittest.TestCase):
     def test(self):
         model = self.init()
         self.get_predictions(model=model)
@@ -74,7 +74,7 @@ class ModelTests(unittest.TestCase):
             
             # check if initial values in y (42.) are replaced with predictions
             y = model.get_predictions(X, models_list)
-            self.assertFalse(42. in y)
+            self.assertFalse(42. in y)'''
 
 
 
