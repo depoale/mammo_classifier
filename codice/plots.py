@@ -140,34 +140,6 @@ def get_confusion_matrix(x_test, y_test, model, i):
     plt.savefig(os.path.join('images', 'ciao.pdf'))
     plt.show(block=False)
 
-def comparison_plot(names, dimension, accuracy):
-    """MSE-num_weights plot to compare visually each fold's performance in relationship with
-        that model's complexity. 
-         .....
-        Parameters
-        ----------
-        names: list of str
-                models names
-        dimension: list of int
-                list of models' number of weights
-        accuracy: list of float
-            list of models' accuracy over test set
-        """
-    plt.figure('Comparison plot')
-    plt.subplots(figsize=(7,7))
-    plt.title('Comparison plot')
-    plt.xlabel('Effective free parameters')
-    plt.ylabel('MSE')
-
-    #scatter plot
-    for i, txt in enumerate(names):
-       
-        plt.errorbar(dimension[i], accuracy[i], label=names[i], fmt='.')
-        plt.annotate(txt, (dimension[i], accuracy[i]))
-    #plt.savefig(os.path.join('images', 'comparison.pdf'))
-    plt.legend()
-    plt.show(block=False)
-
 def gCAM_show(preds, cam_path='gCam'):
     """Shows gradCAM images comparing lables and model predictions
      .....

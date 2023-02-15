@@ -1,11 +1,10 @@
 from utils import read_imgs, callbacks, create_new_dir, save_image, convert_to_grayscale
-from plots import  ROC, get_confusion_matrix, plot, comparison_plot, plot_mean_stdev
+from plots import  ROC, get_confusion_matrix, plot, plot_mean_stdev
 from hypermodel import hyp_tuning_model
 import os
 from keras.preprocessing.image import ImageDataGenerator
 import numpy as np
 from matplotlib import pyplot as plt
-from keras.utils.layer_utils import count_params
 import shutil
 from sklearn.model_selection import KFold
 from sklearn.model_selection import train_test_split
@@ -15,6 +14,8 @@ import torch
 import statistics as stats
 from tools_for_Pytorch import WeightInitializer, WeightNormalizer, pytorch_linear_model
 from ensemble import train_ensemble
+import shutup
+shutup.please()
 import warnings 
 warnings.filterwarnings('ignore')
 
@@ -357,7 +358,7 @@ class Model:
         self._X = data.X
         self._y = data.y
         self.max_trials = max_trials
-        self.overwrite = ~fast  #overwrite means make hps search (not fast)
+        self.overwrite = not fast  #overwrite means make hps search (not fast)
         self.k = k   # k-fold parameter
         self.modelBuilder = hyp_tuning_model  #hypermodel
         self.models_list = []  # list of path to pretrained model (ensemble feeder)
@@ -448,8 +449,7 @@ class Model:
         k: int
             k-fold parameter. Default 5"""
         #initialize lists to keep track of each fold's performance
-        test_acc=[]
-        dimension=[]
+        test_acc = []
         best_hps_list=[]
 
         #preparation for figures
@@ -480,7 +480,6 @@ class Model:
             accuracy= round(best_model.evaluate(X_test, y_test)[1],3)
 
             # append this fold's number of trainable parameters and its accuracy on test set
-            dimension.append(count_params(best_model.trainable_weights))
             test_acc.append(accuracy)
             
             #add this fold's results to the plots
@@ -495,7 +494,6 @@ class Model:
 
         # plot mean and stdev in ROC curve plot
         plot_mean_stdev(tprs, mean_fpr, aucs)
-        comparison_plot(names=self.models_list, dimension=dimension, accuracy=test_acc)
     
         # print stats and chosen hyperparametrs
         print(f'Test Accuracy {test_acc}')

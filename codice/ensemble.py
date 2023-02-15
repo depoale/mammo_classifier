@@ -6,6 +6,8 @@ from torchmetrics.classification import BinaryAccuracy
 from tools_for_Pytorch import EarlyStopping
 import torch
 from torch import nn
+import shutup
+shutup.please()
 import warnings 
 warnings.filterwarnings('ignore')
 
