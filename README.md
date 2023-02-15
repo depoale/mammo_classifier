@@ -53,7 +53,7 @@ The default hyperparameters values are shown in the following tab: <br>
 | `depth`           |  1,3,5        | 
 
 Here is the scheme representing the architecture of the designed CNN hypermodel.
-<img src="images/hypermodel_schema.jpg" width="1000"> <br>
+<img src="images/hypermodel_schema.jpg" width="700"> <br>
 
 # Model selection and model assessment
 The model selection and model assessment procedure is presented in the diagram below: given an hypermodel and an hyperparameters space, the best model is selected with an internal Hold-out (validation set = 25% of development set). A K-fold cross-validation (K=5) procedure is chosen to evaluate each model’s performance.
@@ -142,7 +142,6 @@ options:
                         hypermodel search
   -gcam , --gradcam     Number of random images to visualize using gradCAM
 ```
-Beware that
 
 
 
