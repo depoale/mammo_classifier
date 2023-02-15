@@ -1,5 +1,5 @@
 from utils import read_imgs, callbacks, create_new_dir, save_image, convert_to_grayscale
-from plots import  ROC, get_confusion_matrix, plot, plot_mean_stdev
+from plots import ROC, get_confusion_matrix, plot, plot_mean_stdev
 from hypermodel import hyp_tuning_model
 import os
 from keras.preprocessing.image import ImageDataGenerator
@@ -58,7 +58,7 @@ class Data:
         
     """
      
-    def __init__(self, augmented=False, wavelet=False, wave_settings=wave_settings_default, path='total_data'):
+    def __init__(self, augmented=False, wavelet=False, wave_settings=wave_settings_default, path='dataset'):
        
         #default path to dataset
         self._path = path
@@ -564,13 +564,11 @@ class Model:
         # split train and validation
         X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2, shuffle=True, random_state=24)
         
-        # create dataset for external test (data stored in 'New_dataset/External_test')
-        test_data = Data(path = os.path.join('New_dataset', 'External_test'))
+        # create dataset for external test (data stored in 'External_test')
+        test_data = Data(path ='External_test')
 
         # get random images from this dataset and get each expert's predictions
         X_test, y_test = test_data.get_random_images(size=25, classes=[1])
-        """ X_test = test_data.X
-        y_test = test_data.y """
         X_test = self.get_predictions(X_test)
 
         # transform to tensors

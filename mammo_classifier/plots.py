@@ -137,7 +137,6 @@ def get_confusion_matrix(x_test, y_test, model, i):
     sn.heatmap(df_cm, annot=True)
     plt.xlabel('Predicted label', fontsize=7)
     plt.ylabel('Actual label', fontsize=7)
-    plt.savefig(os.path.join('images', 'ciao.pdf'))
     plt.show(block=False)
 
 def gCAM_show(preds, cam_path='gCam'):

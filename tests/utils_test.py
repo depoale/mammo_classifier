@@ -8,7 +8,7 @@ import utils
 
 class UtilsTests(unittest.TestCase):
     def test_read_imgs(self):
-        X, y = utils.read_imgs('total_data', [0, 1])
+        X, y = utils.read_imgs('dataset', [0, 1])
         self.assertEqual(len(X),len(y))
         with self.assertRaises(FileNotFoundError):
             X, y = utils.read_imgs('hola', [0, 1])

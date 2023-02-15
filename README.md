@@ -10,7 +10,7 @@ The aim of this project is to build and train an ensemble of Convolutional Neura
 # Dataset
 The employed [dataset](https://www.pi.infn.it/~boccali/DL\_class\_data.tar.gz) is made up of **797** images, **414** of which represent normal breast tissue (they are labelled with "0") while the remaining **383** show breast tissue presenting microcalcifications clusters (they are labelled with "1"). <br>
 Here are some examples:
-<img src="images/random_images.png" width="800"> 
+<img src="docs/images/random_images.png" width="800"> 
 
 ## Pre-processing
 Since the images were already standardised (size: 60x60, colormap: grayscale), only the normalisation of the pixel values to a (0,1) range was added in the pre-processing stage.
@@ -21,18 +21,18 @@ The user can select whether to use the aforementioned default dataset as it is o
 ## Data augmentation
 In our case, data augmentation procedures are implemented using `keras.ImageDataGenerator`.  
 Here are shown some examples of "augmented" images generated starting from the initial dataset. 
-<img src="images/augmented_images.png" width="800">
+<img src="docs/images/augmented_images.png" width="800">
 
 ## Wavelet-based filtering
 Wavelet-based filters are often used in medical imaging in order to enhance images' information content, which mostly means improving the visibility of features of interest. <br>
 This part of the project is developed in `Matlab` and embedded in `Python` using `matlab.engine`.<br>
 Among the many Wavelet families available, the user can set the `wavelet_family` parameter to be `sym3` or `haar`. The decomposition level is set to be 3 and the threshold for the decomposition coefficients can be set in terms of the standard deviations of their distributions by the user with the parameter `threshold`. In this case, best performances are obtained within 2 stdev. <br>
 Here are some examples of images obtained with Wavelet-based filtering: 
-<img src="images/random_wavelet.png" width="800"> <br>
+<img src="docs/images/random_wavelet.png" width="800"> <br>
 
 ## External dataset
 At the end of the training phase, the final model will be tested on an external [dataset](https://data.mendeley.com/datasets/ywsbh3ndr8/2) of mammograms' portions, in order to assess its generalization capability and its overall performance. Here are some hand-selected 60x60 sections from this dataset:   
-<img src="images/new_dataset.png" width="800"> <br>
+<img src="docs/images/new_dataset.png" width="800"> <br>
 
 Note that, since these healthy mammograms' sections are fairly different from the ones seen by the model during the training phase in the initial dataset, only the ones containing microcalcifications will be employed in the final test phase. 
 
@@ -53,11 +53,11 @@ The default hyperparameters values are shown in the following tab: <br>
 | `depth`           |  1,3,5        | 
 
 Here is the scheme representing the architecture of the designed CNN hypermodel.
-<img src="images/hypermodel_schema.jpg" width="500"> <br>
+<img src="docs/images/hypermodel_schema.jpg" width="500"> <br>
 
 # Model selection and model assessment
 The model selection and model assessment procedure is presented in the diagram below: given an hypermodel and an hyperparameters space, the best model is selected with an internal Hold-out (validation set = 25% of development set). A K-fold cross-validation (K=5) procedure is chosen to evaluate each model’s performance.
-<img src="images/model_sel_assess.jpeg" width="800"> <br>
+<img src="docs/images/model_sel_assess.jpeg" width="800"> <br>
 
 Using `keras-tuner.BayesianOptimizator`, hyperparameters search is performed, exploring the user-selected `searching_fraction` of the space (default fraction = 25%), so that suitable hyperparameters values are chosen for each of the five folds. <br>
 Since this step is computationally expensive, it is possible to skip it if the user sets the `fast_execution` parameter to be `True`. By doing so, the hyperparameters for each fold will be set to pre-saved values without any search.
@@ -80,20 +80,20 @@ In order to implement the workflow described so far, two costum-made classes wer
 # Results
 Using the default values for the hyperparameters, an example of the classificator's performance is shown in the following plots: <br>
 - Learning Curves recorded for one fold
-<img src="images/Fold_1.png" width="1500"> <br>
+<img src="docs/images/Fold_1.png" width="1500"> <br>
 - ROC curves and AUCs relative to the testing data for each fold 
-<img src="images/ROC_-_Testing_new.png" width="1500"> <br>
+<img src="docs/images/ROC_-_Testing_new.png" width="1500"> <br>
 - Confusion Matrices for each of the 5 folds
-<img src="images/Confusion_Matrices_new.png" width="1500"> <br>
+<img src="docs/images/Confusion_Matrices_new.png" width="1500"> <br>
 - Learning and Testing curves for the models' ensamble
-<img src="images/ensemble_plot_new.png" width="1500"> <br>
+<img src="docs/images/ensemble_plot_new.png" width="1500"> <br>
 
 # GradCAM and interpretability
 As part of the analysis, we included the possibility to "visualise" what the model has learnt using GradCAM algorithm (Gradient-weighted Class Activation Mapping). Selecting the most reliable of the five model (according to the ensemble's weights), the GradCAM algorithm was employed to highlight which regions of an input image are relevant in the decision making
 process. <br>
 The user can choose (by setting the parameter `gradcam`) the number of images randomly extracted from the dataset to visualize through the GradCAM.  
 Here are some examples of mammograms' portions visualised with GradCAM: 
-<img src="images/gCAM.png" width="800"> <br>
+<img src="docs/images/gCAM.png" width="800"> <br>
 
 # Usage
 Simply download this repository and run using default parameters.
