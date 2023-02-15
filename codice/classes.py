@@ -8,7 +8,7 @@ from matplotlib import pyplot as plt
 from keras.utils.layer_utils import count_params
 import tensorflow as tf
 import shutil
-#import matlab.engine
+import matlab.engine
 from sklearn.model_selection import KFold
 from sklearn.model_selection import train_test_split
 import keras_tuner as kt
@@ -54,8 +54,8 @@ class Data:
         
         #wavelet procedure
         if wavelet:
-            #self.wave(wave_settings)
-            pass
+            self.wave(wave_settings)
+            
         
         # set self._X and self._y according to self._PATH
         self.set_data(self._path)
@@ -147,7 +147,7 @@ class Data:
         self._path = IMGS_DIR
 
     
-    '''def wave(self, wave_settings):
+    def wave(self, wave_settings):
 
         """Performs a Wavelet-based filtering procedure on the input images (images from the
         original dataset or augmented images) and then saves the new images in a proper 
@@ -271,7 +271,7 @@ class Data:
 
 
         #setting the self path to the new wavelet-filtered images dataset
-        self._path = IMGS_DIR'''
+        self._path = IMGS_DIR
 
     def get_random_images(self, size:int, classes=None):
         """Extract random elements from the dataset
