@@ -96,13 +96,19 @@ Here are some examples of mammograms' portions visualised with GradCAM:
 <img src="images/gCAM.png" width="800"> <br>
 
 # Usage
-Simply download this repository and run
-'''
+Simply download this repository and run using default parameters.
+```
 cd mammo_classifier/mammo_classifier
 python3 main.py
-'''
-The algorithm will run using default parameters. In order to change them, refer to the help
-'''
+```
+If you are running the code for the first time, make sure you install the requirements:
+```
+pip install -r requirements.txt
+```
+Beware that, in order to use the wavelet-filtering feature, your device must have **`MATLAB`** (latest version: R2022b) and the `Python` module **`matlabengine`** already installed (they are **not** included in the project's requirements).
+
+In order to change the parameters, refer to the help:
+```
 python3 main.py -h
 
 usage: main.py [-h] [-aug] [-wave] [-wave_fam] [-thr] [-fast] [-depth  [...]]
@@ -135,8 +141,8 @@ options:
                         Fraction of the hyperparamiters space explored during
                         hypermodel search
   -gcam , --gradcam     Number of random images to visualize using gradCAM
-'''
-
+```
+Beware that
 
 
 
