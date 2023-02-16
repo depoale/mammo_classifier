@@ -1,4 +1,4 @@
-# Mammograms classifier
+# mammo_classifier
 Ensemble of CNN models for microcalcifications detection.
 <br>
 
