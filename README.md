@@ -81,7 +81,7 @@ In order to implement the workflow described so far, two costum-made classes wer
 – `get_ensemble`, which trains and then saves the ensemble
 
 # Results
-Using the default values for the hyperparameters, an example of the classificator's performance is shown in the following plots: <br>
+Using the default values for the user-selectable parameters, an example of the classificator's performance is shown in the following plots: <br>
 - Learning Curves recorded for one fold:
 <img src="docs/images/Fold_1.png" width="1500"> <br>
 - ROC curves and AUCs relative to the testing data for each fold:
