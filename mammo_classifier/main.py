@@ -145,4 +145,3 @@ if __name__=='__main__':
     preds = best_model.predict(rand_images)
     get_gcam_images(rand_images, best_model)
     gCAM_show(preds=preds)
-    delete_directory('models')
