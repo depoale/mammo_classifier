@@ -1,6 +1,4 @@
-from utils import read_imgs, callbacks, create_new_dir, save_image, convert_to_grayscale
-from plots import ROC, get_confusion_matrix, plot, plot_mean_stdev
-from hypermodel import hyp_tuning_model
+"""Costum-made classes"""
 import os
 from keras.preprocessing.image import ImageDataGenerator
 import numpy as np
@@ -12,13 +10,17 @@ import keras_tuner as kt
 from keras.models import load_model
 import torch
 import statistics as stats
-from tools_for_Pytorch import WeightInitializer, WeightNormalizer, pytorch_linear_model
-from ensemble import train_ensemble
+
 import shutup
 shutup.please()
 import warnings 
 warnings.filterwarnings('ignore')
 
+from utils import read_imgs, callbacks, create_new_dir, save_image, convert_to_grayscale
+from plots import ROC, get_confusion_matrix, plot, plot_mean_stdev
+from hypermodel import hyp_tuning_model
+from tools_for_Pytorch import WeightInitializer, WeightNormalizer, pytorch_linear_model
+from ensemble import train_ensemble
 
 img_width = 60
 img_height = 60
@@ -507,7 +509,7 @@ class Model:
             print(f"Conv_in: {hps.get('Conv2d_init')}")
             print(f"Dropout: {hps.get('dropout')}")
             print(f'--------------------')
-        plt.show(block=False)
+        plt.show()
     
 
     def get_predictions(self, X=None, models_list=None):

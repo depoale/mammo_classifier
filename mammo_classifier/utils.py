@@ -103,11 +103,19 @@ def rate(values):
     """Check type and value of rate quantities"""
     if isinstance(values, list):
         for v in values:
-            if isinstance(v, float):
+            if isinstance(v, str):
+                try:
+                    v=float(v)
+                except ValueError:
+                    print(f'Argument invalid: expected float got {type(v)}')
                 check_rate(v)
             else: 
                 raise argparse.ArgumentTypeError(f'Argument invalid: expected float got {type(v)}')
-    elif isinstance(values, float):
+    elif isinstance(values, str):
+        try:
+            values=float(values)
+        except ValueError:
+            print(f'Argument invalid: expected float got {type(values)}')
         check_rate(values)
     else:
         raise argparse.ArgumentTypeError(f'Argument invalid: expected float got {type(values)}')
