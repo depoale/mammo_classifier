@@ -1,5 +1,6 @@
 # Mammograms classifier
 Ensemble of CNN models for microcalcifications detection.
+<br>
 
 [![Documentation Status](https://readthedocs.org/projects/cmepda_prj/badge/?version=latest)](https://cmepda_prj.readthedocs.io/en/latest/?badge=latest)
 ![GitHub repo size](https://img.shields.io/github/repo-size/depoale/mammo_classifier) 
