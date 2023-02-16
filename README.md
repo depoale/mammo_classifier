@@ -69,11 +69,11 @@ Beware that `fast_execution`=True should be used only for practical time-saving 
 # Ensamble
 At this point we are left with 5 trained models or "experts" (one for each fold), so an **ensemble learning strategy** is implemented using `PyTorch`.
 The response of the "committee" is going to be a weighted average of the single predictions. The weights of the ensamble are trained to maximise its accuracy and represent the reliability of each expert among the committee.
-We want to keep the weights inside the range (0,1) and normalised, so that each weight represent the "contribution" of each model to the final response. In order to implement this, `WeightNormalizer` (a costum-made callable class) is applied after each optimisation step.
+We want to keep the weights inside the range (0,1) and normalised, so that each weight represent the "contribution" of each model to the final response. In order to implement this, `WeightNormalizer` (a custom-made callable class) is applied after each optimisation step.
 Finally, the ensemble’s performance is tested on the external dataset of mammograms' portions that we have already introduced. 
 
 # Classes
-In order to implement the workflow described so far, two costum-made classes were built: `Data` and `Model`. <br>
+In order to implement the workflow described so far, two custom-made classes were built: `Data` and `Model`. <br>
 • `Data` class is used to handle and manage the datasets: it is called to perform data augmentation and Wavelet-based filtering and contains the `get_random_images method`, which returns random images from one or both classes. <br>
 • `Model` class is used to carry out the aforementioned models and ensamble training. It is equipped with many methods, such as: <br>
 – `tuner`, which performs the hyperparameters search in the user-selected space <br>
@@ -94,7 +94,7 @@ Using the default values for the user-selectable parameters, an example of the c
 
 # GradCAM and interpretability
 As part of the analysis, we included the possibility to "visualise" what the model has learnt using GradCAM algorithm (Gradient-weighted Class Activation Mapping). Selecting the most reliable of the five model (according to the ensemble's weights), the GradCAM algorithm is employed to highlight which regions of an input image are relevant in the decision making process. <br>
-The user can choose (by setting the parameter `gradcam`) the number of images from the processed dataset to visualize through the GradCAM.  
+The user can choose (by setting the parameter `gradcam`) the number of random images from the processed dataset to visualize through the GradCAM.  
 Here are some examples of mammograms' portions visualised with GradCAM: 
 <img src="docs/images/gCAM.png" width="800"> <br>
 

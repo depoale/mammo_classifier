@@ -1,4 +1,4 @@
-"""Costum-made classes"""
+"""Custom-made classes"""
 import os
 from keras.preprocessing.image import ImageDataGenerator
 import numpy as np
