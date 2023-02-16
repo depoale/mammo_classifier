@@ -17,12 +17,13 @@ Here are some examples:
 Since the images were already standardised (size: 60x60, colormap: grayscale), only the normalisation of the pixel values to a (0,1) range was added in the pre-processing stage.
 
 # Data transformations
-The user can select whether to process the aforementioned default dataset as it is or to perform data augmentation or Wavelet-based filtering procedures on its images by setting `augmentation` or `wavelet` parameters to be `True`.
+The user can select whether to process the aforementioned default dataset as it is or to perform data augmentation or Wavelet-based filtering procedures on its images by setting `augmentation` or `wavelet` parameters to be `True` (the default values are `augmentation`=True and `wavelet`=False).
 
 ## Data augmentation
 In our case, data augmentation procedures are implemented using `keras.ImageDataGenerator`.  
 Here are shown some examples of "augmented" images generated starting from the initial dataset. 
-<img src="docs/images/augmented_images.png" width="800">
+<img src="docs/images/augmented_images.png" width="800"> <br>
+Performing data augmentation procedures is strictly recommended due to the complexity of the model. 
 
 ## Wavelet-based filtering
 Wavelet-based filters are often used in medical imaging in order to enhance images' information content, which mostly means improving the visibility of features of interest. <br>
@@ -61,7 +62,8 @@ The model selection and model assessment procedure is presented in the diagram b
 <img src="docs/images/model_sel_assess.jpeg" width="800"> <br>
 
 Using `keras-tuner.BayesianOptimizator`, hyperparameters search is performed, exploring the user-selected `searching_fraction` of the hyperparameters' space (default fraction = 25%), so that suitable hyperparameters values are chosen for each of the five folds. <br>
-Since this step is computationally expensive, it is possible to skip it if the user sets the `fast_execution` parameter to be `True`. By doing so, the hyperparameters for each fold will be set to pre-saved values without any new search.
+Since this step is computationally expensive, it is possible to skip it if the user sets the `fast_execution` parameter to be `True`. By doing so, the hyperparameters for each fold will be set to pre-saved values without any new search. <br>
+Beware that `fast_execution`=True should be used only for practical time-saving reasons: performing the hyperparameters search is **mandatory** to obtain un-biased and reliable results.
 
 # Ensamble
 At this point we are left with 5 trained models or "experts" (one for each fold), so an ensemble learning strategy is implemented using `PyTorch`.
@@ -120,7 +122,7 @@ Mammography classifier
 options:
   -h, --help            show this help message and exit
   -aug , --augmented    Whether to perform data augmentation procedure.
-                        Default: False
+                        Default: True
   -wave , --wavelet     Whether to apply wavelet filter.  Default: False
   -wave_fam , --wavelet_family 
                         Wavelet family choice (between 'sym3' and 'haar').
