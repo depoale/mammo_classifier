@@ -1,3 +1,4 @@
+"""Miscellaneous functions"""
 import os
 from matplotlib import pyplot as plt
 from keras.callbacks import EarlyStopping, ReduceLROnPlateau
@@ -97,30 +98,34 @@ def str2bool(v):
 
 def check_rate(v):
     if not 0. <= v <= 1.:
-                raise ValueError(f'Rate value should be between 0 and 1 not {v}')
+        raise ValueError(f'Rate value should be between 0 and 1 not {v}')
 
 def rate(values):
     """Check type and value of rate quantities"""
     if isinstance(values, list):
-        for v in values:
+        for i, v in enumerate(values):
             if isinstance(v, str):
                 try:
-                    v=float(v)
+                    float(v)
                 except ValueError:
                     print(f'Argument invalid: expected float got {type(v)}')
-                check_rate(v)
+                values[i]=float(v)
+                check_rate(values[i])
             else: 
                 raise argparse.ArgumentTypeError(f'Argument invalid: expected float got {type(v)}')
+        return values
     elif isinstance(values, str):
         try:
-            values=float(values)
+            float(values)
         except ValueError:
             print(f'Argument invalid: expected float got {type(values)}')
+        values=float(values)
         check_rate(values)
+        return values
     else:
         raise argparse.ArgumentTypeError(f'Argument invalid: expected float got {type(values)}')
 
-    return values
+    
 
 # functions for gCAM plot
 def nearest_square(limit:int):
