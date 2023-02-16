@@ -47,7 +47,7 @@ def plot(history, i):
     plt.show(block=False)
 
 def ROC(x_test, y_test, model, color, i, mean_fpr, tprs, aucs):
-    """Each fold's contribution to the ROC curve plot
+    """Each fold's contribution to the ROC curves plot
      .....
     Parameters
     ----------
@@ -55,13 +55,14 @@ def ROC(x_test, y_test, model, color, i, mean_fpr, tprs, aucs):
     y_test: np.array
     model: keras.Model
     color: str
+        color of the current fold's curve in the plot
     i: int
         k-fold index
-    mean_fpr: np.array
+    mean_fpr: list
         mean false positive rate
-    tprs: np.array
+    tprs: list
         true positive rates
-    aucs: np.array
+    aucs: list
         areas under curve
     """
     _, test_accuracy = model.evaluate(x_test, y_test)
@@ -78,7 +79,6 @@ def ROC(x_test, y_test, model, color, i, mean_fpr, tprs, aucs):
     print(f'AUC = {roc_auc}')
     
     plt.figure('ROC - Testing')
-    #plt.title('ROC - Testing')
     lw = 2
     plt.plot(fpr, tpr, color = color, alpha=0.45, lw = lw, label = f'{i} ROC curve (area = {round(roc_auc, 2)})')
     plt.plot([0, 1], [0, 1], color = 'purple', lw = lw, linestyle = '--')
@@ -90,15 +90,15 @@ def ROC(x_test, y_test, model, color, i, mean_fpr, tprs, aucs):
     plt.show(block=False)
     
 def plot_mean_stdev(tprs, mean_fpr, aucs):
-    """"Add mean and stdev to ROC curve plot
+    """"Add mean and stdev to ROC curves plot
     ...
     Parameters
     ----------
-    mean_fpr: np.array
+    mean_fpr: list
         mean false positive rate
-    tprs: np.array
+    tprs: list
         true positive rates
-    aucs: np.array
+    aucs: list
         areas under curve
     """
     mean_tpr = np.mean(tprs, axis=0)
@@ -156,7 +156,7 @@ def gCAM_show(preds, cam_path='gCam'):
     tmp += [imread(fname) for fname in fnames]
     images = np.array(tmp, dtype='float32')[...]/255
 
-    #create image
+    #create figure
     fig = plt.figure(figsize=(8, 8))
     size = len(images)
     rows, columns = get_rows_columns(size)
@@ -166,5 +166,4 @@ def gCAM_show(preds, cam_path='gCam'):
         ax.title.set_text(f'Label=1 Pred={preds[i][0]:.1f}')
         plt.imshow(images[i])
 
-    #plt.savefig('gcam.pdf')
     plt.show()

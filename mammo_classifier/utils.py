@@ -13,8 +13,8 @@ from hypermodel import set_hyperp
 
 def read_imgs(dataset_path, classes):
     """Function reading all the images in a given folder which already contains
-    two subfolder.
-
+    two subfolders.
+    ...
     Parameters
     ----------
         dataset_path : str
@@ -45,11 +45,12 @@ def read_imgs(dataset_path, classes):
 
     return np.array(tmp, dtype='float32')[..., np.newaxis]/255, np.array(labels)
 
+# keras callbacks used in training
 callbacks = [EarlyStopping(monitor='val_accuracy', min_delta=5e-3, patience=20, verbose=1),
                 ReduceLROnPlateau(monitor='val_loss', factor=0.1, min_delta=1e-4, patience=10, verbose=1)]
 
 def wave_dict(wavelet_family, threshold):
-    """Creates dictionary containing wavelet settings"""
+    """Creates dictionary containing user-selected wavelet settings"""
     wave_dict = {
             'wavelet_family' : wavelet_family,
             'threshold': threshold
@@ -58,7 +59,8 @@ def wave_dict(wavelet_family, threshold):
     return wave_dict
 
 def hyperp_dict(net_depth, Conv2d_init, dropout_rate):
-    """Creates dictionary containing wavelet settings"""
+    """Creates dictionary containing user-selected hps keeping only unique values in each list 
+    and sets it to be a global variable with set_hyperp"""
     hyperp_dict = {
             'depth' : list(set(net_depth)),
             'Conv2d_init': list(set(Conv2d_init)),
@@ -97,6 +99,7 @@ def str2bool(v):
         raise argparse.ArgumentTypeError('Boolean value expected.')
 
 def check_rate(v):
+    """Checks that value is in (0,1)"""
     if not 0. <= v <= 1.:
         raise ValueError(f'Rate value should be between 0 and 1 not {v}')
 
@@ -125,7 +128,6 @@ def rate(values):
     else:
         raise argparse.ArgumentTypeError(f'Argument invalid: expected float got {type(values)}')
 
-    
 
 # functions for gCAM plot
 def nearest_square(limit:int):

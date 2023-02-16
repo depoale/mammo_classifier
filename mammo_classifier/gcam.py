@@ -2,8 +2,8 @@
 import tensorflow as tf
 import numpy as np
 import os
-from utils import create_new_dir
 import matplotlib.cm as cm
+from utils import create_new_dir
 
 
 def make_gradcam_heatmap(
@@ -96,7 +96,8 @@ def make_gradcam_heatmap(
     superimposed_img.save(output_path)
 
 def get_gcam_images(images, best_model):
-    """Creates and saves overlaid images using gradCAM and calling make_gradcam_heatmap function."""
+    """Creates and saves overlaid images using gradCAM calling make_gradcam_heatmap function."""
+    # get list of layers after last_conv_layer_name
     classifier_layer_names = [layer.name for idx, layer in enumerate(best_model.layers) if idx > 8]
     create_new_dir('gCam')
     for i, image in enumerate(images):

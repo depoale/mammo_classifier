@@ -5,8 +5,8 @@ from torch import nn
 
 class EarlyStopping:
     """
-    source: https://github.com/Bjarten/early-stopping-pytorch/blob/master/pytorchtools.py
     Early stops the training if validation loss doesn't improve after a given patience.
+    source: https://github.com/Bjarten/early-stopping-pytorch/blob/master/pytorchtools.py
     """
     def __init__(self, patience=15, verbose=False, delta=1e-3, path='checkpoint.pt', trace_func=print):
         """

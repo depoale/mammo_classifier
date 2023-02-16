@@ -39,16 +39,16 @@ class Data:
         augmented: bool
             whether to perform data augmentation
         wavelet: bool
-            whether to use wavelet procedure 
+            whether to use wavelet filtering 
         wave_settings: dict
-            settings for wavelet procedure
+            settings for wavelet filtering
         path: str
             path to dataset directory
             
         Methods
         -------
         set_data(directory) -> X, y
-            returns arrays of images and lables from path in directory
+            returns arrays of images and lables from directory
         shuffle_data -> X, y
             returns shuffled data
         aug
@@ -60,7 +60,7 @@ class Data:
         
     """
      
-    def __init__(self, augmented=False, wavelet=False, wave_settings=wave_settings_default, path='dataset'):
+    def __init__(self, augmented=True, wavelet=False, wave_settings=wave_settings_default, path='dataset'):
        
         #default path to dataset
         self._path = path
@@ -69,12 +69,12 @@ class Data:
         if augmented:
             self.aug()
         
-        #wavelet procedure
+        #wavelet filtering
         if wavelet:
             self.wave(wave_settings)
             
         
-        # set self._X and self._y according to self._PATH
+        # get images from directory
         self._X, self._y = self.set_data(self._path)
         self._X, self._y = self.shuffle_data()
         self.len = len(self._X)
@@ -123,7 +123,7 @@ class Data:
 
     def aug(self):
         """Augmentation procedure"""
-        # setting new dataset directory
+        # setting new dataset directory to store augmented images
         IMGS_DIR ='augmented_data'
 
         for cl in ['0', '1']:
@@ -161,23 +161,26 @@ class Data:
             #generate & save the images
             for k in range(len(gen)):
                 gen.next()
-
+        
+        #set augmented dataset path
         self._path = IMGS_DIR
 
     
     def wave(self, wave_settings):
 
-        """Performs a Wavelet-based filtering procedure on the input images (images from the
-        original dataset or augmented images) and then saves the new images in a proper 
+        """Performs a Wavelet-based filtering on the input images (images from the
+        original dataset or augmented images) and then saves the new images in 'wavelet_data'
         directory"""
         
         #importing and calling MATLAB as a computational engine
         import matlab.engine
         eng = matlab.engine.start_matlab()
         
+        #user-selected parameters
+
         #setting the Wavelet family to be used 
         wave = wave_settings['wavelet_family']
-        #the decomposition level is already set
+        #decomposition level
         N = 3 
         #setting the threshold for decomposistion coefficients in terms of their stdev
         Q =  wave_settings['threshold'] 
@@ -248,7 +251,7 @@ class Data:
                 c_labels = c_labels[0]
 
                 for il in range(1, N+1):
-                    #creating a vector of "1"
+                    #creating a vector of "1" to set labels' vector
                     ones = eng.ones(1,3*np.double(size_CM[il]))
                     #converting MATLAB matrices into numpy arrays
                     ones = np.asarray(ones)
@@ -280,7 +283,7 @@ class Data:
 
                 #reconstructing filtered images
                 I_rec = eng.waverec2(c_mod,s,wave, nargout=1)
-                ##converting MATLAB matrices into numpy arrays
+                #converting MATLAB matrices into numpy arrays
                 I_rec = np.asarray(I_rec)
 
                 #saving wavelet_filtered images in the new directory
@@ -301,7 +304,7 @@ class Data:
             number of random images 
         classes: list
             list of classes from which we want to extract random images
-            default: None means that images will be extracted regardless from the class"""
+            default: None means that images will be extracted from all of the classes"""
         
         #extract images from the user-given list
         if classes is not None:
@@ -329,11 +332,11 @@ class Model:
     Attributes
     ----------
     X: np.array
-    y:np.array
+    y: np.array
     max_trials: int
         maximum number of trials in tuner search
     overwrite: bool
-        overwrite means make hps search (not fast)
+        overwrite implies making hps search (not fast)
     k: int
         k-fold parameter. Default 5
     modelBuilder: keras.Hypermodel
@@ -341,7 +344,7 @@ class Model:
     models_list:list
         list of path to pretrained model (ensemble feeder)
     selected_model: str
-        path to one model
+        path to a single trained model. Default is ensemble winner
     
     Methods
     -------
@@ -360,10 +363,10 @@ class Model:
         self._X = data.X
         self._y = data.y
         self.max_trials = max_trials
-        self.overwrite = not fast  #overwrite means make hps search (not fast)
+        self.overwrite = not fast  #overwrite implies making hps search (not fast)
         self.k = k   # k-fold parameter
         self.modelBuilder = hyp_tuning_model  #hypermodel
-        self.models_list = []  # list of path to pretrained model (ensemble feeder)
+        self.models_list = []  # list of path to pretrained models (ensemble feeder)
         self._selected_model = ''    #path to a selected model (default: ensemble winner)
 
     @property
@@ -464,7 +467,7 @@ class Model:
         plt.title('Confusion Matrices')
         colors = ['green', 'red', 'blue', 'darkorange', 'gold']
 
-        # here model selection and model assessment are peformed (k-fold + hold-out)
+        # here model selection (hold-out) and model assessment (k-fold) are peformed
         fold  = KFold(n_splits=self.k, shuffle=True, random_state=42)
         for i, (dev_idx, test_idx) in enumerate(fold.split(self._X, self._y)):
             #divide development and test sets
@@ -473,7 +476,7 @@ class Model:
             print('--------------')
             print(f'FOLD {i+1}')
             print('--------------')
-            #tuner search
+            #tuner search with self.tuner
             best_hps, best_model = self.tuner(X_dev, y_dev, self.modelBuilder, i, k=5)
             best_hps_list.append(best_hps)
 
@@ -481,7 +484,7 @@ class Model:
             history = best_model.fit(X_dev, y_dev, epochs=100, batch_size=60, validation_split=1/(k-1), callbacks=callbacks)
             accuracy= round(best_model.evaluate(X_test, y_test)[1],3)
 
-            # append this fold's number of trainable parameters and its accuracy on test set
+            # append this fold's accuracy on test set
             test_acc.append(accuracy)
             
             #add this fold's results to the plots
@@ -521,7 +524,6 @@ class Model:
         ----------
         X: np.array
             Array to predict. Default None means that self._X is predicted
-
         models_list: list
             list of paths to pre-trained models (experts) that will give predictions 
         
@@ -530,12 +532,13 @@ class Model:
         y: np.array
             Array of predictions"""
         
+        #check and set X
         if X is None:
             X = self._X
-            #check parameters' types
         elif not isinstance(X, np.ndarray):
             raise TypeError(f'Expected np.ndarray got {type(X)}')
-
+        
+        #check and set models list
         if models_list is None:
             models_list = self.models_list
         elif isinstance(models_list, list):
@@ -580,9 +583,9 @@ class Model:
         # linear model performs weighted average 
         model = pytorch_linear_model(in_features=len(self.models_list), out_features=1)   
     
-        # random weights initialization (and normalisation)
-        # the weights represent the "reliability" of a model among the comitee, so they are bound 
-        # in range (0.01, 1) and their sum must add up to 1
+        """random weights initialization (and normalisation)
+        the weights represent the "reliability" of a model among the commitee, so they are bound 
+        in range (0.01, 1) and their sum must add up to 1"""
         initializer=WeightInitializer()
         model.apply(initializer)
 
@@ -591,13 +594,13 @@ class Model:
         # applied after each optimiser step to clip and normalise the updated weights
         normalizer = WeightNormalizer()
 
-        #ensemble trainibg
+        #ensemble training
         weights, final_acc, test_acc = train_ensemble(model, optimizer, normalizer, X_train, y_train, X_val, y_val, X_test, y_test, batch_size=20)
         #Ensemble stats
         print(f'Final accuracy: {final_acc}')
         print(f'Test accuracy: {test_acc}')
 
-        # set selected_model to be the most reliable in the comitee
+        # set selected_model to be the most reliable in the commitee
         weights = torch.tensor(weights.data).numpy()
         best_idx = np.where(weights == weights.max())[0][0]
         self._selected_model = os.path.join('models', f'model_{best_idx}')

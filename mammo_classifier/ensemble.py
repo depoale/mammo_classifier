@@ -4,17 +4,17 @@ import matplotlib.pyplot as plt
 import torch
 import torch.nn as nn
 from torchmetrics.classification import BinaryAccuracy
-from tools_for_Pytorch import EarlyStopping
 import torch
 from torch import nn
 import shutup
 shutup.please()
 import warnings 
 warnings.filterwarnings('ignore')
+from tools_for_Pytorch import EarlyStopping
 
 
 def train_ensemble(model, optimizer, normalizer, X_train, y_train, X_val, y_val, X_test, y_test, batch_size=80):
-    """Performs the forward and backwards training loop until early stopping, then computes the metric.
+    """Performs the forward and backward training loop until early stopping, then computes the metric.
     ...
     Parameters
     ---------
@@ -31,6 +31,13 @@ def train_ensemble(model, optimizer, normalizer, X_train, y_train, X_val, y_val,
     y_test: torch.tensor
     batch_size: int
         Default 80
+    
+    Returns
+    -------
+    weights: torch.tensor
+        ensemble trained weights
+    final_acc: list
+    test_acc: list
     """
 
     loss_fn = nn.MSELoss()
@@ -38,9 +45,10 @@ def train_ensemble(model, optimizer, normalizer, X_train, y_train, X_val, y_val,
     early_stopping = EarlyStopping()
 
     torch.manual_seed(42)
-    epochs = 500
+    epochs = 500    #artificially large number of epochs (expected to stop with early stopping)
     epoch_count = []
 
+    # initialising lists to keep track of the performance
     train_mse_values = []
     val_mse_values = []
     test_mse_values = []
@@ -54,36 +62,37 @@ def train_ensemble(model, optimizer, normalizer, X_train, y_train, X_val, y_val,
         permutation = torch.randperm(X_train.size()[0])
         batch_mse=[]
         batch_acc = []
+        #one training loop for each mini batch
         for i in range(0, X_train.size()[0], batch_size):
             
-            #create mini-batch
+            # 1. Create mini-batch
             indices = permutation[i:i+batch_size]
             batch_x, batch_y = X_train[indices], y_train[indices]
 
-            # train mode
+            # 2. Train mode
             model.train()
 
-            # 1. Forward pass on train data
+            # 3. Forward pass on train batch data
             train_pred = model(batch_x)
 
-            # 2. Calculate the loss and accuracy
+            # 4. Calculate the loss and accuracy
             train_mse = loss_fn(train_pred, batch_y)
             train_acc = acc_fn(train_pred, batch_y)
 
-            # 3. append current batch results
+            # 5. append current batch results
             batch_mse.append(train_mse)
             batch_acc.append(train_acc)
 
-            # 4. Zero grad of the optimizer
+            # 6. Zero grad of the optimizer
             optimizer.zero_grad()
             
-            # 5. Backpropagation
+            # 7. Backpropagation
             train_mse.backward()
             
-            # 6. Progress the optimizer
+            # 8. Progress the optimizer
             optimizer.step()
 
-            # 7. Normalize new weights
+            # 9. Normalize new weights
             model.apply(normalizer)
 
         # evaluation mode

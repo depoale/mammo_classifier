@@ -35,7 +35,7 @@ class ModelTests(unittest.TestCase):
         self.get_predictions(model=model)
 
     def init(self):
-        data = Data()
+        data = Data(augmented=False)
         model = Model(data)
         self.assertEqual(len(model.X), len(model.y), len(data))
         X, y = data.get_random_images(22)

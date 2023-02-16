@@ -1,5 +1,4 @@
 """Hypermodel builder and hps setter"""
-
 from keras.models import Sequential
 from keras.layers import Conv2D, MaxPooling2D, Dense, Flatten, Dropout, Input, BatchNormalization
 from keras.optimizers import Adam
@@ -10,12 +9,12 @@ img_width = 60
 
 
 def set_hyperp(hyperp_dict):
-    """Create a dictionary containg the user-selected hps keeping only unique values in each list. 
-    It is set to be a global variable so that it is accessible to the hypermodel aswell.
+    """Hps dictionary is set to be a global variable so that it is accessible to the hypermodel as well.
     ...
     Parameters
     ----------
-    args: arg"""
+    hyperp_dict: dict
+        hps dictionary"""
     global hyperp
     hyperp  = hyperp_dict
 
@@ -34,11 +33,12 @@ def hyp_tuning_model(hp):
     hp_Dense_units = 256
     initializer = GlorotNormal()
 
-    # set hps using the user-selected values (stored in the dictionary hyperp)
+    # set hps using the values stored in the dictionary hyperp
     hp_depth = hp.Choice('depth', hyperp['depth'])
     hp_Conv2D_init = hp.Choice('Conv2d_init', hyperp['Conv2d_init'])
     hp_dropout = hp.Choice('dropout', hyperp['dropout'])
 
+    #three convolutional blocks
     model.add(Conv2D(hp_Conv2D_init, (3, 3), activation='relu', padding='same', strides=1, 
                      name='conv_1', input_shape=shape, kernel_initializer=initializer))
     model.add(BatchNormalization())
@@ -60,6 +60,7 @@ def hyp_tuning_model(hp):
     model.add(Flatten())
     model.add(Dropout(hp_dropout + 0.1))
 
+    #fully-connected block
     for i in range(hp_depth):
         units = hp_Dense_units/(i+1)
         model.add(Dense(units, activation='relu', name=f'dense_{i}', kernel_initializer=initializer))
