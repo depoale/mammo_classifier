@@ -25,9 +25,9 @@ class UtilsTests(unittest.TestCase):
             utils.str2bool('test')
 
     def test_rate(self):
-        self.assertEqual(utils.rate(0.2), 0.2)
-        self.assertEqual(utils.rate([0.2, 0.3]), [0.2, 0.3])
-        with self.assertRaises(argparse.ArgumentTypeError):
+        self.assertEqual(utils.rate('0.2'), 0.2)
+        self.assertEqual(utils.rate(['0.2', '0.3']), [0.2, 0.3])
+        with self.assertRaises(ValueError):
             utils.rate('test')
         with self.assertRaises(argparse.ArgumentTypeError):
             utils.rate([0.4,'test'])

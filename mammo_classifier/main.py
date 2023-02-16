@@ -1,22 +1,23 @@
-from utils import wave_dict, hyperp_dict, str2bool, rate, delete_directory
-from hypermodel import get_search_space_size
+"""Main"""
 import numpy as np
 import argparse
 import os
-from classes import Data, Model
 import time
 import keras
-from gcam import get_gcam_images
-from plots import gCAM_show
 import shutup
 import warnings 
+from utils import wave_dict, hyperp_dict, str2bool, rate, delete_directory
+from hypermodel import get_search_space_size
+from classes import Data, Model
+from gcam import get_gcam_images
+from plots import gCAM_show
 warnings.filterwarnings('ignore')
 shutup.please()
 if __name__=='__main__':
     start = time.time()
     os.chdir('..')
     parser = argparse.ArgumentParser(
-        description="Mammography classifier"
+        description="Mammograms classifier"
     )
     
     parser.add_argument(
@@ -24,8 +25,8 @@ if __name__=='__main__':
         "--augmented",
         metavar="",
         type=str2bool,
-        help="Whether to perform data augmentation procedure. Default: False",
-        default=False,
+        help="Whether to perform data augmentation procedure. Default: True",
+        default=True,
     )
     
     parser.add_argument(
@@ -63,8 +64,8 @@ if __name__=='__main__':
         "--fast_execution",
         metavar="",
         type=str2bool,
-        help="If True avoid hyperparameters search and use the pre-saved hyperpar. Default: True",
-        default=True,
+        help="If True avoid hyperparameters search and use the pre-saved hyperpar. Default: False",
+        default=False,
     )
     
     parser.add_argument(
@@ -104,7 +105,7 @@ if __name__=='__main__':
         "--searching_fraction",
         metavar="",
         type=rate,
-        help="Fraction of the hyperparamiters space explored during hypermodel search",
+        help="Fraction of the hyperparamiters space explored during hypermodel search. Default: 0.25",
         default=0.25,
     )
 
@@ -113,7 +114,7 @@ if __name__=='__main__':
         "--gradcam",
         metavar="",
         type=int,
-        help="Number of random images to visualize using gradCAM",
+        help="Number of random images to visualize using gradCAM. Default: 6",
         default=6,
     )
 
